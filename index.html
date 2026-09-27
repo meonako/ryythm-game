@@ -4,6 +4,10 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>모바일 4레인 리듬게임</title>
+  
+  <!-- 둥근모꼴 웹폰트 불러오기 -->
+  <link href="https://fonts.googleapis.com/css2?family=DungGeunMo&display=swap" rel="stylesheet">
+
   <style>
     * {
       box-sizing: border-box;
@@ -19,7 +23,7 @@
       height: 100%;
       overflow: hidden;
       background-color: #111;
-      font-family: 'DungGeunMo', sans-serif;
+      font-family: 'DungGeunMo', sans-serif; /* 둥근모꼴 적용 */
       color: #fff;
     }
 
@@ -55,24 +59,35 @@
 
     .hidden { display: none !important; }
 
-    h1 { font-size: 2rem; color: #00f0ff; margin-bottom: 15px; text-shadow: 0 0 10px #00f0ff; }
-    p { margin-bottom: 15px; color: #ccc; font-size: 0.95rem; text-align: center; }
+    /* 네온 핑크 타이틀 */
+    h1 { 
+      font-size: 2.2rem; 
+      color: #ff007f; 
+      margin-bottom: 15px; 
+      text-shadow: 0 0 12px #ff007f, 0 0 20px #ff007f; 
+      letter-spacing: 1px;
+    }
 
+    p { margin-bottom: 15px; color: #ccc; font-size: 1rem; text-align: center; }
+
+    /* 네온 핑크 버튼 스타일 */
     .btn {
-      background: linear-gradient(135deg, #00f0ff, #7000ff);
+      background: linear-gradient(135deg, #ff007f, #7000ff);
       color: white;
       border: none;
-      padding: 14px 30px;
-      font-size: 1.1rem;
+      padding: 16px 36px;
+      font-size: 1.2rem;
       font-weight: bold;
+      font-family: 'DungGeunMo', sans-serif;
       border-radius: 30px;
       cursor: pointer;
-      box-shadow: 0 0 15px rgba(0,240,255,0.4);
-      margin: 8px;
+      box-shadow: 0 0 15px rgba(255, 0, 127, 0.5);
+      margin: 10px;
+      transition: transform 0.1s;
     }
 
     .btn:active {
-      transform: scale(0.96);
+      transform: scale(0.95);
     }
 
     /* 곡 선택 카드 스타일 */
@@ -89,7 +104,7 @@
 
     .song-card {
       background: rgba(255, 255, 255, 0.08);
-      border: 1px solid rgba(0, 240, 255, 0.3);
+      border: 1px solid rgba(255, 0, 127, 0.4);
       border-radius: 12px;
       padding: 15px;
       display: flex;
@@ -100,8 +115,8 @@
     }
 
     .song-card:active {
-      background: rgba(0, 240, 255, 0.25);
-      border-color: #00f0ff;
+      background: rgba(255, 0, 127, 0.25);
+      border-color: #ff007f;
       transform: scale(0.98);
     }
 
@@ -110,40 +125,38 @@
     }
 
     .song-title {
-      font-size: 1.1rem;
-      font-weight: bold;
+      font-size: 1.2rem;
       color: #fff;
     }
 
     .song-artist {
-      font-size: 0.85rem;
+      font-size: 0.9rem;
       color: #aaa;
-      margin-top: 3px;
+      margin-top: 4px;
     }
 
     .song-play-btn {
-      background: #00f0ff;
-      color: #000;
-      font-weight: bold;
-      padding: 6px 14px;
+      background: #ff007f;
+      color: #fff;
+      padding: 8px 16px;
       border-radius: 15px;
-      font-size: 0.85rem;
+      font-size: 0.95rem;
+      box-shadow: 0 0 8px rgba(255, 0, 127, 0.6);
     }
 
     #hud {
       position: absolute;
-      top: 10px;
-      left: 10px; right: 10px;
+      top: 15px;
+      left: 15px; right: 15px;
       display: flex;
       justify-content: space-between;
       z-index: 5;
-      font-weight: bold;
-      font-size: 1.1rem;
+      font-size: 1.2rem;
       pointer-events: none;
     }
 
     #score-display { color: #fff; }
-    #combo-display { color: #ff007f; font-size: 1.3rem; }
+    #combo-display { color: #ff007f; font-size: 1.4rem; text-shadow: 0 0 8px #ff007f; }
 
     #touch-controls {
       position: absolute;
@@ -160,17 +173,13 @@
       display: flex;
       justify-content: center;
       align-items: center;
-      font-size: 1.2rem;
-      color: rgba(255,255,255,0.5);
+      font-size: 1.3rem;
+      color: rgba(255,255,255,0.6);
+      font-family: 'DungGeunMo', sans-serif;
     }
 
     .touch-pad:active, .touch-pad.active {
-      background: rgba(0, 240, 255, 0.3);
-    }
-
-    #start-btn:active {
-      transform: scale(0.95);
-      opacity: 0.8;
+      background: rgba(255, 0, 127, 0.3);
     }
   </style>
 </head>
@@ -196,11 +205,8 @@
     <h1>4-LANE RHYTHM</h1>
     <p>모바일 터치 또는 키보드 (D, F, J, K)로 플레이하세요.</p>
     
-    <img src="./images/start_btn.png" id="start-btn" alt="GAME START" 
-         onerror="this.style.display='none'; document.getElementById('start-btn-fallback').style.display='block';"
-         style="width: 200px; cursor: pointer; display: block; margin: 15px auto; transition: transform 0.1s;">
-    
-    <button class="btn" id="start-btn-fallback" style="display: none;">GAME START</button>
+    <!-- 원래 CSS 전용 게임 시작 버튼으로 원복 -->
+    <button class="btn" id="start-btn">GAME START</button>
   </div>
 
   <!-- 2. 곡 선택 화면 -->
@@ -217,10 +223,10 @@
   <div id="result-screen" class="screen hidden">
     <h1>CLEAR!</h1>
     <p id="result-score" style="font-size: 1.5rem; color:#fff;"></p>
-    <p id="result-combo" style="color:#ff007f;"></p>
+    <p id="result-combo" style="color:#ff007f; text-shadow: 0 0 8px #ff007f;"></p>
     <div style="display: flex; gap: 10px; margin-top: 10px;">
       <button class="btn" id="retry-btn">다시하기</button>
-      <button class="btn" id="select-menu-btn" style="background: linear-gradient(135deg, #444, #888);">곡 선택</button>
+      <button class="btn" id="select-menu-btn" style="background: linear-gradient(135deg, #444, #888); box-shadow: none;">곡 선택</button>
     </div>
   </div>
 </div>
@@ -310,7 +316,7 @@ const SONGS = [
     id: 'demo',
     title: 'Demo Beat (Short)',
     artist: 'System',
-    audioPath: '', // 음원 파일 없이 효과음으로 플레이 가능한 테스트 곡
+    audioPath: '', // 음원 없이 효과음으로 플레이 가능한 테스트 곡
     bpm: 130,
     notes: [
       { time: 1.0, lane: 0 }, { time: 1.5, lane: 1 }, { time: 2.0, lane: 2 }, { time: 2.5, lane: 3 },
@@ -371,7 +377,6 @@ function resizeCanvas() {
 window.addEventListener('resize', resizeCanvas);
 resizeCanvas();
 
-// 안전한 오디오 컨텍스트 초기화
 function initAudio() {
   if (!audioCtx) {
     audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -430,13 +435,12 @@ function showSelectScreen() {
 }
 
 // ==========================================
-// 5. 게임 시작 및 실행 제어 (오류 방지)
+// 5. 게임 시작 및 실행 제어
 // ==========================================
 function selectAndStartGame(song) {
   initAudio();
   currentSong = song;
 
-  // 음원 설정 및 사전 로드
   bgmAudio.pause();
   if (song.audioPath) {
     bgmAudio.src = song.audioPath;
@@ -445,7 +449,6 @@ function selectAndStartGame(song) {
     bgmAudio.src = '';
   }
 
-  // 음악이 완전히 끝났을 때 자동 게임 종료
   bgmAudio.onended = () => {
     endGame();
   };
@@ -468,7 +471,6 @@ function selectAndStartGame(song) {
   isPlaying = true;
   countdown = 3;
 
-  // 카운트다운 타이머
   const countInterval = setInterval(() => {
     countdown--;
     if (countdown > 0) {
@@ -477,7 +479,6 @@ function selectAndStartGame(song) {
       playBeep(1200, 'triangle', 0.2);
       clearInterval(countInterval);
       
-      // 음악 재생 시도 (실패해도 게임 흐름이 끊기지 않도록 안전 로직)
       if (currentSong.audioPath) {
         bgmAudio.currentTime = 0;
         const playPromise = bgmAudio.play();
@@ -535,7 +536,6 @@ function gameLoop(timestamp) {
 
   ctx.clearRect(0, 0, containerWidth, containerHeight);
 
-  // 배경 이미지
   if (loadedImages.bg) {
     ctx.drawImage(loadedImages.bg, 0, 0, containerWidth, containerHeight);
   } else {
@@ -553,18 +553,18 @@ function gameLoop(timestamp) {
     ctx.stroke();
   }
 
-  // 판정선
-  ctx.strokeStyle = '#00f0ff';
+  // 판정선 (네온 핑크 테두리)
+  ctx.strokeStyle = '#ff007f';
   ctx.lineWidth = 4;
   ctx.beginPath();
   ctx.moveTo(0, judgmentLineY);
   ctx.lineTo(containerWidth, judgmentLineY);
   ctx.stroke();
 
-  // 카운트다운 출력
+  // 카운트다운 (둥근모꼴 폰트 적용)
   if (countdown > 0) {
-    ctx.fillStyle = '#00f0ff';
-    ctx.font = 'bold 60px DungGeunMo';
+    ctx.fillStyle = '#ff007f';
+    ctx.font = 'bold 65px DungGeunMo';
     ctx.textAlign = 'center';
     ctx.fillText(countdown, containerWidth / 2, containerHeight / 2);
     requestAnimationFrame(gameLoop);
@@ -573,7 +573,6 @@ function gameLoop(timestamp) {
 
   const currentTime = (performance.now() - gameStartTime) / 1000;
 
-  // 노트 그리기 및 판정
   liveNotes.forEach(note => {
     if (note.hit) return;
 
@@ -595,7 +594,7 @@ function gameLoop(timestamp) {
       if (loadedImages.notes[note.lane]) {
         ctx.drawImage(loadedImages.notes[note.lane], noteX, noteY - noteHeight/2, noteW, noteHeight);
       } else {
-        ctx.fillStyle = note.lane % 2 === 0 ? '#ff0055' : '#00ccff';
+        ctx.fillStyle = note.lane % 2 === 0 ? '#ff007f' : '#00f0ff';
         ctx.beginPath();
         ctx.roundRect(noteX, noteY - noteHeight/2, noteW, noteHeight, 6);
         ctx.fill();
@@ -603,11 +602,11 @@ function gameLoop(timestamp) {
     }
   });
 
-  // 판정 텍스트 이펙트
+  // 판정 이펙트 텍스트 (둥근모꼴 폰트 적용)
   for (let i = effects.length - 1; i >= 0; i--) {
     const eff = effects[i];
-    ctx.fillStyle = eff.text === 'MISS' ? `rgba(255, 0, 0, ${eff.alpha})` : `rgba(0, 240, 255, ${eff.alpha})`;
-    ctx.font = 'bold 22px DungGeunMo';
+    ctx.fillStyle = eff.text === 'MISS' ? `rgba(255, 0, 0, ${eff.alpha})` : `rgba(255, 0, 127, ${eff.alpha})`;
+    ctx.font = 'bold 24px DungGeunMo';
     ctx.textAlign = 'center';
     ctx.fillText(eff.text, eff.x, eff.y);
 
@@ -616,7 +615,6 @@ function gameLoop(timestamp) {
     if (eff.alpha <= 0) effects.splice(i, 1);
   }
 
-  // 안전 종료 조건 (음악이 없거나 끝부분 노트 통과 후 3초 뒤 자동 종료)
   const lastNoteTime = currentSong.notes[currentSong.notes.length - 1].time;
   if (currentTime > lastNoteTime + 3.0) {
     endGame();
@@ -672,12 +670,7 @@ window.addEventListener('keyup', (e) => {
 });
 
 // 버튼 연결
-const startBtn = document.getElementById('start-btn');
-const fallbackBtn = document.getElementById('start-btn-fallback');
-
-if (startBtn) startBtn.addEventListener('click', showSelectScreen);
-if (fallbackBtn) fallbackBtn.addEventListener('click', showSelectScreen);
-
+document.getElementById('start-btn').addEventListener('click', showSelectScreen);
 document.getElementById('retry-btn').addEventListener('click', () => {
   if (currentSong) selectAndStartGame(currentSong);
 });
