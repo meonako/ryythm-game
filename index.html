@@ -36,7 +36,7 @@
       height: 90vh;
       max-height: 700px;
       background-color: #050505;
-      border: 4px solid ##FDC7FB;
+      border: 4px solid #FF69C7;
       box-shadow: 0 0 20px rgba(255, 105, 199, 0.4);
       display: flex;
       flex-direction: column;
@@ -83,6 +83,7 @@
 
     .hidden { display: none !important; }
 
+    /* 메인 타이틀 */
     h1 {
       color: #fcd3f2;
       font-size: 1.2rem;
@@ -91,12 +92,13 @@
       text-shadow: 3px 3px #FF69C7;
     }
 
-   h2 {
-  color: #ffffff; /* 흰색으로 변경 */
-  font-size: 0.75rem; /* 문구 길이에 맞게 폰트 크기 조정 */
-  margin-bottom: 25px;
-  text-shadow: none; /* 그림자 제거 */
-}
+    /* 서브 타이틀 (그림자 없는 흰색) */
+    h2 {
+      color: #ffffff;
+      font-size: 0.75rem;
+      margin-bottom: 25px;
+      text-shadow: none;
+    }
 
     p {
       font-size: 0.6rem;
@@ -105,16 +107,21 @@
       line-height: 1.6;
     }
 
+    /* 시작 버튼 (그림자 없는 스타일) */
     .start-btn {
-      color: #ffffff; /* 흰색으로 변경 */
-  font-size: 2.0rem; /* 문구 길이에 맞게 폰트 크기 조정 */
-  margin-bottom: 25px;
-  text-shadow: none; /* 그림자 제거 */
-}
+      background-color: #FF69C7;
+      color: #ffffff;
+      border: none;
+      padding: 12px 20px;
+      font-size: 0.8rem;
+      cursor: pointer;
+      box-shadow: none;
+      transition: transform 0.1s;
+    }
 
     .start-btn:active {
-      transform: translate(2px, 2px);
-      box-shadow: none;
+      transform: scale(0.98);
+    }
 
     /* 하단 터치 패드 */
     #touch-pads {
@@ -130,14 +137,11 @@
       display: flex;
       justify-content: center;
       align-items: center;
-      font-size: 0.9rem;
-      color: #fcd3f2;
     }
 
     .pad:last-child { border-right: none; }
     .pad.active {
       background-color: #FF69C7;
-      color: #000;
     }
   </style>
 </head>
@@ -155,9 +159,7 @@
     <!-- 시작 오버레이 -->
     <div id="start-screen" class="screen">
       <h1>ROMANTIC<br>RHYTHM</h1>
-      
-      <h2>2026  WORK  BY  YUNSEON</h2>
-      
+      <h2>2026 WORK BY YUNSEON</h2>
       <p>KEYBOARD: D - F - J - K<br>TOUCH: BOTTOM PADS</p>
       <button class="start-btn" id="start-btn">START GAME</button>
     </div>
@@ -166,7 +168,7 @@
     <div id="result-screen" class="screen hidden"></div>
   </div>
 
-  <!-- 하단 터치 영역 -->
+  <!-- 하단 터치 영역 (글자 제거됨) -->
   <div id="touch-pads">
     <div class="pad" id="pad-0"></div>
     <div class="pad" id="pad-1"></div>
@@ -451,13 +453,13 @@ function endGame() {
 
   let rank = 'F';
   let message = 'KEEP TRYING!';
-  let rankColor = '#ff4444'; // 기본 빨간색 네온
+  let rankColor = '#ff4444';
 
   // 랭크 조건 산출
   if (perfectCount === totalNotes) {
     rank = 'S';
     message = 'ALL PERFECT!! PERFECT GAME!';
-    rankColor = '#ffd700'; // 금색 네온
+    rankColor = '#ffd700';
   } else if (missCount === 0) {
     rank = 'S';
     message = 'GREAT JOB! NO MISS!';
@@ -465,21 +467,21 @@ function endGame() {
   } else if (missCount <= 3) {
     rank = 'A';
     message = 'EXCELLENT PERFORMANCE!';
-    rankColor = '#fcd3f2'; // 분홍 네온
+    rankColor = '#fcd3f2';
   } else if (missCount <= 7) {
     rank = 'B';
     message = 'NICE CLEAR!';
-    rankColor = '#00ffff'; // 민트 네온
+    rankColor = '#00ffff';
   } else {
     rank = 'F';
     message = 'STAGE FAILED... TRY AGAIN!';
-    rankColor = '#ff4444'; // 빨간 네온
+    rankColor = '#ff4444';
   }
 
-  // 결과 오버레이 렌더링 (RANK 단독 네온 + RETRY 네온버튼 적용)
+  // 결과 오버레이 렌더링 (랭크 단독 네온 + RETRY 네온 버튼 + SCORE 제거)
   const resultScreen = document.getElementById('result-screen');
   resultScreen.innerHTML = `
-    <!-- 심플 랭크 글자 단독 네온 연출 -->
+    <!-- 랭크 단독 대형 네온 연출 -->
     <div style="
       color: #ffffff; 
       font-size: 4.5rem; 
@@ -497,7 +499,7 @@ function endGame() {
 
     <p style="color: #ffffff; font-size: 0.55rem; margin-bottom: 25px;">"${message}"</p>
     
-    <!-- 카운트 결과 영역 (SCORE 제거됨) -->
+    <!-- 결과 집계 영역 (SCORE 제외) -->
     <div style="
       font-size: 0.65rem; 
       line-height: 2.2; 
@@ -528,6 +530,7 @@ function endGame() {
   document.getElementById('retry-btn').addEventListener('click', startGame);
   resultScreen.classList.remove('hidden');
 }
+
 // ==========================================
 // 6. 이벤트 바인딩
 // ==========================================
