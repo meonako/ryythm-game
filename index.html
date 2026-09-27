@@ -355,7 +355,7 @@ function gameLoop(timestamp) {
     if (noteY > -20 && noteY < height + 20 && !note.missed) {
       const x = note.lane * laneWidth + 6;
       const w = laneWidth - 12;
-      const mainColor = (note.lane === 0 || note.lane === 3) ? '#FF69C7' : '#ffd700';
+      const mainColor = (note.lane === 0 || note.lane === 3) ? '##FDC7FB' : '#FD5DBD ';
 
       ctx.save();
       ctx.shadowColor = mainColor;
