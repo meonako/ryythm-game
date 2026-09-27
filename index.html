@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>My Rhythm Game</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            background: #111;
+            color: white;
+            font-family: Arial, sans-serif;
+            overflow: hidden;
+        }
+
+        /* 게임 전체 화면 */
+        #game {
+            width: 100vw;
+            height: 100vh;
+            position: relative;
+        }
+
+        /* 점수 */
+        #score {
+            position: absolute;
+            top: 30px;
+            left: 30px;
+            font-size: 24px;
+        }
+
+        /* 판정 결과 */
+        #judgement {
+            position: absolute;
+            top: 40%;
+            left: 0;
+            width: 100%;
+            text-align: center;
+            font-size: 40px;
+            font-weight: bold;
+        }
+
+        /* 게임 레인 */
+        #lane {
+            position: absolute;
+            width: 300px;
+            height: 600px;
+
+            left: 50%;
+            top: 50%;
+
+            transform: translate(-50%, -50%);
+
+            background: #222;
+            border: 2px solid #444;
+
+            overflow: hidden;
+        }
+
+        /* 떨어지는 노트 */
+        #note {
+            position: absolute;
+
+            width: 80px;
+            height: 20px;
+
+            left: 110px;
+            top: -30px;
+
+            background: #00eaff;
+            border-radius: 10px;
+        }
+
+        /* 판정선 */
+        #line {
+            position: absolute;
+
+            width: 100%;
+            height: 5px;
+
+            bottom: 80px;
+
+            background: white;
+        }
+
+        /* 시작 버튼 */
+        #start {
+            position: absolute;
+
+            bottom: 30px;
+            left: 50%;
+
+            transform: translateX(-50%);
+
+            padding: 15px 40px;
+
+            font-size: 20px;
+
+            cursor: pointer;
+        }
+    </style>
+</head>
+
+
+<body>
+
+    <div id="game">
+
+        <!-- 점수 -->
+        <div id="score">
+            SCORE: 0
+        </div>
+
+        <!-- PERFECT / GOOD / MISS -->
+        <div id="judgement"></div>
+
+        <!-- 게임 레인 -->
+        <div id="lane">
+
+            <!-- 떨어지는 노트 -->
+            <div id="note"></div>
+
+            <!-- 판정선 -->
+            <div id="line"></div>
+
+        </div>
+
+        <!-- 시작 버튼 -->
+        <button id="start">
+            START
+        </button>
+
+    </div>
+
+
+    <script>
+
+        // -------------------------
+        // 게임에 필요한 변수
+        // -------------------------
+
+        let score = 0;
+
+        let playing = false;
+
+        // 노트의 현재 세로 위치
+        let noteY = -30;
+
+
+        // HTML 요소 가져오기
+        const note = document.getElementById("note");
+
+        const scoreText = document.getElementById("score");
+
+        const judgement = document.getElementById("judgement");
+
+        const startButton = document.getElementById("start");
+
+
+        // -------------------------
+        // START 버튼
+        // -------------------------
+
+        startButton.addEventListener("click", startGame);
+
+
+        function startGame() {
+
+            // 게임 시작
+            playing = true;
+
+            // 점수 초기화
+            score = 0;
+
+            // 노트를 위쪽으로 이동
+            noteY = -30;
+
+            // 화면에 표시
+            scoreText.textContent = "SCORE: 0";
+
+            judgement.textContent = "";
+
+            // 시작 버튼 숨기기
+            startButton.style.display = "none";
+
+            // 게임 시작
+            requestAnimationFrame(gameLoop);
+        }
+
+
+        // -------------------------
+        // 게임 진행
+        // -------------------------
+
+        function gameLoop() {
+
+            // 게임이 끝났으면 종료
+            if (!playing) {
+                return;
+            }
+
+
+            // 노트를 아래쪽으로 이동
+            noteY += 4;
+
+            // 실제 화면에서 노트 위치 변경
+            note.style.top = noteY + "px";
+
+
+            // 노트가 아래까지 내려갔다면 MISS
+            if (noteY > 620) {
+
+                showJudgement("MISS");
+
+                // 다시 위에서 시작
+                noteY = -30;
+            }
+
+
+            // 다음 프레임에서도 게임 실행
+            requestAnimationFrame(gameLoop);
+        }
+
+
+        // -------------------------
+        // 키보드 입력
+        // -------------------------
+
+        document.addEventListener("keydown", function(event) {
+
+            // Space가 아니면 아무것도 하지 않음
+            if (event.code !== "Space") {
+                return;
+            }
+
+            // 게임 시작 전이면 아무것도 하지 않음
+            if (!playing) {
+                return;
+            }
+
+
+            // 판정선 위치와 노트의 거리
+            const distance = Math.abs(noteY - 490);
+
+
+            // PERFECT
+            if (distance < 20) {
+
+                score += 100;
+
+                showJudgement("PERFECT");
+
+                noteY = -30;
+            }
+
+
+            // GOOD
+            else if (distance < 50) {
+
+                score += 50;
+
+                showJudgement("GOOD");
+
+                noteY = -30;
+            }
+
+
+            // MISS
+            else {
+
+                showJudgement("MISS");
+            }
+
+
+            // 점수 업데이트
+            scoreText.textContent = "SCORE: " + score;
+
+        });
+
+
+        // -------------------------
+        // 판정 표시
+        // -------------------------
+
+        function showJudgement(text) {
+
+            judgement.textContent = text;
+
+
+            // 0.4초 후 판정 글씨 제거
+            setTimeout(function() {
+
+                judgement.textContent = "";
+
+            }, 400);
+        }
+
+    </script>
+
+</body>
+</html>
