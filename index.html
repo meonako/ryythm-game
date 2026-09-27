@@ -137,12 +137,10 @@
     <h1>4-LANE RHYTHM</h1>
     <p>모바일 터치 또는 키보드 (D, F, J, K)로 플레이하세요.</p>
     
-    <!-- 버튼 이미지 (images/start_btn.png 가 없으면 기본 버튼으로 보임) -->
     <img src="./images/start_btn.png" id="start-btn" alt="GAME START" 
          onerror="this.style.display='none'; document.getElementById('start-btn-fallback').style.display='block';"
          style="width: 200px; cursor: pointer; display: block; margin: 15px auto; transition: transform 0.1s;">
     
-    <!-- 이미지 로드 실패 시 나타나는 기본 대체 버튼 -->
     <button class="btn" id="start-btn-fallback" style="display: none;">GAME START</button>
   </div>
 
@@ -157,11 +155,11 @@
 
 <script>
 // ==========================================
-// 1. 에셋 경로 설정 (파일명 대소문자 확인!)
+// 1. 에셋 경로 설정 (최상위 파일 경로로 복원)
 // ==========================================
 const ASSETS_CONFIG = {
   bg: './images/bg.jpg', 
-  audio: 'Gossip.mp3', // 최상위에 올려둔 MP3 파일명
+  audio: './Gossip.mp3', // 최상위에 배치된 mp3 경로
   notes: [
     './assets/note_red.png',
     './assets/note_blue.png',
@@ -171,32 +169,70 @@ const ASSETS_CONFIG = {
 };
 
 // ==========================================
-// 2. 노트 채보 데이터
+// 2. 82MAJOR - Gossip (1분 33초 맞춤 채보 데이터)
 // ==========================================
 const DEMO_SONG = {
-  bpm: 120,
+  bpm: 125,
   notes: [
-    { time: 1.0, lane: 0 },
-    { time: 1.5, lane: 1 },
-    { time: 2.0, lane: 2 },
-    { time: 2.5, lane: 3 },
-    { time: 3.0, lane: 1 },
-    { time: 3.0, lane: 2 },
-    { time: 3.5, lane: 0 },
-    { time: 4.0, lane: 3 },
-    { time: 4.5, lane: 1 },
-    { time: 5.0, lane: 2 },
-    { time: 5.5, lane: 0 },
-    { time: 5.5, lane: 3 },
-    { time: 6.0, lane: 1 },
-    { time: 6.5, lane: 2 },
-    { time: 7.0, lane: 0 },
-    { time: 7.5, lane: 3 }
+    // [0 ~ 10초: Intro]
+    { time: 2.0, lane: 0 }, { time: 2.5, lane: 1 }, { time: 3.0, lane: 2 }, { time: 3.5, lane: 3 },
+    { time: 4.0, lane: 1 }, { time: 4.0, lane: 2 }, { time: 4.5, lane: 0 }, { time: 5.0, lane: 3 },
+    { time: 6.0, lane: 0 }, { time: 6.5, lane: 1 }, { time: 7.0, lane: 2 }, { time: 7.5, lane: 3 },
+    { time: 8.0, lane: 0 }, { time: 8.0, lane: 3 }, { time: 8.5, lane: 1 }, { time: 9.0, lane: 2 },
+
+    // [10 ~ 22초: Verse 1]
+    { time: 10.0, lane: 0 }, { time: 10.4, lane: 1 }, { time: 10.8, lane: 2 }, { time: 11.2, lane: 3 },
+    { time: 12.0, lane: 1 }, { time: 12.4, lane: 2 }, { time: 13.0, lane: 0 }, { time: 13.5, lane: 3 },
+    { time: 14.0, lane: 1 }, { time: 14.4, lane: 0 }, { time: 14.8, lane: 2 }, { time: 15.2, lane: 3 },
+    { time: 16.0, lane: 0 }, { time: 16.0, lane: 2 }, { time: 16.5, lane: 1 }, { time: 17.0, lane: 3 },
+    { time: 18.0, lane: 0 }, { time: 18.5, lane: 1 }, { time: 19.0, lane: 2 }, { time: 19.5, lane: 3 },
+    { time: 20.0, lane: 0 }, { time: 20.0, lane: 3 }, { time: 21.0, lane: 1 }, { time: 21.5, lane: 2 },
+
+    // [22 ~ 35초: Chorus / 훅]
+    { time: 22.0, lane: 0 }, { time: 22.4, lane: 1 }, { time: 22.8, lane: 2 }, { time: 23.2, lane: 3 },
+    { time: 23.6, lane: 1 }, { time: 24.0, lane: 0 }, { time: 24.0, lane: 3 },
+    { time: 24.5, lane: 2 }, { time: 24.8, lane: 1 }, { time: 25.2, lane: 0 }, { time: 25.6, lane: 3 },
+    { time: 26.0, lane: 1 }, { time: 26.0, lane: 2 }, { time: 26.5, lane: 0 }, { time: 26.8, lane: 3 },
+    { time: 27.2, lane: 1 }, { time: 27.6, lane: 2 }, { time: 28.0, lane: 0 }, { time: 28.3, lane: 1 },
+    { time: 28.6, lane: 2 }, { time: 29.0, lane: 3 }, { time: 30.0, lane: 0 }, { time: 30.5, lane: 3 },
+    { time: 31.0, lane: 1 }, { time: 31.5, lane: 2 }, { time: 32.0, lane: 0 }, { time: 32.0, lane: 3 },
+
+    // [35 ~ 50초: Verse 2 / 랩 파트]
+    { time: 35.0, lane: 0 }, { time: 35.3, lane: 1 }, { time: 35.6, lane: 2 }, { time: 36.0, lane: 3 },
+    { time: 37.0, lane: 1 }, { time: 37.4, lane: 2 }, { time: 38.0, lane: 0 }, { time: 38.4, lane: 3 },
+    { time: 39.5, lane: 0 }, { time: 39.8, lane: 2 }, { time: 40.2, lane: 1 }, { time: 40.5, lane: 3 },
+    { time: 42.0, lane: 0 }, { time: 42.0, lane: 1 }, { time: 43.0, lane: 2 }, { time: 43.0, lane: 3 },
+    { time: 44.5, lane: 0 }, { time: 45.0, lane: 1 }, { time: 45.5, lane: 2 }, { time: 46.0, lane: 3 },
+    { time: 47.0, lane: 1 }, { time: 47.5, lane: 2 }, { time: 48.0, lane: 0 }, { time: 48.5, lane: 3 },
+
+    // [50 ~ 65초: 브릿지 & 빌드업]
+    { time: 50.0, lane: 0 }, { time: 50.5, lane: 1 }, { time: 51.0, lane: 2 }, { time: 51.5, lane: 3 },
+    { time: 52.5, lane: 0 }, { time: 52.5, lane: 3 }, { time: 53.5, lane: 1 }, { time: 53.5, lane: 2 },
+    { time: 55.0, lane: 0 }, { time: 55.3, lane: 1 }, { time: 55.6, lane: 2 }, { time: 56.0, lane: 3 },
+    { time: 57.0, lane: 0 }, { time: 57.25, lane: 1 }, { time: 57.5, lane: 2 }, { time: 57.75, lane: 3 },
+    { time: 58.0, lane: 0 }, { time: 58.25, lane: 1 }, { time: 58.5, lane: 2 }, { time: 58.75, lane: 3 },
+    { time: 59.0, lane: 0 }, { time: 59.0, lane: 3 }, { time: 60.0, lane: 1 }, { time: 60.0, lane: 2 },
+
+    // [65 ~ 82초: 하이라이트 메인 훅]
+    { time: 65.0, lane: 0 }, { time: 65.4, lane: 1 }, { time: 65.8, lane: 2 }, { time: 66.2, lane: 3 },
+    { time: 67.0, lane: 1 }, { time: 67.0, lane: 2 }, { time: 67.5, lane: 0 }, { time: 68.0, lane: 3 },
+    { time: 69.0, lane: 0 }, { time: 69.3, lane: 1 }, { time: 69.6, lane: 2 }, { time: 70.0, lane: 3 },
+    { time: 71.0, lane: 1 }, { time: 71.5, lane: 2 }, { time: 72.0, lane: 0 }, { time: 72.0, lane: 3 },
+    { time: 73.5, lane: 0 }, { time: 73.8, lane: 1 }, { time: 74.2, lane: 2 }, { time: 74.5, lane: 3 },
+    { time: 76.0, lane: 0 }, { time: 76.5, lane: 3 }, { time: 77.0, lane: 1 }, { time: 77.5, lane: 2 },
+    { time: 79.0, lane: 0 }, { time: 79.3, lane: 1 }, { time: 79.6, lane: 2 }, { time: 80.0, lane: 3 },
+    { time: 81.0, lane: 0 }, { time: 81.0, lane: 3 }, { time: 82.0, lane: 1 }, { time: 82.0, lane: 2 },
+
+    // [82 ~ 92초: 아웃트로 & 피날레]
+    { time: 84.0, lane: 0 }, { time: 84.5, lane: 1 }, { time: 85.0, lane: 2 }, { time: 85.5, lane: 3 },
+    { time: 87.0, lane: 0 }, { time: 87.5, lane: 2 }, { time: 88.0, lane: 1 }, { time: 88.5, lane: 3 },
+    { time: 90.0, lane: 0 }, { time: 90.0, lane: 3 },
+    { time: 91.5, lane: 1 }, { time: 91.5, lane: 2 }
   ]
 };
 
 // ==========================================
-// 3. 변수 및 오디오 객체 설정
+// 3. 변수 및 시스템 설정
 // ==========================================
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
@@ -206,7 +242,7 @@ let laneWidth, judgmentLineY;
 let speed = 600;
 
 let audioCtx = null;
-let bgmAudio = new Audio(); // BGM 오디오 객체
+let bgmAudio = new Audio();
 let isPlaying = false;
 let gameStartTime = 0;
 let countdown = 3;
@@ -270,14 +306,18 @@ function playBeep(freq = 440, type = 'sine', duration = 0.1) {
 }
 
 // ==========================================
-// 4. 게임 시작 및 오디오 강제 재생 로직
+// 4. 게임 시작 및 실행 제어
 // ==========================================
 function startGame() {
   initAudio();
 
-  // 음악 사전 로드 및 사용자 터치 권한으로 즉시 실행 테스트
   bgmAudio.src = ASSETS_CONFIG.audio;
   bgmAudio.load();
+
+  // 음원 재생 종료 시 자동 게임 종료 이벤트 등록
+  bgmAudio.onended = () => {
+    endGame();
+  };
 
   document.getElementById('start-screen').classList.add('hidden');
   document.getElementById('result-screen').classList.add('hidden');
@@ -305,13 +345,11 @@ function startGame() {
       playBeep(1200, 'triangle', 0.2);
       clearInterval(countInterval);
       
-      // 카운트다운 끝난 후 BGM 재생
       bgmAudio.currentTime = 0;
       const playPromise = bgmAudio.play();
       if (playPromise !== undefined) {
         playPromise.catch(error => {
-          console.log("오디오 재생 실패:", error);
-          alert("음악 파일(Gossip.mp3)을 불러오지 못했습니다. 파일명과 대소문자를 확인해 주세요!");
+          console.warn("음악 재생 예외 발생:", error);
         });
       }
       gameStartTime = performance.now();
@@ -437,8 +475,9 @@ function gameLoop(timestamp) {
     if (eff.alpha <= 0) effects.splice(i, 1);
   }
 
+  // 마지막 노트가 통과한 후 오디오 종료 대기 (최대 안전 종료 타임아웃)
   const lastNoteTime = DEMO_SONG.notes[DEMO_SONG.notes.length - 1].time;
-  if (currentTime > lastNoteTime + 2.0) {
+  if (currentTime > lastNoteTime + 4.0) {
     endGame();
     return;
   }
@@ -457,7 +496,7 @@ function endGame() {
 }
 
 // ==========================================
-// 5. 이벤트 리스너 등록
+// 5. 이벤트 바인딩
 // ==========================================
 const keyMap = { 'd': 0, 'f': 1, 'j': 2, 'k': 3, '1': 0, '2': 1, '3': 2, '4': 3 };
 
@@ -491,7 +530,6 @@ window.addEventListener('keyup', (e) => {
   });
 });
 
-// 시작 버튼 클릭/터치 이벤트 (버튼 이미지 + 대체 버튼 둘 다 지원)
 const startBtn = document.getElementById('start-btn');
 const fallbackBtn = document.getElementById('start-btn-fallback');
 
