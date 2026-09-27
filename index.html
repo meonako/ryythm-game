@@ -48,7 +48,7 @@
       justify-content: space-between;
       padding: 15px;
       background-color: #111;
-      border-bottom: 2px solid ##FDC7FB;
+      border-bottom: 2px solid #FDC7FB; /* 오타 수정: ##FDC7FB -> #FDC7FB */
       font-size: 0.8rem;
     }
 
@@ -66,6 +66,7 @@
       width: 100%;
       height: 100%;
       display: block;
+      touch-action: none; /* 터치 스크롤 방지 */
     }
 
     .screen {
@@ -100,7 +101,7 @@
       text-shadow: none;
     }
 
-    /* 시작 버튼 (그림자 없는 스타일) */
+    /* 시작 버튼 */
     .start-btn {
       background-color: #050505;
       color: #ffffff;
@@ -115,8 +116,6 @@
     .start-btn:active {
       transform: scale(0.98);
     }
-
-
   </style>
 </head>
 <body>
@@ -140,8 +139,6 @@
     <!-- 결과 오버레이 -->
     <div id="result-screen" class="screen hidden"></div>
   </div>
-
-
 </div>
 
 <script>
@@ -158,7 +155,7 @@ function resize() {
   width = canvas.width = wrapper.clientWidth;
   height = canvas.height = wrapper.clientHeight;
   laneWidth = width / 4;
-  judgeLineY = height - 50;
+  judgeLineY = height - 35; // 판정선을 캔버스 최하단 영역으로 통합
 }
 window.addEventListener('resize', resize);
 resize();
@@ -445,7 +442,7 @@ function endGame() {
     rankColor = '#ff4444';
   }
 
-  // 결과 오버레이 렌더링 (랭크 단독 네온 + RETRY 네온 버튼 + SCORE 제거)
+  // 결과 오버레이 렌더링
   const resultScreen = document.getElementById('result-screen');
   resultScreen.innerHTML = `
     <!-- 랭크 단독 대형 네온 연출 -->
@@ -480,16 +477,17 @@ function endGame() {
       <p style="color:#ffffff; border-top: 1px solid #444; margin-top: 8px; padding-top: 8px;">MAX COMBO : ${maxCombo}</p>
     </div>
 
-    <!-- 네온 스타일 RETRY 버튼 -->
+    <!-- 박스 없는 흰색 글자 RETRY 버튼 -->
     <div>
       <button class="start-btn" id="retry-btn" style="
         background-color: transparent;
-        color: #ffffff
+        color: #ffffff;
         border: none;
         box-shadow: none;
         text-shadow: none;
         padding: 12px 28px;
         font-size: 1.0rem;
+        cursor: pointer;
       ">RETRY</button>
     </div>
   `;
@@ -499,45 +497,36 @@ function endGame() {
 }
 
 // ==========================================
-// 6. 이벤트 바인딩
+// 6. 이벤트 바인딩 (키보드 및 캔버스 직접 터치)
 // ==========================================
 const keyMap = { 'd': 0, 'f': 1, 'j': 2, 'k': 3, 'D': 0, 'F': 1, 'J': 2, 'K': 3 };
 
+// 키보드 입력
 window.addEventListener('keydown', (e) => {
   if (e.repeat) return;
   const lane = keyMap[e.key];
   if (lane !== undefined) {
-    document.getElementById(`pad-${lane}`)?.classList.add('active');
     triggerInput(lane);
   }
 });
 
-window.addEventListener('keyup', (e) => {
-  const lane = keyMap[e.key];
-  if (lane !== undefined) {
-    document.getElementById(`pad-${lane}`)?.classList.remove('active');
-  }
-});
-
-[0, 1, 2, 3].forEach(lane => {
-  const pad = document.getElementById(`pad-${lane}`);
+// 화면 직접 클릭 / 터치 입력
+function handlePointerDown(e) {
+  if (!isPlaying) return;
+  e.preventDefault();
   
-  const handleTouchStart = (e) => {
-    e.preventDefault();
-    pad.classList.add('active');
+  const rect = canvas.getBoundingClientRect();
+  const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+  const touchX = clientX - rect.left;
+  
+  const lane = Math.floor(touchX / laneWidth);
+  if (lane >= 0 && lane < 4) {
     triggerInput(lane);
-  };
-  
-  const handleTouchEnd = (e) => {
-    e.preventDefault();
-    pad.classList.remove('active');
-  };
+  }
+}
 
-  pad.addEventListener('touchstart', handleTouchStart);
-  pad.addEventListener('touchend', handleTouchEnd);
-  pad.addEventListener('mousedown', handleTouchStart);
-  pad.addEventListener('mouseup', handleTouchEnd);
-});
+canvas.addEventListener('touchstart', handlePointerDown, { passive: false });
+canvas.addEventListener('mousedown', handlePointerDown);
 
 document.getElementById('start-btn').addEventListener('click', startGame);
 </script>
