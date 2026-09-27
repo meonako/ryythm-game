@@ -250,71 +250,101 @@ const IMAGE_ASSETS = {
 // ==========================================
 // 2. 다중 음악 및 채보 데이터 베이스 (SONGS)
 // ==========================================
+
 const SONGS = [
   {
     id: 'gossip',
     title: 'Gossip',
     artist: '82MAJOR',
-    audioPath: './Gossip.mp3',
+    audioPath: './Gossip.mp3', // 편집하신 4초~1분37초 음원 파일 경로
     bpm: 125,
     notes: [
-      // [0 ~ 10초: Intro]
-      { time: 2.0, lane: 0 }, { time: 2.5, lane: 1 }, { time: 3.0, lane: 2 }, { time: 3.5, lane: 3 },
-      { time: 4.0, lane: 1 }, { time: 4.0, lane: 2 }, { time: 4.5, lane: 0 }, { time: 5.0, lane: 3 },
-      { time: 6.0, lane: 0 }, { time: 6.5, lane: 1 }, { time: 7.0, lane: 2 }, { time: 7.5, lane: 3 },
-      { time: 8.0, lane: 0 }, { time: 8.0, lane: 3 }, { time: 8.5, lane: 1 }, { time: 9.0, lane: 2 },
+      // [00:00 ~ 00:10] Intro (비트 박자 감잡기)
+      { time: 1.2, lane: 0 }, { time: 1.7, lane: 1 }, { time: 2.2, lane: 2 }, { time: 2.7, lane: 3 },
+      { time: 3.2, lane: 1 }, { time: 3.2, lane: 2 }, { time: 3.8, lane: 0 }, { time: 4.3, lane: 3 },
+      { time: 5.0, lane: 0 }, { time: 5.4, lane: 1 }, { time: 5.8, lane: 2 }, { time: 6.2, lane: 3 },
+      { time: 7.0, lane: 0 }, { time: 7.0, lane: 3 }, { time: 7.5, lane: 1 }, { time: 8.0, lane: 2 },
+      { time: 8.5, lane: 0 }, { time: 8.8, lane: 1 }, { time: 9.1, lane: 2 }, { time: 9.4, lane: 3 },
 
-      // [10 ~ 22초: Verse 1]
-      { time: 10.0, lane: 0 }, { time: 10.4, lane: 1 }, { time: 10.8, lane: 2 }, { time: 11.2, lane: 3 },
-      { time: 12.0, lane: 1 }, { time: 12.4, lane: 2 }, { time: 13.0, lane: 0 }, { time: 13.5, lane: 3 },
-      { time: 14.0, lane: 1 }, { time: 14.4, lane: 0 }, { time: 14.8, lane: 2 }, { time: 15.2, lane: 3 },
-      { time: 16.0, lane: 0 }, { time: 16.0, lane: 2 }, { time: 16.5, lane: 1 }, { time: 17.0, lane: 3 },
-      { time: 18.0, lane: 0 }, { time: 18.5, lane: 1 }, { time: 19.0, lane: 2 }, { time: 19.5, lane: 3 },
-      { time: 20.0, lane: 0 }, { time: 20.0, lane: 3 }, { time: 21.0, lane: 1 }, { time: 21.5, lane: 2 },
+      // [00:10 ~ 00:22] Verse 1 (빠른 랩 플로우 스타트 - 16비트 연타 적용)
+      { time: 10.0, lane: 0 }, { time: 10.25, lane: 1 }, { time: 10.5, lane: 2 }, { time: 10.75, lane: 3 },
+      { time: 11.2, lane: 1 }, { time: 11.5, lane: 2 }, { time: 12.0, lane: 0 }, { time: 12.4, lane: 3 },
+      { time: 13.0, lane: 0 }, { time: 13.2, lane: 1 }, { time: 13.4, lane: 2 }, { time: 13.6, lane: 3 },
+      { time: 14.0, lane: 1 }, { time: 14.0, lane: 2 }, { time: 14.5, lane: 0 }, { time: 15.0, lane: 3 },
+      { time: 15.8, lane: 0 }, { time: 16.0, lane: 1 }, { time: 16.2, lane: 2 }, { time: 16.4, lane: 3 },
+      { time: 17.0, lane: 1 }, { time: 17.4, lane: 2 }, { time: 18.0, lane: 0 }, { time: 18.0, lane: 3 },
+      { time: 18.8, lane: 0 }, { time: 19.1, lane: 1 }, { time: 19.4, lane: 2 }, { time: 19.7, lane: 3 },
+      { time: 20.2, lane: 1 }, { time: 20.6, lane: 2 }, { time: 21.0, lane: 0 }, { time: 21.5, lane: 3 },
 
-      // [22 ~ 35초: Chorus / 훅]
-      { time: 22.0, lane: 0 }, { time: 22.4, lane: 1 }, { time: 22.8, lane: 2 }, { time: 23.2, lane: 3 },
-      { time: 23.6, lane: 1 }, { time: 24.0, lane: 0 }, { time: 24.0, lane: 3 },
-      { time: 24.5, lane: 2 }, { time: 24.8, lane: 1 }, { time: 25.2, lane: 0 }, { time: 25.6, lane: 3 },
-      { time: 26.0, lane: 1 }, { time: 26.0, lane: 2 }, { time: 26.5, lane: 0 }, { time: 26.8, lane: 3 },
-      { time: 27.2, lane: 1 }, { time: 27.6, lane: 2 }, { time: 28.0, lane: 0 }, { time: 28.3, lane: 1 },
-      { time: 28.6, lane: 2 }, { time: 29.0, lane: 3 }, { time: 30.0, lane: 0 }, { time: 30.5, lane: 3 },
-      { time: 31.0, lane: 1 }, { time: 31.5, lane: 2 }, { time: 32.0, lane: 0 }, { time: 32.0, lane: 3 },
+      // [00:22 ~ 00:35] Chorus / Hook (메인 비트 & 동시치기)
+      { time: 22.0, lane: 0 }, { time: 22.0, lane: 3 },
+      { time: 22.5, lane: 1 }, { time: 22.8, lane: 2 },
+      { time: 23.2, lane: 0 }, { time: 23.5, lane: 1 }, { time: 23.8, lane: 2 }, { time: 24.1, lane: 3 },
+      { time: 24.5, lane: 1 }, { time: 24.5, lane: 2 },
+      { time: 25.0, lane: 0 }, { time: 25.3, lane: 1 }, { time: 25.6, lane: 2 }, { time: 25.9, lane: 3 },
+      { time: 26.5, lane: 0 }, { time: 26.5, lane: 3 },
+      { time: 27.0, lane: 1 }, { time: 27.3, lane: 2 }, { time: 27.6, lane: 1 }, { time: 27.9, lane: 0 },
+      { time: 28.5, lane: 2 }, { time: 28.8, lane: 3 }, { time: 29.2, lane: 1 }, { time: 29.6, lane: 0 },
+      { time: 30.2, lane: 0 }, { time: 30.2, lane: 2 }, { time: 30.8, lane: 1 }, { time: 30.8, lane: 3 },
+      { time: 31.5, lane: 0 }, { time: 31.8, lane: 1 }, { time: 32.1, lane: 2 }, { time: 32.4, lane: 3 },
+      { time: 33.0, lane: 0 }, { time: 33.0, lane: 3 }, { time: 33.5, lane: 1 }, { time: 34.0, lane: 2 },
 
-      // [35 ~ 50초: Verse 2]
-      { time: 35.0, lane: 0 }, { time: 35.3, lane: 1 }, { time: 35.6, lane: 2 }, { time: 36.0, lane: 3 },
-      { time: 37.0, lane: 1 }, { time: 37.4, lane: 2 }, { time: 38.0, lane: 0 }, { time: 38.4, lane: 3 },
-      { time: 39.5, lane: 0 }, { time: 39.8, lane: 2 }, { time: 40.2, lane: 1 }, { time: 40.5, lane: 3 },
-      { time: 42.0, lane: 0 }, { time: 42.0, lane: 1 }, { time: 43.0, lane: 2 }, { time: 43.0, lane: 3 },
-      { time: 44.5, lane: 0 }, { time: 45.0, lane: 1 }, { time: 45.5, lane: 2 }, { time: 46.0, lane: 3 },
-      { time: 47.0, lane: 1 }, { time: 47.5, lane: 2 }, { time: 48.0, lane: 0 }, { time: 48.5, lane: 3 },
+      // [00:35 ~ 00:50] Verse 2 (변박 및 랩 라임 타격)
+      { time: 35.0, lane: 0 }, { time: 35.25, lane: 1 }, { time: 35.5, lane: 2 }, { time: 35.75, lane: 3 },
+      { time: 36.5, lane: 1 }, { time: 36.8, lane: 2 }, { time: 37.2, lane: 0 }, { time: 37.6, lane: 3 },
+      { time: 38.5, lane: 0 }, { time: 38.8, lane: 2 }, { time: 39.1, lane: 1 }, { time: 39.4, lane: 3 },
+      { time: 40.0, lane: 0 }, { time: 40.0, lane: 1 }, { time: 40.8, lane: 2 }, { time: 40.8, lane: 3 },
+      { time: 41.8, lane: 0 }, { time: 42.1, lane: 1 }, { time: 42.4, lane: 2 }, { time: 42.7, lane: 3 },
+      { time: 43.5, lane: 1 }, { time: 43.8, lane: 0 }, { time: 44.2, lane: 2 }, { time: 44.6, lane: 3 },
+      { time: 45.5, lane: 0 }, { time: 45.8, lane: 1 }, { time: 46.1, lane: 2 }, { time: 46.4, lane: 3 },
+      { time: 47.2, lane: 1 }, { time: 47.5, lane: 2 }, { time: 48.0, lane: 0 }, { time: 48.5, lane: 3 },
+      { time: 49.2, lane: 0 }, { time: 49.5, lane: 1 }, { time: 49.8, lane: 2 },
 
-      // [50 ~ 65초: 브릿지]
-      { time: 50.0, lane: 0 }, { time: 50.5, lane: 1 }, { time: 51.0, lane: 2 }, { time: 51.5, lane: 3 },
-      { time: 52.5, lane: 0 }, { time: 52.5, lane: 3 }, { time: 53.5, lane: 1 }, { time: 53.5, lane: 2 },
-      { time: 55.0, lane: 0 }, { time: 55.3, lane: 1 }, { time: 55.6, lane: 2 }, { time: 56.0, lane: 3 },
-      { time: 57.0, lane: 0 }, { time: 57.25, lane: 1 }, { time: 57.5, lane: 2 }, { time: 57.75, lane: 3 },
-      { time: 58.0, lane: 0 }, { time: 58.25, lane: 1 }, { time: 58.5, lane: 2 }, { time: 58.75, lane: 3 },
-      { time: 59.0, lane: 0 }, { time: 59.0, lane: 3 }, { time: 60.0, lane: 1 }, { time: 60.0, lane: 2 },
+      // [00:50 ~ 01:05] Bridge (빌드업 구간)
+      { time: 50.2, lane: 0 }, { time: 50.6, lane: 1 }, { time: 51.0, lane: 2 }, { time: 51.4, lane: 3 },
+      { time: 52.2, lane: 0 }, { time: 52.2, lane: 3 }, { time: 53.0, lane: 1 }, { time: 53.0, lane: 2 },
+      { time: 54.0, lane: 0 }, { time: 54.3, lane: 1 }, { time: 54.6, lane: 2 }, { time: 54.9, lane: 3 },
+      { time: 55.8, lane: 0 }, { time: 56.0, lane: 1 }, { time: 56.2, lane: 2 }, { time: 56.4, lane: 3 },
+      { time: 57.0, lane: 0 }, { time: 57.2, lane: 1 }, { time: 57.4, lane: 2 }, { time: 57.6, lane: 3 },
+      { time: 58.2, lane: 0 }, { time: 58.2, lane: 3 }, { time: 59.0, lane: 1 }, { time: 59.0, lane: 2 },
+      { time: 60.0, lane: 0 }, { time: 60.3, lane: 1 }, { time: 60.6, lane: 2 }, { time: 61.0, lane: 3 },
+      { time: 62.0, lane: 1 }, { time: 62.4, lane: 2 }, { time: 63.0, lane: 0 }, { time: 63.5, lane: 3 },
 
-      // [65 ~ 82초: 절정 하이라이트]
-      { time: 65.0, lane: 0 }, { time: 65.4, lane: 1 }, { time: 65.8, lane: 2 }, { time: 66.2, lane: 3 },
-      { time: 67.0, lane: 1 }, { time: 67.0, lane: 2 }, { time: 67.5, lane: 0 }, { time: 68.0, lane: 3 },
-      { time: 69.0, lane: 0 }, { time: 69.3, lane: 1 }, { time: 69.6, lane: 2 }, { time: 70.0, lane: 3 },
-      { time: 71.0, lane: 1 }, { time: 71.5, lane: 2 }, { time: 72.0, lane: 0 }, { time: 72.0, lane: 3 },
-      { time: 73.5, lane: 0 }, { time: 73.8, lane: 1 }, { time: 74.2, lane: 2 }, { time: 74.5, lane: 3 },
-      { time: 76.0, lane: 0 }, { time: 76.5, lane: 3 }, { time: 77.0, lane: 1 }, { time: 77.5, lane: 2 },
-      { time: 79.0, lane: 0 }, { time: 79.3, lane: 1 }, { time: 79.6, lane: 2 }, { time: 80.0, lane: 3 },
-      { time: 81.0, lane: 0 }, { time: 81.0, lane: 3 }, { time: 82.0, lane: 1 }, { time: 82.0, lane: 2 },
+      // [01:05 ~ 01:25] Highlight / Climax (하이라이트 폭타)
+      { time: 65.0, lane: 0 }, { time: 65.2, lane: 1 }, { time: 65.4, lane: 2 }, { time: 65.6, lane: 3 },
+      { time: 66.2, lane: 1 }, { time: 66.2, lane: 2 }, { time: 66.8, lane: 0 }, { time: 67.2, lane: 3 },
+      { time: 68.0, lane: 0 }, { time: 68.2, lane: 1 }, { time: 68.4, lane: 2 }, { time: 68.6, lane: 3 },
+      { time: 69.2, lane: 1 }, { time: 69.6, lane: 2 }, { time: 70.2, lane: 0 }, { time: 70.2, lane: 3 },
+      { time: 71.0, lane: 0 }, { time: 71.25, lane: 1 }, { time: 71.5, lane: 2 }, { time: 71.75, lane: 3 },
+      { time: 72.5, lane: 0 }, { time: 72.5, lane: 3 }, { time: 73.2, lane: 1 }, { time: 73.6, lane: 2 },
+      { time: 74.5, lane: 0 }, { time: 74.75, lane: 1 }, { time: 75.0, lane: 2 }, { time: 75.25, lane: 3 },
+      { time: 76.0, lane: 1 }, { time: 76.4, lane: 2 }, { time: 77.0, lane: 0 }, { time: 77.5, lane: 3 },
+      { time: 78.5, lane: 0 }, { time: 78.75, lane: 1 }, { time: 79.0, lane: 2 }, { time: 79.25, lane: 3 },
+      { time: 80.0, lane: 0 }, { time: 80.0, lane: 3 }, { time: 80.8, lane: 1 }, { time: 80.8, lane: 2 },
 
-      // [82 ~ 92초: 피날레]
-      { time: 84.0, lane: 0 }, { time: 84.5, lane: 1 }, { time: 85.0, lane: 2 }, { time: 85.5, lane: 3 },
-      { time: 87.0, lane: 0 }, { time: 87.5, lane: 2 }, { time: 88.0, lane: 1 }, { time: 88.5, lane: 3 },
-      { time: 90.0, lane: 0 }, { time: 90.0, lane: 3 },
-      { time: 91.5, lane: 1 }, { time: 91.5, lane: 2 }
+      // [01:25 ~ 01:33] Outro / Finale (곡 마무리)
+      { time: 82.0, lane: 0 }, { time: 82.4, lane: 1 }, { time: 82.8, lane: 2 }, { time: 83.2, lane: 3 },
+      { time: 84.0, lane: 1 }, { time: 84.4, lane: 2 }, { time: 85.0, lane: 0 }, { time: 85.5, lane: 3 },
+      { time: 86.5, lane: 0 }, { time: 86.8, lane: 1 }, { time: 87.1, lane: 2 }, { time: 87.4, lane: 3 },
+      { time: 88.5, lane: 0 }, { time: 88.5, lane: 3 },
+      { time: 89.5, lane: 1 }, { time: 89.5, lane: 2 },
+      { time: 91.0, lane: 0 }, { time: 91.0, lane: 1 }, { time: 91.0, lane: 2 }, { time: 91.0, lane: 3 }
     ]
   },
   {
+    id: 'demo',
+    title: 'Demo Beat (Short)',
+    artist: 'System',
+    audioPath: '',
+    bpm: 130,
+    notes: [
+      { time: 1.0, lane: 0 }, { time: 1.5, lane: 1 }, { time: 2.0, lane: 2 }, { time: 2.5, lane: 3 },
+      { time: 3.0, lane: 1 }, { time: 3.0, lane: 2 }, { time: 3.5, lane: 0 }, { time: 4.0, lane: 3 },
+      { time: 5.0, lane: 0 }, { time: 5.3, lane: 1 }, { time: 5.6, lane: 2 }, { time: 6.0, lane: 3 },
+      { time: 7.0, lane: 1 }, { time: 7.0, lane: 2 }, { time: 8.0, lane: 0 }, { time: 8.0, lane: 3 }
+    ]
+  }
+];
     id: 'demo',
     title: 'Demo Beat (Short)',
     artist: 'System',
