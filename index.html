@@ -113,15 +113,18 @@
 
     /* 박스 없는 심플한 곡 선택 텍스트 버튼 */
     .song-select-btn {
-      background-color: transparent;
-      color: #ffffff;
-      border: none;
-      font-size: 1.0rem;
-      cursor: pointer;
-      margin-bottom: 20px;
-      padding: 10px;
-      transition: color 0.1s, transform 0.1s;
-    }
+  background-color: transparent;
+  color: #ffffff;
+  border: none;
+  font-family: 'Press Start 2P', sans-serif; /* 폰트 통일 */
+  font-size: 1.0rem;
+  cursor: pointer;
+  margin-bottom: 20px;
+  padding: 10px;
+  /* 한글이 깨지지 않고 영문과 크기가 비슷하게 보이도록 설정 */
+  word-break: keep-all;
+  transition: color 0.1s, transform 0.1s;
+}
 
     .song-select-btn:hover, .song-select-btn:active {
       color: #FF69C7;
@@ -186,10 +189,12 @@ bgImage.src = './Cover.png';
 const songs = {
   gossip: {
     src: './Gossip.mp3',
+    bg: './Cover.png', // Gossip 배경 이미지
     pattern: generatePattern()
   },
-  trembling: {
+  떨리는 맘: {
     src: './떨리는 맘.mp3', // 필요시 '떨리는 맘' 음원 파일명으로 변경하세요
+    bg: './Cover2.png', // Gossip 배경 이미지
     pattern: generatePattern()
   }
 };
@@ -247,6 +252,7 @@ function goToSongSelect() {
 }
 
 function startGame(songKey) {
+  activeSongKey = songKey;
   score = 0;
   combo = 0;
   maxCombo = 0;
@@ -256,6 +262,12 @@ function startGame(songKey) {
   effects = [];
   
   const selectedSong = songs[songKey];
+  
+  // [추가] 곡별 배경 이미지 동적 로드
+  isBgLoaded = false;
+  bgImage.src = selectedSong.bg;
+  bgImage.onload = () => { isBgLoaded = true; };
+
   activeNotes = selectedSong.pattern.map(n => ({ ...n, hit: false, missed: false }));
   
   document.getElementById('start-screen').classList.add('hidden');
@@ -274,7 +286,6 @@ function startGame(songKey) {
   startTime = performance.now();
   requestAnimationFrame(gameLoop);
 }
-
 function updateHUD() {
   document.getElementById('score').innerText = String(score).padStart(6, '0');
   document.getElementById('combo').innerText = combo;
