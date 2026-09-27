@@ -454,13 +454,13 @@ function endGame() {
 
   let rank = 'F';
   let message = 'KEEP TRYING!';
-  let rankColor = '#ff4444';
+  let rankColor = '#ff4444'; // 기본 빨간색 네온
 
   // 랭크 조건 산출
   if (perfectCount === totalNotes) {
     rank = 'S';
     message = 'ALL PERFECT!! PERFECT GAME!';
-    rankColor = '#ffd700';
+    rankColor = '#ffd700'; // 금색 네온
   } else if (missCount === 0) {
     rank = 'S';
     message = 'GREAT JOB! NO MISS!';
@@ -468,38 +468,69 @@ function endGame() {
   } else if (missCount <= 3) {
     rank = 'A';
     message = 'EXCELLENT PERFORMANCE!';
-    rankColor = '#fcd3f2';
+    rankColor = '#fcd3f2'; // 분홍 네온
   } else if (missCount <= 7) {
     rank = 'B';
     message = 'NICE CLEAR!';
-    rankColor = '#00ffff';
+    rankColor = '#00ffff'; // 민트 네온
   } else {
     rank = 'F';
     message = 'STAGE FAILED... TRY AGAIN!';
-    rankColor = '#888888';
+    rankColor = '#ff4444'; // 빨간 네온
   }
 
-  // 결과 오버레이 렌더링
+  // 결과 오버레이 렌더링 (RANK 단독 네온 + RETRY 네온버튼 적용)
   const resultScreen = document.getElementById('result-screen');
   resultScreen.innerHTML = `
-    <h1 style="color: ${rankColor}; font-size: 2.2rem; margin-bottom: 10px; text-shadow: 3px 3px #000;">RANK ${rank}</h1>
-    <p style="color: #ffffff; font-size: 0.55rem; margin-bottom: 20px;">"${message}"</p>
+    <!-- 심플 랭크 글자 단독 네온 연출 -->
+    <div style="
+      color: #ffffff; 
+      font-size: 4.5rem; 
+      margin-bottom: 10px; 
+      font-family: 'Press Start 2P', cursive;
+      text-shadow: 
+        0 0 7px #ffffff,
+        0 0 15px ${rankColor},
+        0 0 30px ${rankColor},
+        0 0 50px ${rankColor};
+      line-height: 1;
+    ">
+      ${rank}
+    </div>
+
+    <p style="color: #ffffff; font-size: 0.55rem; margin-bottom: 25px;">"${message}"</p>
     
-    <div style="font-size: 0.6rem; line-height: 2; margin-bottom: 20px; text-align: left; background: rgba(255,255,255,0.05); padding: 15px; border-radius: 4px;">
+    <!-- 카운트 결과 영역 (SCORE 제거됨) -->
+    <div style="
+      font-size: 0.65rem; 
+      line-height: 2.2; 
+      margin-bottom: 30px; 
+      text-align: left; 
+      display: inline-block;
+    ">
       <p style="color:#ffd700;">PERFECT : ${perfectCount}</p>
       <p style="color:#fcd3f2;">GREAT   : ${greatCount}</p>
       <p style="color:#ff4444;">MISS    : ${missCount}</p>
-      <p style="color:#ffffff; border-top: 1px solid #444; margin-top: 5px; padding-top: 5px;">SCORE   : ${score}</p>
-      <p style="color:#ffffff;">MAX COMBO : ${maxCombo}</p>
+      <p style="color:#ffffff; border-top: 1px solid #444; margin-top: 8px; padding-top: 8px;">MAX COMBO : ${maxCombo}</p>
     </div>
 
-    <button class="start-btn" id="retry-btn">RETRY</button>
+    <!-- 네온 스타일 RETRY 버튼 -->
+    <div>
+      <button class="start-btn" id="retry-btn" style="
+        background-color: transparent;
+        color: ${rankColor};
+        border: 2px solid ${rankColor};
+        box-shadow: 0 0 10px ${rankColor}, inset 0 0 10px ${rankColor};
+        text-shadow: 0 0 5px ${rankColor};
+        padding: 12px 28px;
+        font-weight: bold;
+      ">RETRY</button>
+    </div>
   `;
 
   document.getElementById('retry-btn').addEventListener('click', startGame);
   resultScreen.classList.remove('hidden');
 }
-
 // ==========================================
 // 6. 이벤트 바인딩
 // ==========================================
