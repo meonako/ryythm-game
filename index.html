@@ -112,7 +112,6 @@
       margin-bottom: 25px;
     }
 
-    /* 곡 선택 버튼 크기 및 폰트 강제 고정 (한글/영문 크기 동일화) */
     .song-select-btn {
       background-color: transparent;
       color: #ffffff;
@@ -185,7 +184,7 @@ let isBgLoaded = false;
 bgImage.onload = () => { isBgLoaded = true; };
 bgImage.src = './Cover.png';
 
-// 곡 설정 (각 곡별 배경 이미지와 음원 연결)
+// 곡 설정 (키 이름을 'gossip'과 'trembling'으로 명확히 통일)
 const songs = {
   gossip: {
     src: './Gossip.mp3',
@@ -194,7 +193,7 @@ const songs = {
   },
   trembling: {
     src: './떨리는 맘.mp3',
-    bg: './Cover2.png', // 떨리는 맘 전용 배경 이미지
+    bg: './Cover2.png',
     pattern: generatePattern()
   }
 };
@@ -253,6 +252,9 @@ function goToSongSelect() {
 }
 
 function startGame(songKey) {
+  const selectedSong = songs[songKey];
+  if (!selectedSong) return;
+
   activeSongKey = songKey;
   score = 0;
   combo = 0;
@@ -262,9 +264,6 @@ function startGame(songKey) {
   missCount = 0;
   effects = [];
   
-  const selectedSong = songs[songKey];
-  
-  // 곡별 배경 이미지 동적 로드 적용
   isBgLoaded = false;
   bgImage.src = selectedSong.bg;
   bgImage.onload = () => { isBgLoaded = true; };
