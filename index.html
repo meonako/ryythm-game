@@ -37,6 +37,8 @@
       display: flex;
       flex-direction: column;
       overflow: hidden;
+      border: 2px solid #FF69C7;
+      box-shadow: 0 0 20px rgba(255, 105, 199, 0.4);
     }
 
     #hud {
@@ -72,7 +74,7 @@
     .screen {
       position: absolute;
       top: 0; left: 0; width: 100%; height: 100%;
-      background: #000000; 
+      background: rgba(0, 0, 0, 0.95); 
       display: flex;
       flex-direction: column;
       justify-content: center;
@@ -97,12 +99,16 @@
       color: #ffffff;
       border: 2px solid #ffffff;
       padding: 12px 20px;
-      font-size: 1.0rem;
+      font-size: 0.9rem;
       cursor: pointer;
       font-family: 'Press Start 2P', cursive;
+      margin: 8px 0;
+      transition: 0.1s;
     }
 
-    .start-btn:active {
+    .start-btn:hover, .start-btn:active {
+      background-color: #ffffff;
+      color: #000000;
       transform: scale(0.98);
     }
      
@@ -158,7 +164,7 @@
       <button class="song-select-btn" onclick="startGame('trembling')">> 떨리는 맘</button>
     </div>
 
-    <!-- 3단계: 결과 화면 -->
+    <!-- 3단계: 랭크/결과 화면 -->
     <div id="result-screen" class="screen hidden"></div>
   </div>
 </div>
@@ -184,7 +190,7 @@ let isBgLoaded = false;
 bgImage.onload = () => { isBgLoaded = true; };
 bgImage.src = './Cover.png';
 
-// 곡 설정 (요청하신 파일명 반영)
+// 곡 설정 (떨리는 맘.mp3 및 Cover2.png 반영)
 const songs = {
   gossip: {
     src: './Gossip.mp3',
@@ -198,6 +204,7 @@ const songs = {
   }
 };
 
+let activeSongKey = 'gossip';
 let currentBgm = new Audio();
 const NOTE_SPEED = 550;
 
@@ -251,6 +258,7 @@ function goToSongSelect() {
 }
 
 function startGame(songKey) {
+  activeSongKey = songKey;
   const selectedSong = songs[songKey];
   if (!selectedSong) return;
 
@@ -416,16 +424,32 @@ function endGame() {
   isPlaying = false;
   try { currentBgm.pause(); } catch(e) {}
 
+  const totalNotes = songs[activeSongKey].pattern.length;
+  const maxPossibleScore = totalNotes * 1000;
+  const accuracy = maxPossibleScore > 0 ? (score / maxPossibleScore) * 100 : 0;
+
+  let rank = 'F';
+  let message = '"STAGE FAILED... TRY AGAIN!"';
+  if (accuracy >= 90) { rank = 'S'; message = '"AMAZING! PERFECT RHYTHM!"'; }
+  else if (accuracy >= 80) { rank = 'A'; message = '"GREAT JOB!"'; }
+  else if (accuracy >= 70) { rank = 'B'; message = '"GOOD!"'; }
+  else if (accuracy >= 60) { rank = 'C'; message = '"CLEAR!"'; }
+
   const resultScreen = document.getElementById('result-screen');
   resultScreen.innerHTML = `
-    <div style="color: #ffffff; font-size: 3.5rem; margin-bottom: 10px;">CLEAR!</div>
-    <div style="font-size: 0.65rem; line-height: 2.2; margin-bottom: 30px;">
+    <div style="font-size: 4.5rem; color: #ff4444; text-shadow: 0 0 15px #ff4444; margin-bottom: 5px;">${rank}</div>
+    <div style="font-size: 0.65rem; color: #fcd3f2; margin-bottom: 20px;">${message}</div>
+    <div style="font-size: 0.65rem; line-height: 2.2; margin-bottom: 25px; text-align: left;">
       <p style="color:#ffd700;">PERFECT : ${perfectCount}</p>
       <p style="color:#fcd3f2;">GREAT   : ${greatCount}</p>
       <p style="color:#ff4444;">MISS    : ${missCount}</p>
+      <hr style="border: 0; border-top: 1px solid #555; margin: 5px 0;">
       <p style="color:#ffffff;">MAX COMBO : ${maxCombo}</p>
     </div>
-    <div><button class="start-btn" onclick="goToSongSelect()">SELECT SONG</button></div>
+    <div>
+      <button class="start-btn" onclick="startGame('${activeSongKey}')">RETRY</button><br>
+      <button class="start-btn" onclick="goToSongSelect()">SELECT SONG</button>
+    </div>
   `;
   resultScreen.classList.remove('hidden');
 }
