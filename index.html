@@ -349,7 +349,7 @@ function startGame() {
       const playPromise = bgmAudio.play();
       if (playPromise !== undefined) {
         playPromise.catch(error => {
-          console.warn("음악 재생 예외 발생:", error);
+          console.warn("오디오 재생 실패 (터치 권한 또는 캐시 지연):", error);
         });
       }
       gameStartTime = performance.now();
