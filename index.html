@@ -2,7 +2,7 @@
 <html lang="ko">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>82 Rhythm</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -24,6 +24,7 @@
       justify-content: center;
       align-items: center;
       min-height: 100vh;
+      min-height: 100dvh;
       overflow: hidden;
       font-family: 'Press Start 2P', cursive;
     }
@@ -32,6 +33,7 @@
       position: relative;
       width: 100%;
       max-width: 430px;
+      height: 100vh;
       height: 100dvh;
       background-color: #000000;
       display: flex;
@@ -46,11 +48,11 @@
       height: 45px;
       display: flex;
       justify-content: space-between;
-      padding: 18px 15px 12px 15px;
-      position: relative
+      align-items: center;
+      padding: 0 15px;
       background-color: #000000;
       border-bottom: 2px solid #FDC7FB;
-      font-size: 0.75rem;
+      font-size: 0.7rem;
       z-index: 10;
       flex-shrink: 0;
     }
@@ -60,8 +62,8 @@
 
     #canvas-wrapper {
       position: relative;
-      height: calc(100% - 45px);
       width: 100%;
+      height: calc(100% - 45px);
       background-color: #000000;
       overflow: hidden;
     }
@@ -156,7 +158,7 @@
     <div id="start-screen" class="screen">
       <h1>82 RHYTHM</h1>
       <h2>2026 WORK BY YUN</h2>
-      <button class="start-btn" onclick="goToSongSelect()">START GAME</button>
+      <button id="start-game-btn" class="start-btn">START GAME</button>
     </div>
 
     <!-- 2단계: 곡 선택 화면 -->
@@ -164,8 +166,8 @@
       <h1>SELECT SONG</h1>
       <h2>CHOOSE YOUR TRACK</h2>
       
-      <button class="song-select-btn" onclick="startGame('gossip')">> GOSSIP</button>
-      <button class="song-select-btn" onclick="startGame('trembling')">> 떨리는 맘</button>
+      <button class="song-select-btn" data-song="gossip">> GOSSIP</button>
+      <button class="song-select-btn" data-song="trembling">> 떨리는 맘</button>
     </div>
 
     <!-- 3단계: 랭크/결과 화면 -->
@@ -288,7 +290,14 @@ function startGame(songKey) {
 
   currentBgm.src = selectedSong.src;
   currentBgm.currentTime = 0;
-  currentBgm.play().catch(err => console.log(err));
+  
+  const playPromise = currentBgm.play();
+  if (playPromise !== undefined) {
+    playPromise.catch(error => {
+      console.log("Audio play blocked or loading error:", error);
+    });
+  }
+  
   currentBgm.onended = () => { endGame(); };
 
   isPlaying = true;
@@ -438,7 +447,6 @@ function endGame() {
   else if (accuracy >= 70) { rank = 'B'; message = '"GOOD!"'; }
   else if (accuracy >= 60) { rank = 'C'; message = '"CLEAR!"'; }
 
-  // 랭크별 색상 지정
   let rankColor = '#ffffff'; 
   let shadowColor = '#ff4444';
 
@@ -460,11 +468,35 @@ function endGame() {
       <p style="color:#ffffff;">MAX COMBO : ${maxCombo}</p>
     </div>
     <div>
-      <button class="start-btn" onclick="startGame('${activeSongKey}')">RETRY</button><br>
-      <button class="start-btn" onclick="goToSongSelect()">SELECT SONG</button>
+      <button id="retry-btn" class="start-btn">RETRY</button><br>
+      <button id="select-song-btn" class="start-btn">SELECT SONG</button>
     </div>
+  `;
   resultScreen.classList.remove('hidden');
+
+  // 결과 화면 동적 버튼 이벤트 바인딩
+  document.getElementById('retry-btn').addEventListener('click', () => startGame(activeSongKey));
+  document.getElementById('retry-btn').addEventListener('touchend', (e) => { e.preventDefault(); startGame(activeSongKey); });
+
+  document.getElementById('select-song-btn').addEventListener('click', goToSongSelect);
+  document.getElementById('select-song-btn').addEventListener('touchend', (e) => { e.preventDefault(); goToSongSelect(); });
 }
+
+// 모바일 터치 및 클릭 이벤트 안전 바인딩
+document.getElementById('start-game-btn').addEventListener('click', goToSongSelect);
+document.getElementById('start-game-btn').addEventListener('touchend', (e) => {
+  e.preventDefault();
+  goToSongSelect();
+});
+
+document.querySelectorAll('.song-select-btn').forEach(btn => {
+  const songKey = btn.getAttribute('data-song');
+  btn.addEventListener('click', () => startGame(songKey));
+  btn.addEventListener('touchend', (e) => {
+    e.preventDefault();
+    startGame(songKey);
+  });
+});
 
 const keyMap = { 'd': 0, 'f': 1, 'j': 2, 'k': 3, 'D': 0, 'F': 1, 'J': 2, 'K': 3 };
 window.addEventListener('keydown', (e) => {
@@ -477,7 +509,8 @@ canvas.addEventListener('touchstart', (e) => {
   if (!isPlaying) return;
   e.preventDefault();
   const rect = canvas.getBoundingClientRect();
-  const lane = Math.floor((e.touches[0].clientX - rect.left) / laneWidth);
+  const touchX = e.touches[0].clientX;
+  const lane = Math.floor((touchX - rect.left) / laneWidth);
   if (lane >= 0 && lane < 4) triggerInput(lane);
 }, { passive: false });
 
