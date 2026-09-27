@@ -1,930 +1,1146 @@
 <!DOCTYPE html>
 <html lang="ko">
-
 <head>
-
-<meta charset="UTF-8">
-
-<meta name="viewport"
-content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-
-<title>My Rhythm Game</title>
-
-
-<style>
-
-/* =========================
-   기본 설정
-========================= */
-
-* {
-    box-sizing: border-box;
-    user-select: none;
-    -webkit-user-select: none;
-    -webkit-tap-highlight-color: transparent;
-}
-
-
-body {
-
-    margin: 0;
-
-    width: 100vw;
-    height: 100vh;
-
-    overflow: hidden;
-
-    background: #111;
-
-    color: white;
-
-    font-family: Arial, sans-serif;
-}
-
-
-/* =========================
-   게임 화면
-========================= */
-
-#game {
-
-    width: 100vw;
-    height: 100vh;
-
-    position: relative;
-
-    display: flex;
-
-    justify-content: center;
-}
-
-
-/* =========================
-   점수
-========================= */
-
-#info {
-
-    position: absolute;
-
-    top: 20px;
-
-    left: 0;
-
-    width: 100%;
-
-    text-align: center;
-
-    z-index: 20;
-}
-
-
-#score {
-
-    font-size: 24px;
-
-    font-weight: bold;
-}
-
-
-#combo {
-
-    margin-top: 5px;
-
-    font-size: 18px;
-}
-
-
-/* =========================
-   4레인 전체
-========================= */
-
-#laneContainer {
-
-    position: absolute;
-
-    top: 90px;
-
-    bottom: 120px;
-
-    width: min(95vw, 500px);
-
-    display: flex;
-
-    overflow: hidden;
-
-    border-left: 1px solid #555;
-
-    border-right: 1px solid #555;
-}
-
-
-/* =========================
-   각각의 레인
-========================= */
-
-.lane {
-
-    position: relative;
-
-    width: 25%;
-
-    height: 100%;
-
-    border-right: 1px solid #444;
-
-    background: #181818;
-}
-
-
-/* 마지막 레인은 오른쪽 선 제거 */
-
-.lane:last-child {
-
-    border-right: none;
-}
-
-
-/* 레인 번갈아 색 */
-
-.lane:nth-child(even) {
-
-    background: #202020;
-}
-
-
-/* =========================
-   노트
-========================= */
-
-.note {
-
-    position: absolute;
-
-    width: 80%;
-
-    height: 24px;
-
-    left: 10%;
-
-    top: -30px;
-
-    border-radius: 12px;
-
-    background: #00eaff;
-
-    box-shadow: 0 0 15px #00eaff;
-}
-
-
-/* =========================
-   판정선
-========================= */
-
-#judgeLine {
-
-    position: absolute;
-
-    bottom: 70px;
-
-    left: 0;
-
-    width: 100%;
-
-    height: 5px;
-
-    background: white;
-
-    box-shadow: 0 0 10px white;
-
-    z-index: 10;
-}
-
-
-/* =========================
-   터치 버튼
-========================= */
-
-#buttons {
-
-    position: absolute;
-
-    bottom: 20px;
-
-    width: min(95vw, 500px);
-
-    height: 60px;
-
-    display: flex;
-
-    gap: 4px;
-
-    z-index: 30;
-}
-
-
-.key {
-
-    width: 25%;
-
-    border: none;
-
-    border-radius: 8px;
-
-    background: #333;
-
-    color: white;
-
-    font-size: 18px;
-
-    font-weight: bold;
-
-    touch-action: manipulation;
-}
-
-
-.key:active {
-
-    background: #666;
-
-    transform: scale(0.95);
-}
-
-
-/* =========================
-   판정 표시
-========================= */
-
-#judgement {
-
-    position: absolute;
-
-    top: 42%;
-
-    left: 0;
-
-    width: 100%;
-
-    text-align: center;
-
-    font-size: 32px;
-
-    font-weight: bold;
-
-    z-index: 40;
-
-}
-
-
-/* =========================
-   시작 화면
-========================= */
-
-#startScreen {
-
-    position: absolute;
-
-    width: 100%;
-
-    height: 100%;
-
-    background: #111;
-
-    z-index: 100;
-
-    display: flex;
-
-    flex-direction: column;
-
-    justify-content: center;
-
-    align-items: center;
-}
-
-
-#startScreen h1 {
-
-    font-size: 30px;
-
-    margin-bottom: 10px;
-}
-
-
-#startScreen p {
-
-    color: #aaa;
-
-    margin-bottom: 30px;
-}
-
-
-#startButton {
-
-    padding: 15px 50px;
-
-    border: none;
-
-    border-radius: 10px;
-
-    background: #00eaff;
-
-    color: #111;
-
-    font-size: 20px;
-
-    font-weight: bold;
-}
-
-</style>
-
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Neon Pulse - 4-Lane Rhythm Game</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        /* Mobile layout & Touch safety resets */
+        * {
+            user-select: none;
+            -webkit-user-select: none;
+            -webkit-touch-callout: none;
+            touch-action: manipulation;
+        }
+
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background-color: #0b0f19;
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        }
+
+        /* Lane Visual Effects */
+        .lane-key-active {
+            background: linear-gradient(to top, rgba(255, 255, 255, 0.4), transparent) !important;
+            box-shadow: inset 0 -10px 20px rgba(255, 255, 255, 0.5);
+        }
+
+        /* Custom Animations */
+        @keyframes hitPop {
+            0% { transform: scale(0.6); opacity: 1; }
+            50% { transform: scale(1.3); opacity: 0.9; }
+            100% { transform: scale(1.0); opacity: 0; }
+        }
+
+        .animate-hit {
+            animation: hitPop 0.25s ease-out forwards;
+        }
+
+        @keyframes comboPulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.2); }
+            100% { transform: scale(1); }
+        }
+
+        .animate-combo {
+            animation: comboPulse 0.15s ease-in-out;
+        }
+
+        /* Custom Scrollbar for Song Select & Chart Editor */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: rgba(15, 23, 42, 0.6);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(99, 102, 241, 0.5);
+            border-radius: 3px;
+        }
+    </style>
 </head>
+<body class="text-white flex justify-center items-center h-full w-full bg-slate-950">
+
+    <!-- Main Game Wrapper (Mobile Portrait Optimized) -->
+    <div id="game-wrapper" class="relative w-full max-w-md h-full max-h-[920px] bg-slate-900 shadow-2xl overflow-hidden flex flex-col justify-between border-x border-slate-800">
+
+        <!-- ========================================== -->
+        <!-- SCREEN 1: TITLE & SONG SELECT SCREEN -->
+        <!-- ========================================== -->
+        <div id="screen-title" class="absolute inset-0 z-30 flex flex-col justify-between p-6 bg-gradient-to-b from-slate-900 via-slate-900 to-purple-950">
+            <!-- Header -->
+            <div class="text-center mt-6">
+                <span class="px-3 py-1 bg-indigo-500/20 text-indigo-400 text-xs font-bold rounded-full border border-indigo-500/30 tracking-wider uppercase">Mobile Rhythm Engine</span>
+                <h1 class="text-4xl font-extrabold tracking-tight mt-2 bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 via-indigo-300 to-pink-500">
+                    NEON BEAT
+                </h1>
+                <p class="text-xs text-slate-400 mt-1">4-Lane Touch & Keyboard Game</p>
+            </div>
+
+            <!-- Song Selection List -->
+            <div class="my-auto space-y-3 max-h-[50vh] overflow-y-auto px-1">
+                <div class="text-xs font-semibold text-slate-400 mb-1 flex justify-between items-center">
+                    <span>SELECT TRACK</span>
+                    <span id="track-count-badge" class="text-indigo-400">2 Songs</span>
+                </div>
+
+                <!-- Song Cards Container -->
+                <div id="song-list-container" class="space-y-3">
+                    <!-- Dynamic Song Items Rendered via JS -->
+                </div>
+            </div>
+
+            <!-- Bottom Actions & Settings -->
+            <div class="space-y-3 mb-4">
+                <button id="btn-start-game" class="w-full py-4 bg-gradient-to-r from-cyan-500 to-indigo-600 hover:from-cyan-400 hover:to-indigo-500 text-white font-bold text-lg rounded-2xl shadow-lg shadow-indigo-500/30 active:scale-95 transition">
+                    <i class="fa-solid fa-play mr-2"></i> GAME START
+                </button>
+                <div class="grid grid-cols-2 gap-2">
+                    <button id="btn-open-editor" class="py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold rounded-xl border border-slate-700 flex items-center justify-center">
+                        <i class="fa-solid fa-sliders mr-1.5 text-indigo-400"></i> Chart Editor
+                    </button>
+                    <button id="btn-open-settings" class="py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold rounded-xl border border-slate-700 flex items-center justify-center">
+                        <i class="fa-solid fa-gear mr-1.5 text-indigo-400"></i> Speed & Keys
+                    </button>
+                </div>
+            </div>
+        </div>
 
 
-<body>
+        <!-- ========================================== -->
+        <!-- SCREEN 2: MAIN GAMEPLAY CANVAS SCREEN -->
+        <!-- ========================================== -->
+        <div id="screen-gameplay" class="relative w-full h-full flex flex-col justify-between hidden">
+            <!-- Background Image Overlay (Customizable) -->
+            <div id="game-bg" class="absolute inset-0 bg-cover bg-center opacity-30 pointer-events-none" style="background-image: url('https://images.unsplash.com/photo-1518709268805-4e9042af9f23?q=80&w=1000&auto=format&fit=crop');"></div>
+
+            <!-- Top HUD Bar -->
+            <div class="relative z-20 flex justify-between items-center p-4 bg-slate-900/80 backdrop-blur-md border-b border-slate-800">
+                <div>
+                    <button id="btn-pause-game" class="p-2 bg-slate-800 rounded-lg text-slate-300 hover:text-white active:scale-90 transition">
+                        <i class="fa-solid fa-pause"></i>
+                    </button>
+                </div>
+                <div class="text-center">
+                    <div id="hud-score" class="text-2xl font-black text-cyan-400 tracking-wider">0000000</div>
+                    <div id="hud-song-title" class="text-[10px] text-slate-400 uppercase tracking-widest truncate max-w-[140px]">Song Title</div>
+                </div>
+                <div class="text-right">
+                    <div id="hud-acc" class="text-xs font-bold text-indigo-300">100.00%</div>
+                    <div id="hud-grade" class="text-xs font-black text-emerald-400">PERFECT</div>
+                </div>
+            </div>
+
+            <!-- Combo & Judgement Overlay Text -->
+            <div class="absolute inset-x-0 top-[28%] z-20 pointer-events-none flex flex-col items-center justify-center">
+                <div id="judgement-text" class="text-3xl font-black tracking-widest transition-all duration-75 opacity-0 scale-75">
+                    PERFECT
+                </div>
+                <div id="combo-container" class="opacity-0 transition-opacity flex flex-col items-center mt-1">
+                    <span id="combo-count" class="text-4xl font-extrabold text-amber-400 tracking-tight leading-none">0</span>
+                    <span class="text-[10px] font-bold tracking-widest text-amber-300/80 uppercase">COMBO</span>
+                </div>
+            </div>
+
+            <!-- Canvas for Scrolling Lanes & Falling Notes -->
+            <div class="relative w-full flex-1 overflow-hidden">
+                <canvas id="noteCanvas" class="w-full h-full block"></canvas>
+            </div>
+
+            <!-- Bottom Touch Keys / Tap Pads Area -->
+            <div id="touch-controls" class="relative z-20 h-28 bg-slate-950/90 border-t-2 border-indigo-500/50 grid grid-cols-4 gap-1 p-1">
+                <!-- Lane 1 Tap Zone -->
+                <button id="pad-0" data-lane="0" class="touch-pad relative h-full rounded-lg bg-cyan-950/40 border border-cyan-500/30 flex flex-col justify-end items-center pb-2 active:bg-cyan-500/40 transition-colors">
+                    <span class="key-bind-label text-xs font-bold text-cyan-400 opacity-70">D</span>
+                    <div class="lane-hit-flash absolute inset-0 rounded-lg pointer-events-none opacity-0 bg-cyan-400/30"></div>
+                </button>
+                <!-- Lane 2 Tap Zone -->
+                <button id="pad-1" data-lane="1" class="touch-pad relative h-full rounded-lg bg-indigo-950/40 border border-indigo-500/30 flex flex-col justify-end items-center pb-2 active:bg-indigo-500/40 transition-colors">
+                    <span class="key-bind-label text-xs font-bold text-indigo-400 opacity-70">F</span>
+                    <div class="lane-hit-flash absolute inset-0 rounded-lg pointer-events-none opacity-0 bg-indigo-400/30"></div>
+                </button>
+                <!-- Lane 3 Tap Zone -->
+                <button id="pad-2" data-lane="2" class="touch-pad relative h-full rounded-lg bg-indigo-950/40 border border-indigo-500/30 flex flex-col justify-end items-center pb-2 active:bg-indigo-500/40 transition-colors">
+                    <span class="key-bind-label text-xs font-bold text-indigo-400 opacity-70">J</span>
+                    <div class="lane-hit-flash absolute inset-0 rounded-lg pointer-events-none opacity-0 bg-indigo-400/30"></div>
+                </button>
+                <!-- Lane 4 Tap Zone -->
+                <button id="pad-3" data-lane="3" class="touch-pad relative h-full rounded-lg bg-pink-950/40 border border-pink-500/30 flex flex-col justify-end items-center pb-2 active:bg-pink-400/30 transition-colors">
+                    <span class="key-bind-label text-xs font-bold text-pink-400 opacity-70">K</span>
+                    <div class="lane-hit-flash absolute inset-0 rounded-lg pointer-events-none opacity-0 bg-pink-400/30"></div>
+                </button>
+            </div>
+        </div>
 
 
-<div id="game">
+        <!-- ========================================== -->
+        <!-- SCREEN 3: GAME RESULT SCREEN -->
+        <!-- ========================================== -->
+        <div id="screen-result" class="absolute inset-0 z-40 flex flex-col justify-between p-6 bg-slate-950 hidden">
+            <div class="text-center mt-6">
+                <h2 class="text-xs font-bold text-slate-400 uppercase tracking-widest">Stage Cleared</h2>
+                <h1 id="result-song-title" class="text-2xl font-black text-white mt-1">Song Name</h1>
+            </div>
+
+            <!-- Grade & Summary Card -->
+            <div class="my-auto bg-slate-900 border border-slate-800 rounded-2xl p-6 text-center space-y-6 shadow-xl">
+                <div>
+                    <div id="result-grade" class="text-7xl font-black text-amber-400 drop-shadow-lg inline-block">S</div>
+                    <p id="result-rank-text" class="text-xs text-slate-400 mt-1 uppercase tracking-wider">Outstanding Performance</p>
+                </div>
+
+                <div class="grid grid-cols-2 gap-4 pt-4 border-t border-slate-800">
+                    <div class="bg-slate-950/60 p-3 rounded-xl">
+                        <div class="text-xs text-slate-400">Total Score</div>
+                        <div id="result-score" class="text-xl font-extrabold text-cyan-400">0</div>
+                    </div>
+                    <div class="bg-slate-950/60 p-3 rounded-xl">
+                        <div class="text-xs text-slate-400">Accuracy</div>
+                        <div id="result-accuracy" class="text-xl font-extrabold text-indigo-400">0.00%</div>
+                    </div>
+                    <div class="bg-slate-950/60 p-3 rounded-xl">
+                        <div class="text-xs text-slate-400">Max Combo</div>
+                        <div id="result-maxcombo" class="text-xl font-extrabold text-amber-400">0</div>
+                    </div>
+                    <div class="bg-slate-950/60 p-3 rounded-xl">
+                        <div class="text-xs text-slate-400">Misses</div>
+                        <div id="result-misses" class="text-xl font-extrabold text-rose-400">0</div>
+                    </div>
+                </div>
+
+                <!-- Hit Breakdown Details -->
+                <div class="flex justify-between text-xs px-2 text-slate-400">
+                    <span>PERFECT: <b id="cnt-perfect" class="text-emerald-400">0</b></span>
+                    <span>GREAT: <b id="cnt-great" class="text-cyan-400">0</b></span>
+                    <span>GOOD: <b id="cnt-good" class="text-amber-400">0</b></span>
+                    <span>MISS: <b id="cnt-miss" class="text-rose-400">0</b></span>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="space-y-3 mb-4">
+                <button id="btn-retry" class="w-full py-3.5 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-xl shadow-lg active:scale-95 transition">
+                    <i class="fa-solid fa-rotate-right mr-2"></i> PLAY AGAIN
+                </button>
+                <button id="btn-song-select" class="w-full py-3 bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold rounded-xl border border-slate-700 active:scale-95 transition">
+                    <i class="fa-solid fa-list mr-2"></i> SONG MENU
+                </button>
+            </div>
+        </div>
 
 
-<!-- =========================
-     시작 화면
-========================= -->
+        <!-- ========================================== -->
+        <!-- MODAL 1: SETTINGS (Speed & Key Mapping) -->
+        <!-- ========================================== -->
+        <div id="modal-settings" class="absolute inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-6 hidden">
+            <div class="bg-slate-900 border border-slate-800 w-full rounded-2xl p-6 space-y-6">
+                <div class="flex justify-between items-center border-b border-slate-800 pb-3">
+                    <h3 class="text-lg font-bold text-white"><i class="fa-solid fa-gear text-indigo-400 mr-2"></i> Game Settings</h3>
+                    <button id="btn-close-settings" class="text-slate-400 hover:text-white text-xl"><i class="fa-solid fa-xmark"></i></button>
+                </div>
 
-<div id="startScreen">
+                <!-- Note Speed Slider -->
+                <div class="space-y-2">
+                    <div class="flex justify-between text-sm">
+                        <span class="text-slate-300">Note Scroll Speed</span>
+                        <span id="val-speed-display" class="font-bold text-cyan-400">1.0x</span>
+                    </div>
+                    <input id="slider-speed" type="range" min="0.5" max="3.0" step="0.1" value="1.0" class="w-full accent-indigo-500 bg-slate-800 rounded-lg cursor-pointer">
+                    <p class="text-[10px] text-slate-400">Higher speed makes notes move faster down the screen.</p>
+                </div>
 
-    <h1>RHYTHM GAME</h1>
+                <!-- Key Mapping Inputs (Desktop Fallback) -->
+                <div class="space-y-2">
+                    <span class="text-sm text-slate-300">Keyboard Binding (Lane 1-4)</span>
+                    <div class="grid grid-cols-4 gap-2">
+                        <input type="text" id="key-input-0" maxlength="1" value="D" class="bg-slate-800 border border-slate-700 rounded-lg py-2 text-center text-sm font-bold uppercase text-cyan-400 focus:outline-none focus:border-cyan-400">
+                        <input type="text" id="key-input-1" maxlength="1" value="F" class="bg-slate-800 border border-slate-700 rounded-lg py-2 text-center text-sm font-bold uppercase text-indigo-400 focus:outline-none focus:border-indigo-400">
+                        <input type="text" id="key-input-2" maxlength="1" value="J" class="bg-slate-800 border border-slate-700 rounded-lg py-2 text-center text-sm font-bold uppercase text-indigo-400 focus:outline-none focus:border-indigo-400">
+                        <input type="text" id="key-input-3" maxlength="1" value="K" class="bg-slate-800 border border-slate-700 rounded-lg py-2 text-center text-sm font-bold uppercase text-pink-400 focus:outline-none focus:border-pink-400">
+                    </div>
+                </div>
 
-    <p>노트가 판정선에 도착하면 눌러주세요</p>
-
-    <button id="startButton">
-        START
-    </button>
-
-</div>
+                <button id="btn-save-settings" class="w-full py-3 bg-indigo-600 hover:bg-indigo-500 font-bold rounded-xl text-white transition">
+                    Save Settings
+                </button>
+            </div>
+        </div>
 
 
-<!-- =========================
-     점수
-========================= -->
+        <!-- ========================================== -->
+        <!-- MODAL 2: CHART EDITOR TOOL -->
+        <!-- ========================================== -->
+        <div id="modal-editor" class="absolute inset-0 z-50 bg-slate-950 flex flex-col justify-between p-4 hidden">
+            <div class="flex justify-between items-center border-b border-slate-800 pb-3">
+                <h3 class="text-base font-bold text-white"><i class="fa-solid fa-sliders text-indigo-400 mr-2"></i> Built-in Beatmap Chart Editor</h3>
+                <button id="btn-close-editor" class="text-slate-400 hover:text-white text-xl"><i class="fa-solid fa-xmark"></i></button>
+            </div>
 
-<div id="info">
+            <p class="text-xs text-slate-400">
+                Press Play, then tap the 4 Lane buttons (or D/F/J/K keys) along with the audio to record notes in real-time.
+            </p>
 
-    <div id="score">
-        SCORE: 0
+            <!-- Editor Record Pads -->
+            <div class="grid grid-cols-4 gap-2 my-auto">
+                <button data-editor-lane="0" class="editor-pad h-24 bg-cyan-950/60 border border-cyan-500/40 rounded-xl flex items-center justify-center font-bold text-cyan-400 active:bg-cyan-500/50">1</button>
+                <button data-editor-lane="1" class="editor-pad h-24 bg-indigo-950/60 border border-indigo-500/40 rounded-xl flex items-center justify-center font-bold text-indigo-400 active:bg-indigo-500/50">2</button>
+                <button data-editor-lane="2" class="editor-pad h-24 bg-indigo-950/60 border border-indigo-500/40 rounded-xl flex items-center justify-center font-bold text-indigo-400 active:bg-indigo-500/50">3</button>
+                <button data-editor-lane="3" class="editor-pad h-24 bg-pink-950/60 border border-pink-500/40 rounded-xl flex items-center justify-center font-bold text-pink-400 active:bg-pink-500/50">4</button>
+            </div>
+
+            <!-- Recorded JSON Output Block -->
+            <div class="space-y-2">
+                <div class="flex justify-between items-center text-xs text-slate-400">
+                    <span>Recorded Notes JSON (<span id="editor-note-count">0</span> notes)</span>
+                    <button id="btn-copy-chart" class="text-cyan-400 hover:underline"><i class="fa-solid fa-copy"></i> Copy JSON</button>
+                </div>
+                <textarea id="editor-json-output" class="w-full h-24 bg-slate-900 border border-slate-800 rounded-xl p-2 text-[10px] font-mono text-emerald-400 focus:outline-none" readonly>[ ]</textarea>
+            </div>
+
+            <!-- Editor Controls -->
+            <div class="grid grid-cols-2 gap-2">
+                <button id="btn-record-start" class="py-3 bg-emerald-600 hover:bg-emerald-500 font-bold rounded-xl text-white">
+                    <i class="fa-solid fa-circle text-xs text-rose-300 mr-1.5 animate-pulse"></i> Start Recording
+                </button>
+                <button id="btn-record-clear" class="py-3 bg-slate-800 hover:bg-slate-700 font-semibold rounded-xl text-slate-300 border border-slate-700">
+                    Clear Chart
+                </button>
+            </div>
+        </div>
+
     </div>
 
-    <div id="combo">
-        COMBO: 0
-    </div>
-
-</div>
-
-
-<!-- 판정 결과 -->
-
-<div id="judgement"></div>
-
-
-<!-- =========================
-     4개의 레인
-========================= -->
-
-<div id="laneContainer">
-
-    <div class="lane" id="lane0"></div>
-
-    <div class="lane" id="lane1"></div>
-
-    <div class="lane" id="lane2"></div>
-
-    <div class="lane" id="lane3"></div>
-
-    <div id="judgeLine"></div>
-
-</div>
-
-
-<!-- =========================
-     모바일 버튼
-========================= -->
-
-<div id="buttons">
-
-    <button class="key" data-lane="0">
-        1
-    </button>
-
-    <button class="key" data-lane="1">
-        2
-    </button>
-
-    <button class="key" data-lane="2">
-        3
-    </button>
-
-    <button class="key" data-lane="3">
-        4
-    </button>
-
-</div>
-
-
-</div>
-
-
-<script>
-
-
-/* =========================
-   게임 변수
-========================= */
-
-let score = 0;
-
-let combo = 0;
-
-let playing = false;
-
-
-/* 현재 존재하는 노트 */
-
-let notes = [];
-
-
-/* 노트 번호 */
-
-let noteId = 0;
-
-
-/* 노트 속도 */
-
-const noteSpeed = 4;
-
-
-/* 노트가 생성되는 간격 */
-
-const noteInterval = 800;
-
-
-/* =========================
-   HTML 가져오기
-========================= */
-
-const scoreText =
-document.getElementById("score");
-
-const comboText =
-document.getElementById("combo");
-
-const judgement =
-document.getElementById("judgement");
-
-const startButton =
-document.getElementById("startButton");
-
-const startScreen =
-document.getElementById("startScreen");
-
-
-/* =========================
-   게임 시작
-========================= */
-
-startButton.addEventListener(
-    "click",
-    startGame
-);
-
-
-function startGame() {
-
-    score = 0;
-
-    combo = 0;
-
-    notes = [];
-
-    playing = true;
-
-    scoreText.textContent =
-        "SCORE: 0";
-
-    comboText.textContent =
-        "COMBO: 0";
-
-    startScreen.style.display =
-        "none";
-
-
-    /* 첫 노트 */
-
-    createNote();
-
-
-    /* 일정한 간격으로 노트 생성 */
-
-    setInterval(
-        function() {
-
-            if (playing) {
-
-                createNote();
-
+    <script>
+        /**
+         * ============================================================================
+         * 1. ASSETS & USER CUSTOMIZATION CONFIGURATION
+         * ============================================================================
+         * Replace any image URL or audio file path below with your own assets!
+         * You can easily host images in a GitHub repository folder (e.g., './assets/note.png')
+         */
+        const ASSETS = {
+            // Lane Background Image (Optional, set to null for sleek default gradient)
+            bgImage: 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?q=80&w=1000&auto=format&fit=crop',
+            
+            // Custom Images for Notes per Lane [Lane 0, Lane 1, Lane 2, Lane 3]
+            // Set to null to use built-in glowing vector renderers
+            noteImages: [
+                null, // 'assets/note_lane1.png'
+                null, // 'assets/note_lane2.png'
+                null, // 'assets/note_lane3.png'
+                null  // 'assets/note_lane4.png'
+            ],
+
+            // Hit Sparkle Effect Image (Optional)
+            hitEffectImage: null,
+
+            // Audio track paths if using custom MP3/WAV files
+            // E.g.: audioUrl: 'assets/song1.mp3'
+            songs: [
+                {
+                    id: 'synth_wave',
+                    title: 'Neon Overdrive',
+                    artist: 'Synth Engine',
+                    bpm: 128,
+                    audioUrl: null, // Null triggers built-in WebAudio synthesizer generator
+                    bgImage: 'https://images.unsplash.com/photo-1508739773434-c26b3d09e071?q=80&w=1000&auto=format&fit=crop',
+                    // Note Chart Format: Array of objects { time: seconds, lane: 0..3 }
+                    chart: generateSampleChart(128, 60) // Generates 60s of notes automatically
+                },
+                {
+                    id: 'cyber_pulse',
+                    title: 'Cyber Pulse 2077',
+                    artist: 'Digital Beat',
+                    bpm: 140,
+                    audioUrl: null,
+                    bgImage: 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?q=80&w=1000&auto=format&fit=crop',
+                    chart: generateSampleChart(140, 60)
+                }
+            ]
+        };
+
+        // Game Visual & Theme Configuration
+        const CONFIG = {
+            laneColors: ['#06b6d4', '#6366f1', '#6366f1', '#ec4899'], // Cyan, Indigo, Indigo, Pink
+            laneGradients: [
+                'rgba(6, 182, 212, 0.25)',
+                'rgba(99, 102, 241, 0.25)',
+                'rgba(99, 102, 241, 0.25)',
+                'rgba(236, 72, 153, 0.25)'
+            ],
+            hitJudgements: {
+                PERFECT: { window: 0.055, score: 1000, color: '#34d399', text: 'PERFECT' }, // +/- 55ms
+                GREAT:   { window: 0.100, score: 700,  color: '#38bdf8', text: 'GREAT' },   // +/- 100ms
+                GOOD:    { window: 0.150, score: 400,  color: '#fbbf24', text: 'GOOD' },    // +/- 150ms
+                MISS:    { window: 0.220, score: 0,    color: '#f43f5e', text: 'MISS' }
+            },
+            keys: ['D', 'F', 'J', 'K'], // Default desktop keyboard keys
+            speedMultiplier: 1.0       // Adjusted via Settings Modal
+        };
+
+
+        /**
+         * STREAMING_CHUNK:Core Audio Synthesizer and Audio Engine...
+         * Web Audio API Synthesizer (Allows rhythm game to play without external MP3 files)
+         */
+        class AudioEngine {
+            constructor() {
+                this.ctx = null;
+                this.isPlaying = false;
+                this.startTime = 0;
+                this.pauseOffset = 0;
+                this.bpm = 120;
+                this.audioBuffer = null;
+                this.sourceNode = null;
+                this.synthTimer = null;
             }
 
-        },
-        noteInterval
-    );
-
-
-    requestAnimationFrame(gameLoop);
-
-}
-
-
-/* =========================
-   노트 생성
-========================= */
-
-function createNote() {
-
-
-    /* 0~3 중 랜덤 */
-
-    const laneNumber =
-        Math.floor(Math.random() * 4);
-
-
-    /* 레인 찾기 */
-
-    const lane =
-        document.getElementById(
-            "lane" + laneNumber
-        );
-
-
-    /* 노트 만들기 */
-
-    const note =
-        document.createElement("div");
-
-
-    note.classList.add("note");
-
-
-    /* 노트 위치 */
-
-    note.style.top =
-        "-30px";
-
-
-    /* 레인에 넣기 */
-
-    lane.appendChild(note);
-
-
-    /* 노트 정보 저장 */
-
-    notes.push({
-
-        id: noteId++,
-
-        lane: laneNumber,
-
-        y: -30,
-
-        element: note
-
-    });
-
-}
-
-
-/* =========================
-   게임 루프
-========================= */
-
-function gameLoop() {
-
-
-    if (!playing) {
-
-        return;
-
-    }
-
-
-    /* 모든 노트 이동 */
-
-    notes.forEach(
-        function(note) {
-
-
-            note.y += noteSpeed;
-
-
-            note.element.style.top =
-                note.y + "px";
-
-
-        }
-    );
-
-
-    /* 화면 밖 노트 제거 */
-
-    for (
-        let i = notes.length - 1;
-        i >= 0;
-        i--
-    ) {
-
-
-        if (notes[i].y > 700) {
-
-
-            notes[i].element.remove();
-
-
-            notes.splice(i, 1);
-
-
-            combo = 0;
-
-
-            comboText.textContent =
-                "COMBO: 0";
-
-
-            showJudgement("MISS");
-
-        }
-
-    }
-
-
-    requestAnimationFrame(gameLoop);
-
-}
-
-
-/* =========================
-   레인 누르기
-========================= */
-
-function hitLane(laneNumber) {
-
-
-    if (!playing) {
-
-        return;
-
-    }
-
-
-    /* 해당 레인의 노트만 찾기 */
-
-    let target = null;
-
-
-    for (
-        let i = 0;
-        i < notes.length;
-        i++
-    ) {
-
-
-        if (
-            notes[i].lane === laneNumber
-        ) {
-
-            target = notes[i];
-
-            break;
-
-        }
-
-    }
-
-
-    /* 해당 레인에 노트가 없음 */
-
-    if (!target) {
-
-        return;
-
-    }
-
-
-    /* 판정선 위치 */
-
-    const targetY = 420;
-
-
-    /* 노트와 판정선 거리 */
-
-    const distance =
-        Math.abs(
-            target.y - targetY
-        );
-
-
-    /* PERFECT */
-
-    if (distance < 25) {
-
-
-        score += 100;
-
-        combo++;
-
-
-        showJudgement(
-            "PERFECT!"
-        );
-
-
-        removeNote(target);
-
-    }
-
-
-    /* GOOD */
-
-    else if (distance < 60) {
-
-
-        score += 50;
-
-        combo++;
-
-
-        showJudgement(
-            "GOOD"
-        );
-
-
-        removeNote(target);
-
-    }
-
-
-    /* MISS */
-
-    else {
-
-
-        combo = 0;
-
-
-        showJudgement(
-            "MISS"
-        );
-
-    }
-
-
-    scoreText.textContent =
-        "SCORE: " + score;
-
-
-    comboText.textContent =
-        "COMBO: " + combo;
-
-}
-
-
-/* =========================
-   노트 제거
-========================= */
-
-function removeNote(note) {
-
-
-    note.element.remove();
-
-
-    const index =
-        notes.indexOf(note);
-
-
-    if (index !== -1) {
-
-        notes.splice(
-            index,
-            1
-        );
-
-    }
-
-}
-
-
-/* =========================
-   판정 표시
-========================= */
-
-function showJudgement(text) {
-
-
-    judgement.textContent =
-        text;
-
-
-    setTimeout(
-        function() {
-
-            judgement.textContent =
-                "";
-
-        },
-        400
-    );
-
-}
-
-
-/* =========================
-   모바일 버튼
-========================= */
-
-const buttons =
-document.querySelectorAll(".key");
-
-
-buttons.forEach(
-    function(button) {
-
-
-        button.addEventListener(
-            "click",
-            function() {
-
-
-                const lane =
-                    Number(
-                        button.dataset.lane
-                    );
-
-
-                hitLane(lane);
-
+            init() {
+                if (!this.ctx) {
+                    this.ctx = new (window.AudioContext || window.webkitAudioContext)();
+                }
+                if (this.ctx.state === 'suspended') {
+                    this.ctx.resume();
+                }
             }
-        );
 
-    }
-);
+            async loadSong(songObj) {
+                this.init();
+                this.bpm = songObj.bpm;
 
+                if (songObj.audioUrl) {
+                    try {
+                        const response = await fetch(songObj.audioUrl);
+                        const arrayBuffer = await response.arrayBuffer();
+                        this.audioBuffer = await this.ctx.decodeAudioData(arrayBuffer);
+                    } catch (e) {
+                        console.warn('Failed to load audio file, falling back to WebAudio Synth', e);
+                        this.audioBuffer = null;
+                    }
+                } else {
+                    this.audioBuffer = null; // Use real-time audio synthesizer
+                }
+            }
 
-/* =========================
-   PC 키보드
-========================= */
+            play() {
+                this.init();
+                this.isPlaying = true;
+                this.startTime = this.ctx.currentTime - this.pauseOffset;
 
-document.addEventListener(
-    "keydown",
-    function(event) {
+                if (this.audioBuffer) {
+                    this.sourceNode = this.ctx.createBufferSource();
+                    this.sourceNode.buffer = this.audioBuffer;
+                    this.sourceNode.connect(this.ctx.destination);
+                    this.sourceNode.start(0, this.pauseOffset);
+                } else {
+                    // Real-time Synth Loop
+                    this.scheduleSynthBeats();
+                }
+            }
 
+            pause() {
+                if (!this.isPlaying) return;
+                this.isPlaying = false;
+                this.pauseOffset = this.ctx.currentTime - this.startTime;
+                if (this.sourceNode) {
+                    try { this.sourceNode.stop(); } catch(e){}
+                }
+                if (this.synthTimer) clearInterval(this.synthTimer);
+            }
 
-        if (
-            event.code === "KeyA"
-        ) {
+            stop() {
+                this.pause();
+                this.pauseOffset = 0;
+            }
 
-            hitLane(0);
+            getCurrentTime() {
+                if (!this.isPlaying) return this.pauseOffset;
+                return this.ctx.currentTime - this.startTime;
+            }
 
+            // Built-in Synthesizer Beat Generator
+            scheduleSynthBeats() {
+                const interval = 60 / this.bpm;
+                let beatCount = 0;
+
+                this.synthTimer = setInterval(() => {
+                    if (!this.isPlaying) return;
+                    const osc = this.ctx.createOscillator();
+                    const gain = this.ctx.createGain();
+                    osc.connect(gain);
+                    gain.connect(this.ctx.destination);
+
+                    // Kick & Bass synth tones
+                    if (beatCount % 4 === 0) {
+                        osc.frequency.setValueAtTime(130, this.ctx.currentTime);
+                        osc.frequency.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.15);
+                        gain.gain.setValueAtTime(0.6, this.ctx.currentTime);
+                        gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.15);
+                    } else {
+                        osc.frequency.setValueAtTime(300, this.ctx.currentTime);
+                        osc.frequency.exponentialRampToValueAtTime(40, this.ctx.currentTime + 0.08);
+                        gain.gain.setValueAtTime(0.2, this.ctx.currentTime);
+                        gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.08);
+                    }
+
+                    osc.start();
+                    osc.stop(this.ctx.currentTime + 0.15);
+                    beatCount++;
+                }, (interval / 2) * 1000);
+            }
+
+            // Hit Sound Effect Generator
+            playHitSound() {
+                if (!this.ctx) return;
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+                osc.type = 'triangle';
+                osc.frequency.setValueAtTime(800, this.ctx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(200, this.ctx.currentTime + 0.05);
+                
+                gain.gain.setValueAtTime(0.3, this.ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.05);
+
+                osc.connect(gain);
+                gain.connect(this.ctx.destination);
+                osc.start();
+                osc.stop(this.ctx.currentTime + 0.05);
+            }
         }
 
 
-        if (
-            event.code === "KeyS"
-        ) {
+        /**
+         * STREAMING_CHUNK:Rhythm Engine Core Mechanics & Canvas Rendering...
+         */
+        class RhythmEngine {
+            constructor(canvas, audioEngine) {
+                this.canvas = canvas;
+                this.ctx = canvas.getContext('2d');
+                this.audio = audioEngine;
 
-            hitLane(1);
+                this.selectedSong = null;
+                this.notes = [];
+                this.activeNotes = [];
+                
+                // Gameplay Stats
+                this.score = 0;
+                this.combo = 0;
+                this.maxCombo = 0;
+                this.judgementCounts = { PERFECT: 0, GREAT: 0, GOOD: 0, MISS: 0 };
+                this.totalNotesHit = 0;
 
+                // Visual Render Parameters
+                this.hitYRatio = 0.85; // Target hit line position (85% down from canvas top)
+                this.laneWidth = 0;
+                this.hitY = 0;
+
+                // Animation Frame Reference
+                this.animId = null;
+
+                // Loaded Image Preloader Cache
+                this.noteImgElements = [null, null, null, null];
+                this.preloadAssets();
+
+                this.resizeCanvas();
+                window.addEventListener('resize', () => this.resizeCanvas());
+            }
+
+            preloadAssets() {
+                ASSETS.noteImages.forEach((src, idx) => {
+                    if (src) {
+                        const img = new Image();
+                        img.src = src;
+                        this.noteImgElements[idx] = img;
+                    }
+                });
+            }
+
+            resizeCanvas() {
+                const parent = this.canvas.parentElement;
+                this.canvas.width = parent.clientWidth;
+                this.canvas.height = parent.clientHeight;
+                this.laneWidth = this.canvas.width / 4;
+                this.hitY = this.canvas.height * this.hitYRatio;
+            }
+
+            loadChart(song) {
+                this.selectedSong = song;
+                // Deep copy chart notes
+                this.notes = JSON.parse(JSON.stringify(song.chart)).sort((a, b) => a.time - b.time);
+                this.activeNotes = this.notes.map(n => ({ ...n, hit: false, missed: false }));
+
+                // Reset Statistics
+                this.score = 0;
+                this.combo = 0;
+                this.maxCombo = 0;
+                this.judgementCounts = { PERFECT: 0, GREAT: 0, GOOD: 0, MISS: 0 };
+                this.totalNotesHit = 0;
+                
+                this.updateHUD(true);
+            }
+
+            start() {
+                this.audio.play();
+                this.loop();
+            }
+
+            pause() {
+                this.audio.pause();
+                if (this.animId) cancelAnimationFrame(this.animId);
+            }
+
+            loop() {
+                const currentTime = this.audio.getCurrentTime();
+                this.update(currentTime);
+                this.render(currentTime);
+
+                // Check song end condition (2 seconds after last note)
+                const lastNoteTime = this.notes.length > 0 ? this.notes[this.notes.length - 1].time : 0;
+                if (currentTime > lastNoteTime + 2.5) {
+                    showResultScreen();
+                    return;
+                }
+
+                this.animId = requestAnimationFrame(() => this.loop());
+            }
+
+            update(currentTime) {
+                const travelTime = 1.2 / CONFIG.speedMultiplier; // Seconds for note to travel top to bottom
+
+                this.activeNotes.forEach(note => {
+                    if (note.hit || note.missed) return;
+
+                    // Check for Miss condition (note fell past hit line)
+                    if (currentTime - note.time > CONFIG.hitJudgements.MISS.window) {
+                        note.missed = true;
+                        this.registerHit('MISS');
+                    }
+                });
+            }
+
+            render(currentTime) {
+                const ctx = this.ctx;
+                const width = this.canvas.width;
+                const height = this.canvas.height;
+                const travelTime = 1.2 / CONFIG.speedMultiplier;
+
+                // Clear canvas
+                ctx.clearRect(0, 0, width, height);
+
+                // Render 4 Lane Dividers & Highlight
+                for (let i = 0; i < 4; i++) {
+                    const x = i * this.laneWidth;
+
+                    // Fill Lane Background Gradient
+                    ctx.fillStyle = CONFIG.laneGradients[i];
+                    ctx.fillRect(x, 0, this.laneWidth, height);
+
+                    // Vertical Lane Separators
+                    ctx.strokeStyle = 'rgba(255, 255, 255, 0.08)';
+                    ctx.lineWidth = 1;
+                    ctx.beginPath();
+                    ctx.moveTo(x, 0);
+                    ctx.lineTo(x, height);
+                    ctx.stroke();
+                }
+
+                // Render Target Hit Line
+                ctx.strokeStyle = 'rgba(255, 255, 255, 0.8)';
+                ctx.lineWidth = 3;
+                ctx.beginPath();
+                ctx.moveTo(0, this.hitY);
+                ctx.lineTo(width, this.hitY);
+                ctx.stroke();
+
+                // Glow Effect on Hit Line
+                ctx.shadowColor = '#6366f1';
+                ctx.shadowBlur = 10;
+                ctx.strokeStyle = '#a5b4fc';
+                ctx.lineWidth = 1;
+                ctx.beginPath();
+                ctx.moveTo(0, this.hitY);
+                ctx.lineTo(width, this.hitY);
+                ctx.stroke();
+                ctx.shadowBlur = 0; // Reset Shadow
+
+                // Render Notes
+                const noteHeight = 20;
+                this.activeNotes.forEach(note => {
+                    if (note.hit || note.missed) return;
+
+                    // Calculate Y Position based on time delta
+                    const timeDiff = note.time - currentTime;
+                    // Y position calculation: hitY is target location when timeDiff = 0
+                    const noteY = this.hitY - (timeDiff / travelTime) * this.hitY;
+
+                    // Render note only if visible on canvas
+                    if (noteY > -50 && noteY < height + 50) {
+                        const noteX = note.lane * this.laneWidth + 4;
+                        const noteW = this.laneWidth - 8;
+
+                        // Custom Image Note Rendering
+                        if (this.noteImgElements[note.lane]) {
+                            ctx.drawImage(this.noteImgElements[note.lane], noteX, noteY - noteHeight / 2, noteW, noteHeight);
+                        } else {
+                            // Sleek Default Vector Note Styling
+                            ctx.fillStyle = CONFIG.laneColors[note.lane];
+                            ctx.shadowColor = CONFIG.laneColors[note.lane];
+                            ctx.shadowBlur = 8;
+                            
+                            // Rounded Rectangle Note Block
+                            ctx.beginPath();
+                            ctx.roundRect(noteX, noteY - noteHeight / 2, noteW, noteHeight, 6);
+                            ctx.fill();
+
+                            // Inner Bright Accent Strip
+                            ctx.fillStyle = '#ffffff';
+                            ctx.beginPath();
+                            ctx.roundRect(noteX + 4, noteY - 2, noteW - 8, 4, 2);
+                            ctx.fill();
+
+                            ctx.shadowBlur = 0; // Reset
+                        }
+                    }
+                });
+            }
+
+            // Tap / Key Press Input Trigger
+            handleInput(lane) {
+                const currentTime = this.audio.getCurrentTime();
+                
+                // Trigger Hit Pad Flash UI Effect
+                triggerPadFlash(lane);
+
+                // Find closest unhit note in the tapped lane
+                const candidate = this.activeNotes.find(
+                    n => n.lane === lane && !n.hit && !n.missed && Math.abs(n.time - currentTime) <= CONFIG.hitJudgements.MISS.window
+                );
+
+                if (candidate) {
+                    const diff = Math.abs(candidate.time - currentTime);
+                    candidate.hit = true;
+
+                    // Determine Judgement Grade
+                    let grade = 'MISS';
+                    if (diff <= CONFIG.hitJudgements.PERFECT.window) grade = 'PERFECT';
+                    else if (diff <= CONFIG.hitJudgements.GREAT.window) grade = 'GREAT';
+                    else if (diff <= CONFIG.hitJudgements.GOOD.window) grade = 'GOOD';
+
+                    this.registerHit(grade);
+                    this.audio.playHitSound();
+                    createHitParticle(lane, this.hitY, CONFIG.laneColors[lane]);
+                }
+            }
+
+            registerHit(grade) {
+                const info = CONFIG.hitJudgements[grade];
+                this.judgementCounts[grade]++;
+
+                if (grade === 'MISS') {
+                    this.combo = 0;
+                } else {
+                    this.combo++;
+                    if (this.combo > this.maxCombo) this.maxCombo = this.combo;
+                    this.score += info.score + Math.min(this.combo * 10, 500); // Combo Bonus
+                    this.totalNotesHit++;
+                }
+
+                this.updateHUD(false, grade);
+            }
+
+            updateHUD(reset = false, lastGrade = null) {
+                const scoreEl = document.getElementById('hud-score');
+                const accEl = document.getElementById('hud-acc');
+                const comboCountEl = document.getElementById('combo-count');
+                const comboContainer = document.getElementById('combo-container');
+                const judgeText = document.getElementById('judgement-text');
+
+                // Formatted Score String (e.g. 0004500)
+                scoreEl.innerText = String(this.score).padStart(7, '0');
+
+                // Calculate Accuracy Percentage
+                const totalNotesProcessed = Object.values(this.judgementCounts).reduce((a, b) => a + b, 0);
+                let acc = 100.0;
+                if (totalNotesProcessed > 0) {
+                    const maxPossibleScore = totalNotesProcessed * CONFIG.hitJudgements.PERFECT.score;
+                    const rawScore = (this.judgementCounts.PERFECT * 1000) + 
+                                     (this.judgementCounts.GREAT * 700) + 
+                                     (this.judgementCounts.GOOD * 400);
+                    acc = Math.min(100, (rawScore / maxPossibleScore) * 100);
+                }
+                accEl.innerText = acc.toFixed(2) + '%';
+
+                // Display Combo & Judgement Animation
+                if (!reset && lastGrade) {
+                    judgeText.innerText = CONFIG.hitJudgements[lastGrade].text;
+                    judgeText.style.color = CONFIG.hitJudgements[lastGrade].color;
+                    judgeText.classList.remove('opacity-0', 'scale-75', 'animate-hit');
+                    void judgeText.offsetWidth; // Force Reflow
+                    judgeText.classList.add('animate-hit');
+
+                    if (this.combo > 1) {
+                        comboCountEl.innerText = this.combo;
+                        comboContainer.classList.remove('opacity-0');
+                        comboCountEl.classList.remove('animate-combo');
+                        void comboCountEl.offsetWidth;
+                        comboCountEl.classList.add('animate-combo');
+                    } else {
+                        comboContainer.classList.add('opacity-0');
+                    }
+                }
+            }
         }
 
 
-        if (
-            event.code === "KeyD"
-        ) {
+        /**
+         * STREAMING_CHUNK:Initializing Helper Tools & Event Handlers...
+         */
+        // Generate procedural sample beatmap for instant playable demo
+        function generateSampleChart(bpm, durationSec) {
+            const chart = [];
+            const bps = bpm / 60;
+            const beatInterval = 1 / bps;
+            
+            for (let t = 2.0; t < durationSec; t += beatInterval / 2) {
+                // Random lane selector with rhythm pattern
+                if (Math.random() > 0.25) {
+                    const lane = Math.floor(Math.random() * 4);
+                    chart.push({ time: parseFloat(t.toFixed(3)), lane: lane });
+                }
+            }
+            return chart;
+        }
 
-            hitLane(2);
+        // Hit Visual Effect Particles
+        function createHitParticle(lane, hitY, color) {
+            const canvas = document.getElementById('noteCanvas');
+            const laneW = canvas.width / 4;
+            const centerX = lane * laneW + laneW / 2;
 
+            const particle = document.createElement('div');
+            particle.className = 'absolute pointer-events-none rounded-full blur-sm animate-hit';
+            particle.style.left = `${centerX - 24}px`;
+            particle.style.top = `${hitY - 24}px`;
+            particle.style.width = '48px';
+            particle.style.height = '48px';
+            particle.style.background = `radial-gradient(circle, ${color} 0%, transparent 70%)`;
+            
+            canvas.parentElement.appendChild(particle);
+            setTimeout(() => particle.remove(), 300);
+        }
+
+        // Tap Pad Visual Flash Feedback
+        function triggerPadFlash(lane) {
+            const pad = document.getElementById(`pad-${lane}`);
+            if (!pad) return;
+            const flash = pad.querySelector('.lane-hit-flash');
+            if (flash) {
+                flash.style.opacity = '1';
+                setTimeout(() => { flash.style.opacity = '0'; }, 100);
+            }
         }
 
 
-        if (
-            event.code === "KeyF"
-        ) {
+        /**
+         * STREAMING_CHUNK:Setting up App State, Screen Routing & Event Listeners...
+         */
+        // App State Globals
+        const audioEngine = new AudioEngine();
+        let rhythmEngine = null;
+        let selectedSongIndex = 0;
 
-            hitLane(3);
+        // Dom Elements
+        const screenTitle = document.getElementById('screen-title');
+        const screenGameplay = document.getElementById('screen-gameplay');
+        const screenResult = document.getElementById('screen-result');
+        const modalSettings = document.getElementById('modal-settings');
+        const modalEditor = document.getElementById('modal-editor');
+        const songListContainer = document.getElementById('song-list-container');
 
+        // Initialize Application
+        window.addEventListener('DOMContentLoaded', () => {
+            const canvas = document.getElementById('noteCanvas');
+            rhythmEngine = new RhythmEngine(canvas, audioEngine);
+
+            renderSongList();
+            setupInputListeners();
+            setupEditorListeners();
+        });
+
+        // Render Song Cards in Title Menu
+        function renderSongList() {
+            songListContainer.innerHTML = '';
+            ASSETS.songs.forEach((song, idx) => {
+                const isSelected = idx === selectedSongIndex;
+                const card = document.createElement('div');
+                card.className = `p-4 rounded-2xl border transition cursor-pointer flex justify-between items-center ${
+                    isSelected 
+                        ? 'bg-indigo-900/40 border-indigo-500 shadow-lg shadow-indigo-500/10' 
+                        : 'bg-slate-800/60 border-slate-700/60 hover:bg-slate-800'
+                }`;
+
+                card.innerHTML = `
+                    <div>
+                        <div class="font-bold text-sm text-white">${song.title}</div>
+                        <div class="text-xs text-slate-400 mt-0.5">${song.artist} • ${song.bpm} BPM</div>
+                    </div>
+                    <div class="text-right">
+                        <span class="text-xs font-semibold px-2.5 py-1 rounded-full ${isSelected ? 'bg-indigo-500 text-white' : 'bg-slate-700 text-slate-300'}">
+                            ${isSelected ? 'READY' : 'SELECT'}
+                        </span>
+                    </div>
+                `;
+
+                card.addEventListener('click', () => {
+                    selectedSongIndex = idx;
+                    renderSongList();
+                });
+
+                songListContainer.appendChild(card);
+            });
+            
+            document.getElementById('track-count-badge').innerText = `${ASSETS.songs.length} Tracks`;
         }
 
-    }
-);
+        // Mobile Touch & Desktop Keyboard Input Handling
+        function setupInputListeners() {
+            // Touch Controls for 4 Hit Pads
+            for (let i = 0; i < 4; i++) {
+                const pad = document.getElementById(`pad-${i}`);
+                
+                const handleTouchStart = (e) => {
+                    e.preventDefault();
+                    if (rhythmEngine) rhythmEngine.handleInput(i);
+                };
 
-</script>
+                pad.addEventListener('touchstart', handleTouchStart, { passive: false });
+                pad.addEventListener('mousedown', handleTouchStart);
+            }
 
+            // Desktop Keyboard Input Handling (Fallback)
+            window.addEventListener('keydown', (e) => {
+                if (e.repeat) return;
+                const keyUpper = e.key.toUpperCase();
+                const laneIdx = CONFIG.keys.findIndex(k => k.toUpperCase() === keyUpper);
+                
+                if (laneIdx !== -1) {
+                    if (!screenGameplay.classList.contains('hidden')) {
+                        rhythmEngine.handleInput(laneIdx);
+                    }
+                    // Trigger recording in Editor Modal if active
+                    if (!modalEditor.classList.contains('hidden') && isRecordingChart) {
+                        recordChartNote(laneIdx);
+                    }
+                }
+            });
+
+            // UI Button Listeners
+            document.getElementById('btn-start-game').addEventListener('click', startGame);
+            document.getElementById('btn-pause-game').addEventListener('click', pauseGame);
+            document.getElementById('btn-retry').addEventListener('click', startGame);
+            document.getElementById('btn-song-select').addEventListener('click', showTitleScreen);
+
+            // Modal Controls
+            document.getElementById('btn-open-settings').addEventListener('click', () => modalSettings.classList.remove('hidden'));
+            document.getElementById('btn-close-settings').addEventListener('click', () => modalSettings.classList.add('hidden'));
+            document.getElementById('btn-save-settings').addEventListener('click', saveSettings);
+
+            // Note Speed Slider Display
+            const speedSlider = document.getElementById('slider-speed');
+            speedSlider.addEventListener('input', (e) => {
+                document.getElementById('val-speed-display').innerText = `${parseFloat(e.target.value).toFixed(1)}x`;
+            });
+        }
+
+        // Save User Settings (Speed & Keys)
+        function saveSettings() {
+            CONFIG.speedMultiplier = parseFloat(document.getElementById('slider-speed').value);
+            CONFIG.keys[0] = document.getElementById('key-input-0').value || 'D';
+            CONFIG.keys[1] = document.getElementById('key-input-1').value || 'F';
+            CONFIG.keys[2] = document.getElementById('key-input-2').value || 'J';
+            CONFIG.keys[3] = document.getElementById('key-input-3').value || 'K';
+
+            // Update Labels on Touch Pads
+            for (let i = 0; i < 4; i++) {
+                const pad = document.getElementById(`pad-${i}`);
+                if (pad) pad.querySelector('.key-bind-label').innerText = CONFIG.keys[i].toUpperCase();
+            }
+
+            modalSettings.classList.add('hidden');
+        }
+
+        // Screen Navigation Flow
+        async function startGame() {
+            const song = ASSETS.songs[selectedSongIndex];
+            
+            // Screen Transitions
+            screenTitle.classList.add('hidden');
+            screenResult.classList.add('hidden');
+            screenGameplay.classList.remove('hidden');
+
+            // Update HUD Metadata
+            document.getElementById('hud-song-title').innerText = song.title;
+            if (song.bgImage) {
+                document.getElementById('game-bg').style.backgroundImage = `url('${song.bgImage}')`;
+            }
+
+            // Load and Start Audio Engine & Chart
+            await audioEngine.loadSong(song);
+            rhythmEngine.loadChart(song);
+            rhythmEngine.start();
+        }
+
+        function pauseGame() {
+            if (rhythmEngine) rhythmEngine.pause();
+            showTitleScreen();
+        }
+
+        function showTitleScreen() {
+            if (rhythmEngine) rhythmEngine.pause();
+            screenGameplay.classList.add('hidden');
+            screenResult.classList.add('hidden');
+            screenTitle.classList.remove('hidden');
+        }
+
+        function showResultScreen() {
+            if (rhythmEngine) rhythmEngine.pause();
+
+            screenGameplay.classList.add('hidden');
+            screenResult.classList.remove('hidden');
+
+            const song = ASSETS.songs[selectedSongIndex];
+            document.getElementById('result-song-title').innerText = song.title;
+
+            // Score Calculations
+            const finalScore = rhythmEngine.score;
+            const total = Object.values(rhythmEngine.judgementCounts).reduce((a, b) => a + b, 0);
+            let acc = 100.0;
+            if (total > 0) {
+                const maxRaw = total * 1000;
+                const userRaw = (rhythmEngine.judgementCounts.PERFECT * 1000) + 
+                                (rhythmEngine.judgementCounts.GREAT * 700) + 
+                                (rhythmEngine.judgementCounts.GOOD * 400);
+                acc = Math.min(100, (userRaw / maxRaw) * 100);
+            }
+
+            // Determine Rank Grade
+            let grade = 'F';
+            let rankText = 'Try Again';
+            if (acc >= 95) { grade = 'S'; rankText = 'Outstanding Performance!'; }
+            else if (acc >= 85) { grade = 'A'; rankText = 'Great Play!'; }
+            else if (acc >= 75) { grade = 'B'; rankText = 'Good Job!'; }
+            else if (acc >= 60) { grade = 'C'; rankText = 'Cleared'; }
+
+            // Populate Results UI
+            document.getElementById('result-grade').innerText = grade;
+            document.getElementById('result-rank-text').innerText = rankText;
+            document.getElementById('result-score').innerText = finalScore.toLocaleString();
+            document.getElementById('result-accuracy').innerText = acc.toFixed(2) + '%';
+            document.getElementById('result-maxcombo').innerText = rhythmEngine.maxCombo;
+            document.getElementById('result-misses').innerText = rhythmEngine.judgementCounts.MISS;
+
+            document.getElementById('cnt-perfect').innerText = rhythmEngine.judgementCounts.PERFECT;
+            document.getElementById('cnt-great').innerText = rhythmEngine.judgementCounts.GREAT;
+            document.getElementById('cnt-good').innerText = rhythmEngine.judgementCounts.GOOD;
+            document.getElementById('cnt-miss').innerText = rhythmEngine.judgementCounts.MISS;
+        }
+
+
+        /**
+         * STREAMING_CHUNK:Setting up Chart Editor Tool Module...
+         */
+        let isRecordingChart = false;
+        let recordedNotes = [];
+        let recordStartTime = 0;
+
+        function setupEditorListeners() {
+            const btnOpen = document.getElementById('btn-open-editor');
+            const btnClose = document.getElementById('btn-close-editor');
+            const btnRecord = document.getElementById('btn-record-start');
+            const btnClear = document.getElementById('btn-record-clear');
+            const btnCopy = document.getElementById('btn-copy-chart');
+
+            btnOpen.addEventListener('click', () => modalEditor.classList.remove('hidden'));
+            btnClose.addEventListener('click', () => {
+                stopChartRecording();
+                modalEditor.classList.add('hidden');
+            });
+
+            btnRecord.addEventListener('click', () => {
+                if (isRecordingChart) {
+                    stopChartRecording();
+                } else {
+                    startChartRecording();
+                }
+            });
+
+            btnClear.addEventListener('click', () => {
+                recordedNotes = [];
+                document.getElementById('editor-json-output').value = '[ ]';
+                document.getElementById('editor-note-count').innerText = '0';
+            });
+
+            btnCopy.addEventListener('click', () => {
+                const textarea = document.getElementById('editor-json-output');
+                textarea.select();
+                document.execCommand('copy');
+                btnCopy.innerText = 'Copied!';
+                setTimeout(() => btnCopy.innerHTML = '<i class="fa-solid fa-copy"></i> Copy JSON', 1500);
+            });
+
+            // Editor Pad Tap Handlers
+            document.querySelectorAll('.editor-pad').forEach(pad => {
+                const lane = parseInt(pad.getAttribute('data-editor-lane'));
+                const handlePadTap = (e) => {
+                    e.preventDefault();
+                    if (isRecordingChart) recordChartNote(lane);
+                };
+                pad.addEventListener('touchstart', handlePadTap, { passive: false });
+                pad.addEventListener('mousedown', handlePadTap);
+            });
+        }
+
+        function startChartRecording() {
+            isRecordingChart = true;
+            recordedNotes = [];
+            recordStartTime = performance.now();
+            
+            const song = ASSETS.songs[selectedSongIndex];
+            audioEngine.loadSong(song).then(() => {
+                audioEngine.play();
+            });
+
+            const btnRecord = document.getElementById('btn-record-start');
+            btnRecord.innerHTML = '<i class="fa-solid fa-square text-xs mr-1.5"></i> Stop Recording';
+            btnRecord.className = 'py-3 bg-rose-600 hover:bg-rose-500 font-bold rounded-xl text-white';
+        }
+
+        function stopChartRecording() {
+            isRecordingChart = false;
+            audioEngine.stop();
+
+            const btnRecord = document.getElementById('btn-record-start');
+            btnRecord.innerHTML = '<i class="fa-solid fa-circle text-xs text-rose-300 mr-1.5 animate-pulse"></i> Start Recording';
+            btnRecord.className = 'py-3 bg-emerald-600 hover:bg-emerald-500 font-bold rounded-xl text-white';
+        }
+
+        function recordChartNote(lane) {
+            const timeOffset = (performance.now() - recordStartTime) / 1000;
+            const noteObj = { time: parseFloat(timeOffset.toFixed(3)), lane: lane };
+            
+            recordedNotes.push(noteObj);
+            document.getElementById('editor-note-count').innerText = recordedNotes.length;
+            document.getElementById('editor-json-output').value = JSON.stringify(recordedNotes, null, 2);
+        }
+    </script>
 </body>
-
 </html>
