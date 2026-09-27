@@ -111,15 +111,15 @@
       margin-bottom: 25px;
     }
 
-    /* 심플한 텍스트형 곡 선택 버튼 스타일 */
+    /* 박스 없는 심플한 곡 선택 텍스트 버튼 */
     .song-select-btn {
       background-color: transparent;
       color: #ffffff;
       border: none;
-      font-size: 1.1rem;
+      font-size: 1.0rem;
       cursor: pointer;
       margin-bottom: 20px;
-      padding: 5px;
+      padding: 10px;
       transition: color 0.1s, transform 0.1s;
     }
 
@@ -147,9 +147,10 @@
       <button class="start-btn" onclick="goToSongSelect()">START GAME</button>
     </div>
 
-    <!-- 2단계: 곡 선택 화면 (심플 텍스트 스타일) -->
+    <!-- 2단계: 곡 선택 화면 (박스 제거, 심플 흰색 텍스트 스타일) -->
     <div id="song-select-screen" class="screen hidden">
-      <h1 style="font-size: 1.5rem; margin-bottom: 30px;">SELECT SONG</h1>
+      <h1>SELECT SONG</h1>
+      <h2>CHOOSE YOUR TRACK</h2>
       
       <button class="song-select-btn" onclick="startGame('gossip')">> GOSSIP</button>
       <button class="song-select-btn" onclick="startGame('trembling')">> 떨리는 맘</button>
@@ -181,15 +182,15 @@ let isBgLoaded = false;
 bgImage.onload = () => { isBgLoaded = true; };
 bgImage.src = './Cover.png';
 
-// 곡별 오디오 및 패턴 설정
+// 곡 설정 (각각 다른 음악 파일과 패턴 연결 가능)
 const songs = {
   gossip: {
     src: './Gossip.mp3',
     pattern: generatePattern()
   },
   trembling: {
-    src: './Trembling.mp3', // 필요시 파일명 경로에 맞게 수정 가능합니다
-    pattern: generatePattern() // '떨리는 맘' 패턴 (동일 패턴 또는 별도 패턴 사용 가능)
+    src: './Trembling.mp3', // 필요시 '떨리는 맘' 음원 파일명으로 변경하세요
+    pattern: generatePattern()
   }
 };
 
@@ -228,7 +229,6 @@ function generatePattern() {
   return rawData.map(item => ({ time: item.t, lane: item.l }));
 }
 
-let activeSongKey = 'gossip';
 let isPlaying = false;
 let startTime = 0;
 let score = 0;
@@ -240,16 +240,13 @@ let missCount = 0;
 let activeNotes = [];
 let effects = [];
 
-// [시작 화면] -> [곡 선택 화면] 이동
 function goToSongSelect() {
   document.getElementById('start-screen').classList.add('hidden');
   document.getElementById('song-select-screen').classList.remove('hidden');
   document.getElementById('result-screen').classList.add('hidden');
 }
 
-// [곡 선택 화면] -> [게임 화면] 진입 및 플레이 시작
 function startGame(songKey) {
-  activeSongKey = songKey;
   score = 0;
   combo = 0;
   maxCombo = 0;
