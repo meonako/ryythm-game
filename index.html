@@ -79,7 +79,7 @@
       align-items: center;
       text-align: center;
       padding: 20px;
-      z-index: 999; /* 화면이 무조건 맨 위에 오도록 설정 */
+      z-index: 999;
     }
 
     .hidden { display: none !important; }
@@ -87,18 +87,43 @@
     h1 {
       color: #fcd3f2;
       font-size: 2.0rem;
-      margin-bottom: 15px;
+      margin-bottom: 10px;
       line-height: 1.5;
       text-shadow: 3px 3px #FF69C7;
     }
 
-    .start-btn {
-      background-color: transparent;
+    /* 곡 선택 버튼 스타일 */
+    .song-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-bottom: 20px;
+      width: 80%;
+    }
+
+    .song-btn {
+      background-color: #111;
       color: #ffffff;
-      border: none;
-      padding: 12px 20px;
-      font-size: 1.0rem;
+      border: 2px solid #FF69C7;
+      padding: 10px;
+      font-size: 0.7rem;
       cursor: pointer;
+      transition: 0.1s;
+    }
+
+    .song-btn:hover, .song-btn.selected {
+      background-color: #FF69C7;
+      color: #000;
+    }
+
+    .start-btn {
+      background-color: #ffd700;
+      color: #000000;
+      border: none;
+      padding: 12px 25px;
+      font-size: 0.9rem;
+      cursor: pointer;
+      font-weight: bold;
     }
 
     .start-btn:active {
@@ -107,8 +132,8 @@
      
     h2 {
       color: #ffffff;
-      font-size: 0.75rem;
-      margin-bottom: 25px;
+      font-size: 0.65rem;
+      margin-bottom: 20px;
     }
   </style>
 </head>
@@ -123,10 +148,16 @@
   <div id="canvas-wrapper">
     <canvas id="gameCanvas"></canvas>
 
-    <!-- ★ onclick을 직접 박아서 버튼 인식이 안 될 수가 없게 만듦 -->
+    <!-- 시작 및 곡 선택 화면 -->
     <div id="start-screen" class="screen">
       <h1>82 RHYTHM</h1>
-      <h2>2026 WORK BY YUN</h2>
+      <h2>SELECT YOUR SONG</h2>
+      
+      <!-- 곡 목록 버튼들 -->
+      <div class="song-list" id="song-list-container">
+        <!-- 자바스크립트로 동적 생성됨 -->
+      </div>
+
       <button class="start-btn" onclick="startGame()">START GAME</button>
     </div>
 
@@ -150,50 +181,43 @@ function resize() {
 window.addEventListener('resize', resize);
 resize();
 
+// ==========================================
+// 곡 데이터 리스트 (여기에 곡을 계속 추가하면 됩니다!)
+// ==========================================
+const songList = [
+  {
+    title: "1. Gossip",
+    audioSrc: "./Gossip.mp3",
+    bgSrc: "./Cover.png",
+    pattern: [
+      {t: 4.2, l: 0}, {t: 4.9, l: 3}, {t: 5.4, l: 1}, {t: 6.1, l: 2}, {t: 7.0, l: 0},
+      {t: 7.8, l: 3}, {t: 8.6, l: 2}, {t: 9.2, l: 1}, {t: 10.1, l: 0}, {t: 10.9, l: 3},
+      {t: 11.6, l: 1}, {t: 12.4, l: 2}, {t: 13.2, l: 0}, {t: 14.0, l: 3}, {t: 14.8, l: 1},
+      {t: 15.3, l: 2}, {t: 15.7, l: 0}, {t: 16.4, l: 3}, {t: 17.1, l: 1}, {t: 17.7, l: 2},
+      {t: 18.4, l: 0}, {t: 19.1, l: 3}, {t: 19.8, l: 1}, {t: 20.5, l: 2}, {t: 21.2, l: 0},
+      {t: 21.9, l: 3}, {t: 22.5, l: 1}, {t: 23.2, l: 2}, {t: 24.0, l: 0}, {t: 24.7, l: 3}
+    ]
+  },
+  {
+    title: "2. 두 번째 곡 예시",
+    audioSrc: "./Song2.mp3", // 실제 파일명으로 변경
+    bgSrc: "./Cover2.png",   // 실제 이미지명으로 변경
+    pattern: [
+      {t: 3.0, l: 1}, {t: 4.0, l: 2}, {t: 5.0, l: 0}, {t: 6.0, l: 3}
+    ]
+  }
+];
+
+let currentSongIndex = 0; // 현재 선택된 곡 번호
+
 const bgImage = new Image();
 let isBgLoaded = false;
 bgImage.onload = () => { isBgLoaded = true; };
-bgImage.src = './Cover.png';
 
 const bgm = new Audio();
-bgm.src = './Gossip.mp3';
-
 const NOTE_SPEED = 550;
 
-function generatePattern() {
-  const rawData = [
-    {t: 4.2, l: 0}, {t: 4.9, l: 3}, {t: 5.4, l: 1}, {t: 6.1, l: 2}, {t: 7.0, l: 0},
-    {t: 7.8, l: 3}, {t: 8.6, l: 2}, {t: 9.2, l: 1}, {t: 10.1, l: 0}, {t: 10.9, l: 3},
-    {t: 11.6, l: 1}, {t: 12.4, l: 2}, {t: 13.2, l: 0}, {t: 14.0, l: 3}, {t: 14.8, l: 1},
-    {t: 15.3, l: 2}, {t: 15.7, l: 0}, {t: 16.4, l: 3}, {t: 17.1, l: 1}, {t: 17.7, l: 2},
-    {t: 18.4, l: 0}, {t: 19.1, l: 3}, {t: 19.8, l: 1}, {t: 20.5, l: 2}, {t: 21.2, l: 0},
-    {t: 21.9, l: 3}, {t: 22.5, l: 1}, {t: 23.2, l: 2}, {t: 24.0, l: 0}, {t: 24.7, l: 3},
-    {t: 25.4, l: 1}, {t: 26.1, l: 2}, {t: 26.9, l: 0}, {t: 27.6, l: 3}, {t: 28.3, l: 1},
-    {t: 29.0, l: 2}, {t: 29.8, l: 0}, {t: 30.5, l: 3}, {t: 31.2, l: 1}, {t: 31.9, l: 2},
-    {t: 32.5, l: 0}, {t: 33.0, l: 3}, {t: 33.7, l: 2}, {t: 34.3, l: 1}, {t: 35.0, l: 0},
-    {t: 35.7, l: 3}, {t: 36.4, l: 1}, {t: 37.1, l: 2}, {t: 37.8, l: 0}, {t: 38.5, l: 3},
-    {t: 39.2, l: 1}, {t: 39.9, l: 2}, {t: 40.6, l: 0}, {t: 41.3, l: 3}, {t: 42.0, l: 1},
-    {t: 42.7, l: 2}, {t: 43.4, l: 0}, {t: 44.1, l: 3}, {t: 44.8, l: 1}, {t: 45.5, l: 2},
-    {t: 46.2, l: 0}, {t: 46.9, l: 3}, {t: 47.6, l: 1},
-    {t: 48.2, l: 0}, {t: 48.2, l: 2}, {t: 49.0, l: 1}, {t: 49.7, l: 3}, {t: 50.4, l: 0},
-    {t: 51.1, l: 2}, {t: 51.8, l: 1}, {t: 51.8, l: 3}, {t: 52.6, l: 0}, {t: 53.3, l: 2},
-    {t: 54.0, l: 1}, {t: 54.7, l: 3}, {t: 55.4, l: 0}, {t: 55.4, l: 1}, {t: 56.2, l: 2},
-    {t: 56.9, l: 3}, {t: 57.6, l: 0}, {t: 58.3, l: 1}, {t: 59.0, l: 2}, {t: 59.0, l: 3},
-    {t: 59.8, l: 0}, {t: 60.5, l: 1}, {t: 61.2, l: 2}, {t: 61.9, l: 3}, {t: 62.6, l: 0},
-    {t: 62.6, l: 2}, {t: 63.4, l: 1}, {t: 64.1, l: 3}, {t: 64.8, l: 0}, {t: 65.5, l: 2},
-    {t: 66.2, l: 1}, {t: 66.2, l: 3}, {t: 67.0, l: 0}, {t: 67.7, l: 2}, {t: 68.4, l: 1},
-    {t: 69.1, l: 3}, {t: 69.8, l: 0}, {t: 69.8, l: 2}, {t: 70.6, l: 1}, {t: 71.3, l: 3},
-    {t: 72.0, l: 0}, {t: 72.7, l: 2}, {t: 73.4, l: 1}, {t: 74.1, l: 3}, {t: 74.8, l: 0},
-    {t: 75.5, l: 2}, {t: 76.3, l: 1}, {t: 77.2, l: 3}, {t: 78.1, l: 0}, {t: 79.0, l: 2},
-    {t: 79.9, l: 1}, {t: 80.8, l: 3}, {t: 81.7, l: 0}, {t: 82.6, l: 2}, {t: 83.6, l: 1},
-    {t: 84.7, l: 3}, {t: 85.8, l: 0}, {t: 87.0, l: 2}, {t: 88.2, l: 1}, {t: 89.5, l: 3},
-    {t: 90.9, l: 0}, {t: 92.3, l: 2}
-  ];
-  return rawData.map(item => ({ time: item.t, lane: item.l }));
-}
-
-const SONG_PATTERN = generatePattern();
-
+let SONG_PATTERN = [];
 let isPlaying = false;
 let startTime = 0;
 let score = 0;
@@ -205,8 +229,32 @@ let missCount = 0;
 let activeNotes = [];
 let effects = [];
 
-// ★ 무조건 실행되는 시작 함수
+// 곡 선택 화면 UI 생성
+function initSongSelector() {
+  const container = document.getElementById('song-list-container');
+  container.innerHTML = '';
+  
+  songList.forEach((song, index) => {
+    const btn = document.createElement('button');
+    btn.className = `song-btn ${index === currentSongIndex ? 'selected' : ''}`;
+    btn.innerText = song.title;
+    btn.onclick = () => {
+      currentSongIndex = index;
+      initSongSelector(); // 선택 표시 업데이트
+    };
+    container.appendChild(btn);
+  });
+}
+initSongSelector();
+
+// 게임 시작 함수 (선택한 곡 정보를 로드)
 function startGame() {
+  const selectedSong = songList[currentSongIndex];
+  
+  bgm.src = selectedSong.audioSrc;
+  bgImage.src = selectedSong.bgSrc;
+  SONG_PATTERN = selectedSong.pattern;
+
   score = 0;
   combo = 0;
   maxCombo = 0;
@@ -217,7 +265,6 @@ function startGame() {
   
   activeNotes = SONG_PATTERN.map(n => ({ ...n, hit: false, missed: false }));
   
-  // 화면 강제 숨기기
   document.getElementById('start-screen').classList.add('hidden');
   document.getElementById('result-screen').classList.add('hidden');
 
@@ -251,8 +298,9 @@ function gameLoop(timestamp) {
   if (!isPlaying) return;
 
   const currentTime = (timestamp - startTime) / 1000;
+  const lastNoteTime = SONG_PATTERN[SONG_PATTERN.length - 1].time + 3.0;
 
-  if (currentTime >= 97.0) {
+  if (currentTime >= lastNoteTime) {
     endGame();
     return;
   }
@@ -307,10 +355,8 @@ function gameLoop(timestamp) {
       ctx.save();
       ctx.shadowColor = mainColor;
       ctx.shadowBlur = 15;
-
       ctx.fillStyle = mainColor;
       ctx.fillRect(x, noteY - noteHeight / 2, w, noteHeight);
-
       ctx.restore();
     }
   });
@@ -373,7 +419,7 @@ function endGame() {
       <p style="color:#ff4444;">MISS    : ${missCount}</p>
       <p style="color:#ffffff;">MAX COMBO : ${maxCombo}</p>
     </div>
-    <div><button class="start-btn" onclick="startGame()">RETRY</button></div>
+    <div><button class="start-btn" onclick="location.reload()">BACK TO MENU</button></div>
   `;
   resultScreen.classList.remove('hidden');
 }
