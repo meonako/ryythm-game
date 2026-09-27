@@ -184,7 +184,7 @@ let isBgLoaded = false;
 bgImage.onload = () => { isBgLoaded = true; };
 bgImage.src = './Cover.png';
 
-// 곡 설정 (키 이름을 'gossip'과 'trembling'으로 명확히 통일)
+// 곡 설정 (요청하신 파일명 반영)
 const songs = {
   gossip: {
     src: './Gossip.mp3',
@@ -198,7 +198,6 @@ const songs = {
   }
 };
 
-let activeSongKey = 'gossip';
 let currentBgm = new Audio();
 const NOTE_SPEED = 550;
 
@@ -255,7 +254,6 @@ function startGame(songKey) {
   const selectedSong = songs[songKey];
   if (!selectedSong) return;
 
-  activeSongKey = songKey;
   score = 0;
   combo = 0;
   maxCombo = 0;
