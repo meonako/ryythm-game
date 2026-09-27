@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>4 Rhythm Game</title>
+  <title>Pixel Rhythm Game</title>
   <!-- 레트로 픽셀 폰트 로드 -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -36,8 +36,8 @@
       height: 90vh;
       max-height: 700px;
       background-color: #050505;
-      border: 4px solid #ff69b4;
-      box-shadow: 0 0 20px rgba(255, 105, 180, 0.4);
+      border: 4px solid #FF69C7;
+      box-shadow: 0 0 20px rgba(255, 105, 199, 0.4);
       display: flex;
       flex-direction: column;
     }
@@ -48,12 +48,12 @@
       justify-content: space-between;
       padding: 15px;
       background-color: #111;
-      border-bottom: 2px solid #ff69b4;
+      border-bottom: 2px solid #FF69C7;
       font-size: 0.8rem;
     }
 
     #score { color: #ffd700; }
-    #combo { color: #ff69b4; }
+    #combo { color: #fcd3f2; }
 
     /* Canvas 및 오버레이 화면 */
     #canvas-wrapper {
@@ -92,10 +92,10 @@
     }
 
     h2 {
-      color: #ffffff;
+      color: #ffd700;
       font-size: 0.9rem;
       margin-bottom: 25px;
-     
+      text-shadow: 2px 2px #b8860b;
     }
 
     p {
@@ -106,7 +106,7 @@
     }
 
     .start-btn {
-      background-color: #ff69b4;
+      background-color: #FF69C7;
       color: #000;
       border: none;
       padding: 12px 20px;
@@ -126,7 +126,7 @@
       display: flex;
       height: 70px;
       background-color: #111;
-      border-top: 2px solid #ff69b4;
+      border-top: 2px solid #FF69C7;
     }
 
     .pad {
@@ -136,12 +136,12 @@
       justify-content: center;
       align-items: center;
       font-size: 0.9rem;
-      color: #ff69b4;
+      color: #fcd3f2;
     }
 
     .pad:last-child { border-right: none; }
     .pad.active {
-      background-color: #ff69b4;
+      background-color: #FF69C7;
       color: #000;
     }
   </style>
@@ -160,18 +160,13 @@
     <!-- 시작 오버레이 -->
     <div id="start-screen" class="screen">
       <h1>ROMANTIC<br>RHYTHM</h1>
-      <h2>2026   WORK BY YUNSEON</h2>
+      <h2>START GAME</h2>
       <p>KEYBOARD: D - F - J - K<br>TOUCH: BOTTOM PADS</p>
-      <button class="start-btn" id="start-btn">START GAME</button>
+      <button class="start-btn" id="start-btn">PLAY NOW</button>
     </div>
 
     <!-- 결과 오버레이 -->
-    <div id="result-screen" class="screen hidden">
-      <h1>CLEAR</h1>
-      <p id="final-score" style="font-size: 0.8rem; color:#ffd700;"></p>
-      <p id="final-combo" style="font-size: 0.7rem; color:#ff69b4;"></p>
-      <button class="start-btn" id="retry-btn">RETRY</button>
-    </div>
+    <div id="result-screen" class="screen hidden"></div>
   </div>
 
   <!-- 하단 터치 영역 -->
@@ -254,15 +249,15 @@ let startTime = 0;
 let score = 0;
 let combo = 0;
 let maxCombo = 0;
-let activeNotes = [];
-let effects = [];
-  // 기존 변수들에 아래 판정 카운트 변수 추가
 let perfectCount = 0;
 let greatCount = 0;
 let missCount = 0;
 
+let activeNotes = [];
+let effects = [];
+
 // ==========================================
-// 3. 게임 시작 및 오디오 재생
+// 3. 게임 시작 및 음원 연동
 // ==========================================
 function startGame() {
   initAudio();
@@ -270,6 +265,9 @@ function startGame() {
   score = 0;
   combo = 0;
   maxCombo = 0;
+  perfectCount = 0;
+  greatCount = 0;
+  missCount = 0;
   effects = [];
   
   activeNotes = SONG_PATTERN.map(n => ({ ...n, hit: false, missed: false }));
@@ -278,15 +276,16 @@ function startGame() {
   document.getElementById('result-screen').classList.add('hidden');
   updateHUD();
 
-  // 음원 초기화 및 재생 예외 처리
+  // 음원 재생 및 음악 종료 시 게임 종료 처리
   bgm.currentTime = 0;
   const playPromise = bgm.play();
   if (playPromise !== undefined) {
     playPromise.catch(err => {
-      console.warn("오디오 재생 실패 (파일 없음 또는 정책 차단):", err);
+      console.warn("오디오 재생 실패 (파일 없음 또는 재생 제한):", err);
     });
   }
 
+  // ★ 음악이 끝나면 자동으로 게임 종료 실행
   bgm.onended = () => {
     endGame();
   };
@@ -316,7 +315,7 @@ function gameLoop(timestamp) {
 
   const currentTime = (timestamp - startTime) / 1000;
 
-  // 1. 화면 소거 (검은색)
+  // 1. 화면 소거
   ctx.fillStyle = '#050505';
   ctx.fillRect(0, 0, width, height);
 
@@ -330,69 +329,68 @@ function gameLoop(timestamp) {
     ctx.stroke();
   }
 
-  // 3. 판정선 그리기 (네온 핑크)
-  ctx.strokeStyle = '#ff69b4';
+  // 3. 판정선 그리기
+  ctx.strokeStyle = '#FF69C7';
   ctx.lineWidth = 4;
   ctx.beginPath();
   ctx.moveTo(0, judgeLineY);
   ctx.lineTo(width, judgeLineY);
   ctx.stroke();
 
-// 4. 노트 처리 및 그리기 (네온 그라데이션 & 발광 효과 추가)
-    activeNotes.forEach(note => {
-      if (note.hit) return;
+  // 4. 노트 처리 및 그리기 (부드러운 네온 그라데이션)
+  activeNotes.forEach(note => {
+    if (note.hit) return;
 
-      const timeDiff = note.time - currentTime;
-      const noteY = judgeLineY - (timeDiff * NOTE_SPEED);
-      const noteHeight = 18;
+    const timeDiff = note.time - currentTime;
+    const noteY = judgeLineY - (timeDiff * NOTE_SPEED);
+    const noteHeight = 18;
 
-      // 미스 판정
-      if (timeDiff < -0.18 && !note.missed) {
-        note.missed = true;
-        combo = 0;
-        missCount++;
-        addEffect(note.lane, 'MISS');
-        updateHUD();
+    // 미스 판정
+    if (timeDiff < -0.18 && !note.missed) {
+      note.missed = true;
+      combo = 0;
+      missCount++;
+      addEffect(note.lane, 'MISS');
+      updateHUD();
+    }
+
+    // 노트 그래픽 출력
+    if (noteY > -20 && noteY < height + 20 && !note.missed) {
+      const x = note.lane * laneWidth + 6;
+      const w = laneWidth - 12;
+      const mainColor = (note.lane === 0 || note.lane === 3) ? '#FF69C7' : '#ffd700';
+
+      ctx.save();
+
+      // 글로우(발광) 효과
+      ctx.shadowColor = mainColor;
+      ctx.shadowBlur = 15;
+
+      // 그라데이션 만들기
+      const gradient = ctx.createLinearGradient(x, noteY - noteHeight / 2, x, noteY + noteHeight / 2);
+      gradient.addColorStop(0, '#ffffff');
+      gradient.addColorStop(0.3, mainColor);
+      gradient.addColorStop(1, '#111111');
+
+      ctx.fillStyle = gradient;
+
+      // 노트 모서리 처리
+      ctx.beginPath();
+      if (ctx.roundRect) {
+        ctx.roundRect(x, noteY - noteHeight / 2, w, noteHeight, 4);
+      } else {
+        ctx.fillRect(x, noteY - noteHeight / 2, w, noteHeight);
       }
+      ctx.fill();
 
-      // 노트 출력
-      if (noteY > -20 && noteY < height + 20 && !note.missed) {
-        const x = note.lane * laneWidth + 6;
-        const w = laneWidth - 12;
+      // 코어 중앙 하이라이트
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
+      ctx.fillRect(x + 4, noteY - 2, w - 8, 3);
 
-        // 레인별 대표 메인 색상 (0,3번: 핑크 / 1,2번: 노랑)
-        const mainColor = (note.lane === 0 || note.lane === 3) ? '#FDC7FB' : '#FD5DBD';
-        
-        ctx.save(); // 스타일 설정 시작
+      ctx.restore();
+    }
+  });
 
-        // ① 네온 발광 효과 (Outer Glow) - 부드럽게 번지는 번짐값 설정
-        ctx.shadowColor = mainColor;
-        ctx.shadowBlur = 15; // 숫자가 클수록 외곽이 부드럽고 넓게 퍼집니다.
-
-        // ② 수직 수평 그라데이션 만들기 (중앙은 밝고 외곽으로 갈수록 부드러워짐)
-        const gradient = ctx.createLinearGradient(x, noteY - noteHeight / 2, x, noteY + noteHeight / 2);
-        gradient.addColorStop(0, '#ffffff');    // 상단 테두리 쪽에 가까울수록 밝은 하얀 핑크/노랑
-        gradient.addColorStop(0.3, mainColor);  // 메인 네온 색상
-        gradient.addColorStop(1, '#111111');    // 하단은 어두워지며 부드럽게 그라데이션 처리
-
-        ctx.fillStyle = gradient;
-
-        // ③ 둥근 네온 바 형태로 그리기 (픽셀 느낌을 원하시면 fillRect를 쓰셔도 됩니다)
-        ctx.beginPath();
-        if (ctx.roundRect) {
-          ctx.roundRect(x, noteY - noteHeight / 2, w, noteHeight, 4); // 약간 둥근 테두리
-        } else {
-          ctx.fillRect(x, noteY - noteHeight / 2, w, noteHeight);
-        }
-        ctx.fill();
-
-        // ④ 중앙 밝은 핵심 선 (Core Highlight)
-        ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
-        ctx.fillRect(x + 4, noteY - 2, w - 8, 3);
-
-        ctx.restore(); // 스타일 초기화 (다른 요소에 발광이 번지지 않도록 복원)
-      }
-    });
   // 5. 판정 텍스트 연출
   for (let i = effects.length - 1; i >= 0; i--) {
     const eff = effects[i];
@@ -406,24 +404,16 @@ function gameLoop(timestamp) {
     if (eff.alpha <= 0) effects.splice(i, 1);
   }
 
-  // 6. 게임 종료 체크 (노트가 모두 끝나고 2초 뒤)
-  const lastNote = SONG_PATTERN[SONG_PATTERN.length - 1];
-  if (currentTime > lastNote.time + 2.0) {
-    endGame();
-    return;
-  }
-
   requestAnimationFrame(gameLoop);
 }
 
 // ==========================================
-// 4. 입력 및 판정
+// 4. 입력 판정
 // ==========================================
 function triggerInput(lane) {
   if (!isPlaying) return;
 
   const currentTime = (performance.now() - startTime) / 1000;
-  
   playSound(300 + lane * 100, 'square', 0.05);
 
   const target = activeNotes.find(n => n.lane === lane && !n.hit && !n.missed);
@@ -437,7 +427,13 @@ function triggerInput(lane) {
       if (combo > maxCombo) maxCombo = combo;
       
       const isPerfect = diff <= 0.07;
-      score += isPerfect ? 1000 : 500;
+      if (isPerfect) {
+        perfectCount++;
+        score += 1000;
+      } else {
+        greatCount++;
+        score += 500;
+      }
       
       addEffect(lane, isPerfect ? 'PERFECT' : 'GREAT');
       playSound(isPerfect ? 800 : 600, 'triangle', 0.1);
@@ -446,62 +442,66 @@ function triggerInput(lane) {
   }
 }
 
+// ==========================================
+// 5. 게임 종료 및 랭크 산출 (음악 종료 시 호출)
+// ==========================================
 function endGame() {
+  if (!isPlaying) return;
   isPlaying = false;
-  try {bgm.pause(); } catch(e) {}
-  const totalNotes = SONG_PATTERN.length; // 전체 노트 수
+  try { bgm.pause(); } catch(e) {}
 
-  // 랭크 판정 로직 (원하는 기준대로 조건 변경 가능)
+  const totalNotes = SONG_PATTERN.length;
+
   let rank = 'F';
   let message = 'KEEP TRYING!';
-  let rankColor = '#ff0000'; // 기본 빨간색
+  let rankColor = '#ff4444';
 
-  // 예시 기준: Perfect 비율 및 Miss 개수로 랭크 측정
+  // 랭크 조건 산출
   if (perfectCount === totalNotes) {
     rank = 'S';
     message = 'ALL PERFECT!! PERFECT GAME!';
-    rankColor = '#ffd700'; // 금색
-  } else if (missCount === 0 && (perfectCount / totalNotes) >= 0.8) {
+    rankColor = '#ffd700';
+  } else if (missCount === 0) {
     rank = 'S';
     message = 'GREAT JOB! NO MISS!';
     rankColor = '#ffd700';
   } else if (missCount <= 3) {
     rank = 'A';
     message = 'EXCELLENT PERFORMANCE!';
-    rankColor = '#ff69b4'; // 핑크색
+    rankColor = '#fcd3f2';
   } else if (missCount <= 7) {
     rank = 'B';
     message = 'NICE CLEAR!';
-    rankColor = '#00ffff'; // 민트색
+    rankColor = '#00ffff';
   } else {
     rank = 'F';
     message = 'STAGE FAILED... TRY AGAIN!';
-    rankColor = '#888888'; // 회색
+    rankColor = '#888888';
   }
 
-  // 결과 화면 HTML 변경
-  document.getElementById('result-screen').innerHTML = `
-    <h1 style="color: ${rankColor}; font-size: 2.5rem; margin-bottom: 10px;">RANK ${rank}</h1>
-    <p style="color: #ffffff; font-size: 0.6rem; margin-bottom: 15px;">"${message}"</p>
+  // 결과 오버레이 렌더링
+  const resultScreen = document.getElementById('result-screen');
+  resultScreen.innerHTML = `
+    <h1 style="color: ${rankColor}; font-size: 2.2rem; margin-bottom: 10px; text-shadow: 3px 3px #000;">RANK ${rank}</h1>
+    <p style="color: #ffffff; font-size: 0.55rem; margin-bottom: 20px;">"${message}"</p>
     
-    <div style="font-size: 0.6rem; line-height: 1.8; margin-bottom: 20px; text-align: left;">
+    <div style="font-size: 0.6rem; line-height: 2; margin-bottom: 20px; text-align: left; background: rgba(255,255,255,0.05); padding: 15px; border-radius: 4px;">
       <p style="color:#ffd700;">PERFECT : ${perfectCount}</p>
-      <p style="color:#ff69b4;">GREAT   : ${greatCount}</p>
-      <p style="color:#ff0000;">MISS    : ${missCount}</p>
-      <p style="color:#ffffff; border-top: 1px solid #444; padding-top: 5px;">SCORE   : ${score}</p>
+      <p style="color:#fcd3f2;">GREAT   : ${greatCount}</p>
+      <p style="color:#ff4444;">MISS    : ${missCount}</p>
+      <p style="color:#ffffff; border-top: 1px solid #444; margin-top: 5px; padding-top: 5px;">SCORE   : ${score}</p>
       <p style="color:#ffffff;">MAX COMBO : ${maxCombo}</p>
     </div>
 
     <button class="start-btn" id="retry-btn">RETRY</button>
   `;
 
-  // 다시하기 버튼 이벤트 재연결
   document.getElementById('retry-btn').addEventListener('click', startGame);
-  document.getElementById('result-screen').classList.remove('hidden');
+  resultScreen.classList.remove('hidden');
 }
 
 // ==========================================
-// 5. 키보드 & 터치 이벤트
+// 6. 이벤트 바인딩
 // ==========================================
 const keyMap = { 'd': 0, 'f': 1, 'j': 2, 'k': 3, 'D': 0, 'F': 1, 'J': 2, 'K': 3 };
 
@@ -542,7 +542,6 @@ window.addEventListener('keyup', (e) => {
 });
 
 document.getElementById('start-btn').addEventListener('click', startGame);
-document.getElementById('retry-btn').addEventListener('click', startGame);
 </script>
 
 </body>
