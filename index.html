@@ -155,7 +155,7 @@ function resize() {
   width = canvas.width = wrapper.clientWidth;
   height = canvas.height = wrapper.clientHeight;
   laneWidth = width / 4;
-  judgeLineY = height - 35; // 판정선을 캔버스 최하단 영역으로 통합
+  judgeLineY = height - 100; // 판정선을 캔버스 최하단 영역으로 통합
 }
 window.addEventListener('resize', resize);
 resize();
@@ -516,6 +516,12 @@ function handlePointerDown(e) {
   e.preventDefault();
   
   const rect = canvas.getBoundingClientRect();
+  const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+  const touchY = clientY - rect.top;
+
+  // 판정선 위아래 100px 범위 안을 터치했을 때만 입력 허용
+  if (Math.abs(touchY - judgeLineY) > 100) return;
+
   const clientX = e.touches ? e.touches[0].clientX : e.clientX;
   const touchX = clientX - rect.left;
   
@@ -524,7 +530,6 @@ function handlePointerDown(e) {
     triggerInput(lane);
   }
 }
-
 canvas.addEventListener('touchstart', handlePointerDown, { passive: false });
 canvas.addEventListener('mousedown', handlePointerDown);
 
