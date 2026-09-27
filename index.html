@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>82 Rhythm Game</title>
+  <title>Pixel Rhythm Game</title>
   <!-- 레트로 픽셀 폰트 로드 -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -19,40 +19,42 @@
       font-family: 'Press Start 2P', cursive;
     }
 
- body {
+    body {
       background-color: #000000;
       color: #ffffff;
       display: flex;
       justify-content: center;
       align-items: center;
       min-height: 100vh;
-      min-height: 100dvh; /* 모바일 브라우저 가변 높이 반영 */
+      min-height: 100dvh;
       overflow: hidden;
     }
 
-    /* 하단 주소창에 가리지 않도록 최대 높이 조정 및 비율 완화 */
-   #game-container {
+    /* 여백 없이 전체 화면을 채우는 컨테이너 */
+    #game-container {
       position: relative;
       width: 100%;
-      max-width: 430px; /* 아이폰 Max 시리즈 너비까지 수용 */
+      max-width: 430px;
       height: 100vh;
-      height: 100dvh; /* 브라우저 전체 높이에 딱 맞춤 */
+      height: 100dvh;
       background-color: #050505;
-      border: none; /* 연핑크 테두리 제거 */
-      border-radius: 0; /* 테두리 모서리 제거 */
-      box-shadow: none; /* 그림자 제거 */
+      border: none;
+      border-radius: 0;
+      box-shadow: none;
       display: flex;
       flex-direction: column;
       overflow: hidden;
     }
+
     /* 상단 HUD (점수/콤보) */
     #hud {
       display: flex;
       justify-content: space-between;
-      padding: 15px;
-      background-color: #111;
-      border-bottom: 2px solid #FDC7FB; /* 오타 수정: ##FDC7FB -> #FDC7FB */
-      font-size: 0.8rem;
+      padding: 18px 15px 12px 15px;
+      background-color: rgba(17, 17, 17, 0.9);
+      border-bottom: 2px solid #FDC7FB;
+      font-size: 0.75rem;
+      z-index: 5;
     }
 
     #score { color: #ffd700; }
@@ -69,11 +71,12 @@
       width: 100%;
       height: 100%;
       display: block;
-      touch-action: none; /* 터치 스크롤 방지 */
-    }
-    background-image: url('./Cover.png'); /* 본인이 넣을 이미지 파일명으로 변경 */
+      touch-action: none;
+      /* ★ 배경 이미지 설정 (Cover.png 연결) */
+      background-image: url('./Cover.png');
       background-size: cover;
       background-position: center;
+      background-repeat: no-repeat;
     }
 
     .screen {
@@ -100,7 +103,7 @@
       text-shadow: 3px 3px #FF69C7;
     }
 
-    /* 서브 타이틀 (그림자 없는 흰색) */
+    /* 서브 타이틀 */
     h2 {
       color: #ffffff;
       font-size: 0.75rem;
@@ -108,9 +111,9 @@
       text-shadow: none;
     }
 
-    /* 시작 버튼 */
+    /* 시작 및 다시시작 버튼 */
     .start-btn {
-      background-color: #050505;
+      background-color: transparent;
       color: #ffffff;
       border: none;
       padding: 12px 20px;
@@ -138,7 +141,7 @@
 
     <!-- 시작 오버레이 -->
     <div id="start-screen" class="screen">
-      <h1>82 RHYTHM</h1>
+      <h1>ROMANTIC<br>RHYTHM</h1>
       <h2>2026 WORK BY YUNSEON</h2>
       <button class="start-btn" id="start-btn">START GAME</button>
     </div>
@@ -162,14 +165,14 @@ function resize() {
   width = canvas.width = wrapper.clientWidth;
   height = canvas.height = wrapper.clientHeight;
   laneWidth = width / 4;
-  judgeLineY = height - 60; // 판정선을 캔버스 최하단 영역으로 통합
+  judgeLineY = height - 140; // 하단 주소창을 고려한 판정선 위치
 }
 window.addEventListener('resize', resize);
 resize();
 
 // 외부 오디오 설정
 const bgm = new Audio();
-bgm.src = './Gossip.mp3'; // 외부 MP3 파일 경로
+bgm.src = './Gossip.mp3';
 
 // 효과음용 Web Audio API
 let audioCtx = null;
@@ -182,37 +185,41 @@ function initAudio() {
   }
 }
 
-function playSound(freq, type = 'square', duration = 0.08) {
-  if (!audioCtx) return;
-  try {
-    const osc = audioCtx.createOscillator();
-    const gain = audioCtx.createGain();
-    osc.type = type;
-    osc.frequency.value = freq;
-    gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
-    gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + duration);
-    osc.connect(gain);
-    gain.connect(audioCtx.destination);
-    osc.start();
-    osc.stop(audioCtx.currentTime + duration);
-  } catch(e) {}
+// ==========================================
+// 2. 게임 패턴 및 상태 변수 (4초~97초 노트 채보 / 빠른 템포)
+// ==========================================
+const NOTE_SPEED = 550; // 빠른 노트 낙하 속도
+
+function generatePattern() {
+  const pattern = [];
+  const bpm = 120;
+  const beatInterval = 60 / bpm;
+  
+  let time = 4.0;
+  let currentLane = 0;
+
+  while (time <= 97.0) {
+    const section = Math.floor(time / 16);
+
+    if (section % 2 === 0) {
+      pattern.push({ time: parseFloat(time.toFixed(2)), lane: currentLane });
+      currentLane = (currentLane + 1) % 4;
+      time += beatInterval;
+    } else {
+      if (Math.floor(time * 2) % 2 === 0) {
+        pattern.push({ time: parseFloat(time.toFixed(2)), lane: 0 });
+        pattern.push({ time: parseFloat(time.toFixed(2)), lane: 3 });
+      } else {
+        pattern.push({ time: parseFloat(time.toFixed(2)), lane: 1 });
+        pattern.push({ time: parseFloat(time.toFixed(2)), lane: 2 });
+      }
+      time += beatInterval / 2;
+    }
+  }
+  return pattern;
 }
 
-// ==========================================
-// 2. 게임 패턴 및 상태 변수
-// ==========================================
-const NOTE_SPEED = 550;
-
-// 노트 채보 패턴 (초 단위 위치)
-const SONG_PATTERN = [
-  { time: 1.2, lane: 0 }, { time: 1.7, lane: 1 }, { time: 2.2, lane: 2 }, { time: 2.7, lane: 3 },
-  { time: 3.2, lane: 1 }, { time: 3.2, lane: 2 }, { time: 3.8, lane: 0 }, { time: 4.3, lane: 3 },
-  { time: 5.0, lane: 0 }, { time: 5.4, lane: 1 }, { time: 5.8, lane: 2 }, { time: 6.2, lane: 3 },
-  { time: 7.0, lane: 0 }, { time: 7.0, lane: 3 }, { time: 7.5, lane: 1 }, { time: 8.0, lane: 2 },
-  { time: 8.5, lane: 0 }, { time: 8.8, lane: 1 }, { time: 9.1, lane: 2 }, { time: 9.4, lane: 3 },
-  { time: 10.0, lane: 0 }, { time: 10.25, lane: 1 }, { time: 10.5, lane: 2 }, { time: 10.75, lane: 3 },
-  { time: 11.2, lane: 1 }, { time: 11.5, lane: 2 }, { time: 12.0, lane: 0 }, { time: 12.4, lane: 3 }
-];
+const SONG_PATTERN = generatePattern();
 
 let isPlaying = false;
 let startTime = 0;
@@ -246,19 +253,15 @@ function startGame() {
   document.getElementById('result-screen').classList.add('hidden');
   updateHUD();
 
-  // 음원 재생 및 음악 종료 시 게임 종료 처리
   bgm.currentTime = 0;
   const playPromise = bgm.play();
   if (playPromise !== undefined) {
     playPromise.catch(err => {
-      console.warn("오디오 재생 실패 (파일 없음 또는 재생 제한):", err);
+      console.warn("오디오 재생 실패:", err);
     });
   }
 
-  // ★ 음악이 끝나면 자동으로 게임 종료 실행
-  bgm.onended = () => {
-    endGame();
-  };
+  bgm.onended = () => { endGame(); };
 
   isPlaying = true;
   startTime = performance.now();
@@ -279,18 +282,22 @@ function addEffect(lane, text) {
   });
 }
 
-// 렌더링 프레임
 function gameLoop(timestamp) {
   if (!isPlaying) return;
 
   const currentTime = (timestamp - startTime) / 1000;
 
-  // 1. 화면 소거 (반투명 검은색으로 덮어 배경 사진이 보이면서 노트 시인성 확보)
-  ctx.fillStyle = 'rgba(5, 5, 5, 0.75)'; // 숫자가 낮을수록 배경 사진이 더 선명하게 보입니다 (0.0 ~ 1.0)
+  if (currentTime >= 97.0) {
+    endGame();
+    return;
+  }
+
+  // ★ 배경 이미지(Cover.png)가 노트 뒤로 보이도록 반투명 검은색으로 잔상 지우기
+  ctx.fillStyle = 'rgba(5, 5, 5, 0.65)'; 
   ctx.fillRect(0, 0, width, height);
-  
-  // 2. 레인 구분선 그리기
-  ctx.strokeStyle = '#220022';
+
+  // 레인 구분선 그리기
+  ctx.strokeStyle = 'rgba(255, 105, 199, 0.15)';
   ctx.lineWidth = 2;
   for (let i = 1; i < 4; i++) {
     ctx.beginPath();
@@ -299,7 +306,7 @@ function gameLoop(timestamp) {
     ctx.stroke();
   }
 
-  // 3. 판정선 그리기
+  // 판정선 그리기
   ctx.strokeStyle = '#FF69C7';
   ctx.lineWidth = 4;
   ctx.beginPath();
@@ -307,7 +314,7 @@ function gameLoop(timestamp) {
   ctx.lineTo(width, judgeLineY);
   ctx.stroke();
 
-  // 4. 노트 처리 및 그리기 (부드러운 네온 그라데이션)
+  // 노트 그리기
   activeNotes.forEach(note => {
     if (note.hit) return;
 
@@ -315,7 +322,6 @@ function gameLoop(timestamp) {
     const noteY = judgeLineY - (timeDiff * NOTE_SPEED);
     const noteHeight = 18;
 
-    // 미스 판정
     if (timeDiff < -0.18 && !note.missed) {
       note.missed = true;
       combo = 0;
@@ -324,19 +330,15 @@ function gameLoop(timestamp) {
       updateHUD();
     }
 
-    // 노트 그래픽 출력
     if (noteY > -20 && noteY < height + 20 && !note.missed) {
       const x = note.lane * laneWidth + 6;
       const w = laneWidth - 12;
       const mainColor = (note.lane === 0 || note.lane === 3) ? '#FF69C7' : '#ffd700';
 
       ctx.save();
-
-      // 글로우(발광) 효과
       ctx.shadowColor = mainColor;
       ctx.shadowBlur = 15;
 
-      // 그라데이션 만들기
       const gradient = ctx.createLinearGradient(x, noteY - noteHeight / 2, x, noteY + noteHeight / 2);
       gradient.addColorStop(0, '#ffffff');
       gradient.addColorStop(0.3, mainColor);
@@ -344,7 +346,6 @@ function gameLoop(timestamp) {
 
       ctx.fillStyle = gradient;
 
-      // 노트 모서리 처리
       ctx.beginPath();
       if (ctx.roundRect) {
         ctx.roundRect(x, noteY - noteHeight / 2, w, noteHeight, 4);
@@ -353,7 +354,6 @@ function gameLoop(timestamp) {
       }
       ctx.fill();
 
-      // 코어 중앙 하이라이트
       ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
       ctx.fillRect(x + 4, noteY - 2, w - 8, 3);
 
@@ -361,7 +361,7 @@ function gameLoop(timestamp) {
     }
   });
 
-  // 5. 판정 텍스트 연출
+  // 판정 텍스트 연출
   for (let i = effects.length - 1; i >= 0; i--) {
     const eff = effects[i];
     ctx.fillStyle = eff.text === 'MISS' ? `rgba(255, 0, 0, ${eff.alpha})` : `rgba(255, 215, 0, ${eff.alpha})`;
@@ -384,8 +384,6 @@ function triggerInput(lane) {
   if (!isPlaying) return;
 
   const currentTime = (performance.now() - startTime) / 1000;
-  playSound(300 + lane * 100, 'square', 0.05);
-
   const target = activeNotes.find(n => n.lane === lane && !n.hit && !n.missed);
 
   if (target) {
@@ -406,14 +404,13 @@ function triggerInput(lane) {
       }
       
       addEffect(lane, isPerfect ? 'PERFECT' : 'GREAT');
-      playSound(isPerfect ? 800 : 600, 'triangle', 0.1);
       updateHUD();
     }
   }
 }
 
 // ==========================================
-// 5. 게임 종료 및 랭크 산출 (음악 종료 시 호출)
+// 5. 게임 종료 및 결과 처리
 // ==========================================
 function endGame() {
   if (!isPlaying) return;
@@ -426,7 +423,6 @@ function endGame() {
   let message = 'KEEP TRYING!';
   let rankColor = '#ff4444';
 
-  // 랭크 조건 산출
   if (perfectCount === totalNotes) {
     rank = 'S';
     message = 'ALL PERFECT!! PERFECT GAME!';
@@ -435,11 +431,11 @@ function endGame() {
     rank = 'S';
     message = 'GREAT JOB! NO MISS!';
     rankColor = '#ffd700';
-  } else if (missCount <= 3) {
+  } else if (missCount <= 5) {
     rank = 'A';
     message = 'EXCELLENT PERFORMANCE!';
     rankColor = '#fcd3f2';
-  } else if (missCount <= 7) {
+  } else if (missCount <= 12) {
     rank = 'B';
     message = 'NICE CLEAR!';
     rankColor = '#00ffff';
@@ -449,10 +445,8 @@ function endGame() {
     rankColor = '#ff4444';
   }
 
-  // 결과 오버레이 렌더링
   const resultScreen = document.getElementById('result-screen');
   resultScreen.innerHTML = `
-    <!-- 랭크 단독 대형 네온 연출 -->
     <div style="
       color: #ffffff; 
       font-size: 4.5rem; 
@@ -470,7 +464,6 @@ function endGame() {
 
     <p style="color: #ffffff; font-size: 0.55rem; margin-bottom: 25px;">"${message}"</p>
     
-    <!-- 결과 집계 영역 (SCORE 제외) -->
     <div style="
       font-size: 0.65rem; 
       line-height: 2.2; 
@@ -484,18 +477,8 @@ function endGame() {
       <p style="color:#ffffff; border-top: 1px solid #444; margin-top: 8px; padding-top: 8px;">MAX COMBO : ${maxCombo}</p>
     </div>
 
-    <!-- 박스 없는 흰색 글자 RETRY 버튼 -->
     <div>
-      <button class="start-btn" id="retry-btn" style="
-        background-color: transparent;
-        color: #ffffff;
-        border: none;
-        box-shadow: none;
-        text-shadow: none;
-        padding: 12px 28px;
-        font-size: 1.0rem;
-        cursor: pointer;
-      ">RETRY</button>
+      <button class="start-btn" id="retry-btn">RETRY</button>
     </div>
   `;
 
@@ -504,11 +487,10 @@ function endGame() {
 }
 
 // ==========================================
-// 6. 이벤트 바인딩 (키보드 및 캔버스 직접 터치)
+// 6. 이벤트 바인딩
 // ==========================================
 const keyMap = { 'd': 0, 'f': 1, 'j': 2, 'k': 3, 'D': 0, 'F': 1, 'J': 2, 'K': 3 };
 
-// 키보드 입력
 window.addEventListener('keydown', (e) => {
   if (e.repeat) return;
   const lane = keyMap[e.key];
@@ -517,18 +499,11 @@ window.addEventListener('keydown', (e) => {
   }
 });
 
-// 화면 직접 클릭 / 터치 입력
 function handlePointerDown(e) {
   if (!isPlaying) return;
   e.preventDefault();
   
   const rect = canvas.getBoundingClientRect();
-  const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-  const touchY = clientY - rect.top;
-
-  // 판정선 위아래 100px 범위 안을 터치했을 때만 입력 허용
-  if (Math.abs(touchY - judgeLineY) > 100) return;
-
   const clientX = e.touches ? e.touches[0].clientX : e.clientX;
   const touchX = clientX - rect.left;
   
@@ -537,6 +512,7 @@ function handlePointerDown(e) {
     triggerInput(lane);
   }
 }
+
 canvas.addEventListener('touchstart', handlePointerDown, { passive: false });
 canvas.addEventListener('mousedown', handlePointerDown);
 
