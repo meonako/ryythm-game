@@ -435,12 +435,38 @@ function endGame() {
   else if (accuracy >= 70) { rank = 'B'; message = '"GOOD!"'; }
   else if (accuracy >= 60) { rank = 'C'; message = '"CLEAR!"'; }
 
+ // 랭크별 색상 지정하기
+  let rankColor = '#ffffff'; // 기본값 (F 등급 등)
+  let shadowColor = '#ff4444';
+
+  if (rank === 'S') { rankColor = '#ffffff'; shadowColor = '#ffd700'; } // S등급: 노란색
+  else if (rank === 'A') { rankColor = 'ffffff'; shadowColor = '#FD5DBD'; } // A등급: 핑
+  else if (rank === 'B') { rankColor = '#ffffff'; shadowColor = '#00fff2'; } // B등급: 파란색
+  else if (rank === 'C') { rankColor = '#fffffff'; shadowColor = '#ff8800'; } // C등급: 주황색
+
   const resultScreen = document.getElementById('result-screen');
   resultScreen.innerHTML = `
-    <div style="font-size: 4.5rem; color: #ff4444; text-shadow: 0 0 15px #ff4444; margin-bottom: 5px;">${rank}</div>
+    <!-- 랭크 글자 색상이 위에서 설정한 등급별 색상(rankColor)으로 각각 다르게 출력됩니다 -->
+    <div style="font-size: 4.5rem; color: ${rankColor}; text-shadow: 0 0 15px ${shadowColor}; margin-bottom: 5px;">${rank}</div>
+    
     <div style="font-size: 0.65rem; color: #fcd3f2; margin-bottom: 20px;">${message}</div>
+    
     <div style="font-size: 0.65rem; line-height: 2.2; margin-bottom: 25px; text-align: left;">
       <p style="color:#ffd700;">PERFECT : ${perfectCount}</p>
+      <p style="color:#fcd3f2;">GREAT   : ${greatCount}</p>
+      <p style="color:#ff4444;">MISS    : ${missCount}</p>
+      
+      <hr style="border: 0; border-top: 1px solid #555; margin: 5px 0;">
+      <p style="color:#ffffff;">MAX COMBO : ${maxCombo}</p>
+    </div>
+    <div>
+      <button class="start-btn" onclick="startGame('${activeSongKey}')">RETRY</button><br>
+      <button class="start-btn" onclick="goToSongSelect()">SELECT SONG</button>
+    </div>
+  `;
+    <div style="font-size: 0.65rem; color: #fcd3f2; margin-bottom: 20px;">${message}</div>
+    <div style="font-size: 0.65rem; line-height: 2.2; margin-bottom: 25px; text-align: left;">
+      <p style="color:#00fff2;">PERFECT : ${perfectCount}</p>
       <p style="color:#fcd3f2;">GREAT   : ${greatCount}</p>
       <p style="color:#ff4444;">MISS    : ${missCount}</p>
       <hr style="border: 0; border-top: 1px solid #555; margin: 5px 0;">
