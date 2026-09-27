@@ -111,21 +111,21 @@
       margin-bottom: 25px;
     }
 
-    /* 곡 선택 카드 스타일 */
-    .song-card {
-      border: 2px solid #FF69C7;
-      padding: 15px 20px;
-      width: 85%;
-      max-width: 320px;
-      background: rgba(255, 105, 199, 0.05);
+    /* 심플한 텍스트형 곡 선택 버튼 스타일 */
+    .song-select-btn {
+      background-color: transparent;
+      color: #ffffff;
+      border: none;
+      font-size: 1.1rem;
       cursor: pointer;
-      margin-bottom: 15px;
-      transition: transform 0.1s, background 0.1s;
+      margin-bottom: 20px;
+      padding: 5px;
+      transition: color 0.1s, transform 0.1s;
     }
 
-    .song-card:active {
-      transform: scale(0.97);
-      background: rgba(255, 105, 199, 0.2);
+    .song-select-btn:hover, .song-select-btn:active {
+      color: #FF69C7;
+      transform: scale(1.05);
     }
   </style>
 </head>
@@ -147,15 +147,12 @@
       <button class="start-btn" onclick="goToSongSelect()">START GAME</button>
     </div>
 
-    <!-- 2단계: 곡 선택 화면 -->
+    <!-- 2단계: 곡 선택 화면 (심플 텍스트 스타일) -->
     <div id="song-select-screen" class="screen hidden">
-      <h1 style="font-size: 1.5rem; margin-bottom: 10px;">SELECT SONG</h1>
-      <h2 style="margin-bottom: 25px;">CHOOSE YOUR TRACK</h2>
+      <h1 style="font-size: 1.5rem; margin-bottom: 30px;">SELECT SONG</h1>
       
-      <div class="song-card" onclick="startGame()">
-        <p style="color: #ffd700; font-size: 0.75rem; margin-bottom: 8px;">1. GOSSIP</p>
-        <p style="color: #fcd3f2; font-size: 0.5rem;">TAP TO PLAY</p>
-      </div>
+      <button class="song-select-btn" onclick="startGame('gossip')">> GOSSIP</button>
+      <button class="song-select-btn" onclick="startGame('trembling')">> 떨리는 맘</button>
     </div>
 
     <!-- 3단계: 결과 화면 -->
@@ -184,9 +181,19 @@ let isBgLoaded = false;
 bgImage.onload = () => { isBgLoaded = true; };
 bgImage.src = './Cover.png';
 
-const bgm = new Audio();
-bgm.src = './Gossip.mp3';
+// 곡별 오디오 및 패턴 설정
+const songs = {
+  gossip: {
+    src: './Gossip.mp3',
+    pattern: generatePattern()
+  },
+  trembling: {
+    src: './Trembling.mp3', // 필요시 파일명 경로에 맞게 수정 가능합니다
+    pattern: generatePattern() // '떨리는 맘' 패턴 (동일 패턴 또는 별도 패턴 사용 가능)
+  }
+};
 
+let currentBgm = new Audio();
 const NOTE_SPEED = 550;
 
 function generatePattern() {
@@ -221,8 +228,7 @@ function generatePattern() {
   return rawData.map(item => ({ time: item.t, lane: item.l }));
 }
 
-const SONG_PATTERN = generatePattern();
-
+let activeSongKey = 'gossip';
 let isPlaying = false;
 let startTime = 0;
 let score = 0;
@@ -242,7 +248,8 @@ function goToSongSelect() {
 }
 
 // [곡 선택 화면] -> [게임 화면] 진입 및 플레이 시작
-function startGame() {
+function startGame(songKey) {
+  activeSongKey = songKey;
   score = 0;
   combo = 0;
   maxCombo = 0;
@@ -251,9 +258,9 @@ function startGame() {
   missCount = 0;
   effects = [];
   
-  activeNotes = SONG_PATTERN.map(n => ({ ...n, hit: false, missed: false }));
+  const selectedSong = songs[songKey];
+  activeNotes = selectedSong.pattern.map(n => ({ ...n, hit: false, missed: false }));
   
-  // 모든 오버레이 화면 숨기기 (게임 화면 진입)
   document.getElementById('start-screen').classList.add('hidden');
   document.getElementById('song-select-screen').classList.add('hidden');
   document.getElementById('result-screen').classList.add('hidden');
@@ -261,9 +268,10 @@ function startGame() {
   document.getElementById('score').innerText = '000000';
   document.getElementById('combo').innerText = '0';
 
-  bgm.currentTime = 0;
-  bgm.play().catch(err => console.log(err));
-  bgm.onended = () => { endGame(); };
+  currentBgm.src = selectedSong.src;
+  currentBgm.currentTime = 0;
+  currentBgm.play().catch(err => console.log(err));
+  currentBgm.onended = () => { endGame(); };
 
   isPlaying = true;
   startTime = performance.now();
@@ -399,7 +407,7 @@ function triggerInput(lane) {
 function endGame() {
   if (!isPlaying) return;
   isPlaying = false;
-  try { bgm.pause(); } catch(e) {}
+  try { currentBgm.pause(); } catch(e) {}
 
   const resultScreen = document.getElementById('result-screen');
   resultScreen.innerHTML = `
