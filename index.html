@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>4레인 리듬게임</title>
+  <title>모바일 4레인 리듬게임</title>
   <style>
     * {
       box-sizing: border-box;
@@ -35,14 +35,12 @@
       overflow: hidden;
     }
 
-    /* 캔버스 */
     canvas {
       width: 100%;
       height: 100%;
       display: block;
     }
 
-    /* UI 레이어 */
     .screen {
       position: absolute;
       top: 0; left: 0; right: 0; bottom: 0;
@@ -73,7 +71,6 @@
       margin: 8px;
     }
 
-    /* 상단 HUD */
     #hud {
       position: absolute;
       top: 10px;
@@ -89,7 +86,6 @@
     #score-display { color: #fff; }
     #combo-display { color: #ff007f; font-size: 1.3rem; }
 
-    /* 모바일 터치 패드 */
     #touch-controls {
       position: absolute;
       bottom: 0; left: 0; width: 100%; height: 18%;
@@ -122,16 +118,13 @@
 <body>
 
 <div id="game-container">
-  <!-- 게임 플레이 캔버스 -->
   <canvas id="gameCanvas"></canvas>
 
-  <!-- 상단 점수 UI -->
   <div id="hud">
     <div id="score-display">000000</div>
     <div id="combo-display"></div>
   </div>
 
-  <!-- 모바일 터치 영역 -->
   <div id="touch-controls">
     <div class="touch-pad" id="pad-0">D</div>
     <div class="touch-pad" id="pad-1">F</div>
@@ -142,9 +135,16 @@
   <!-- 메인 대기 화면 -->
   <div id="start-screen" class="screen">
     <h1>4-LANE RHYTHM</h1>
-    <p>윤대통령 That's me</p>
+    <p>모바일 터치 또는 키보드 (D, F, J, K)로 플레이하세요.</p>
     
-    <img src="./images/start_btn.png" id="start-btn" style="width: 200px; cursor: pointer; transition: transform 0.1s;" alt="게임 시작">
+    <!-- 버튼 이미지 (images/start_btn.png 가 없으면 기본 버튼으로 보임) -->
+    <img src="./images/start_btn.png" id="start-btn" alt="GAME START" 
+         onerror="this.style.display='none'; document.getElementById('start-btn-fallback').style.display='block';"
+         style="width: 200px; cursor: pointer; display: block; margin: 15px auto; transition: transform 0.1s;">
+    
+    <!-- 이미지 로드 실패 시 나타나는 기본 대체 버튼 -->
+    <button class="btn" id="start-btn-fallback" style="display: none;">GAME START</button>
+  </div>
 
   <!-- 결과 화면 -->
   <div id="result-screen" class="screen hidden">
@@ -157,22 +157,21 @@
 
 <script>
 // ==========================================
-// 1. 이미지 및 커스텀 경로 설정
+// 1. 에셋 경로 설정 (파일명 대소문자 확인!)
 // ==========================================
 const ASSETS_CONFIG = {
-  // 이미지가 없거나 경로가 틀려도 오류가 나지 않게 구성되었습니다.
-  bg: './images/bg.jpg',
-  audio: './audio/Gossip.mp3',
+  bg: './images/bg.jpg', 
+  audio: './Gossip.mp3', // 최상위에 올려둔 MP3 파일명
   notes: [
-    './images/note_red.png',   // 레인 0
-    './images/note_blue.png',  // 레인 1
-    './images/note_blue.png',  // 레인 2
-    './images/note_red.png'    // 레인 3
+    './assets/note_red.png',
+    './assets/note_blue.png',
+    './assets/note_blue.png',
+    './assets/note_red.png'
   ]
 };
 
 // ==========================================
-// 2. 기본 곡 및 노트 배치 데이터 (1초, 2초, 3초...)
+// 2. 노트 채보 데이터
 // ==========================================
 const DEMO_SONG = {
   bpm: 120,
@@ -197,70 +196,20 @@ const DEMO_SONG = {
 };
 
 // ==========================================
-// 3. 게임 변수 설정
+// 3. 변수 및 오디오 객체 설정
 // ==========================================
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
-// 오디오 객체 생성
-let bgmAudio = new Audio();
 
-function startGame() {
-  initAudio();
-  document.getElementById('start-screen').classList.add('hidden');
-  document.getElementById('result-screen').classList.add('hidden');
-
-  score = 0;
-  combo = 0;
-  maxCombo = 0;
-  effects = [];
-  updateHUD();
-
-  // 1. mp3 노래 파일 지정
-  bgmAudio.src = ASSETS_CONFIG.audio;
-  bgmAudio.currentTime = 0;
-
-  liveNotes = DEMO_SONG.notes.map(n => ({
-    ...n,
-    hit: false,
-    missed: false
-  }));
-
-  isPlaying = true;
-  countdown = 3;
-
-  const countInterval = setInterval(() => {
-    countdown--;
-    if (countdown > 0) {
-      playBeep(600, 'sine', 0.1);
-    } else if (countdown === 0) {
-      playBeep(1200, 'triangle', 0.2);
-      clearInterval(countInterval);
-      
-      // 2. 카운트다운(3, 2, 1)이 끝나면 노래 재생!
-      bgmAudio.play().catch(e => console.log("음악 재생 오류:", e));
-      gameStartTime = performance.now(); 
-    }
-  }, 1000);
-
-  requestAnimationFrame(gameLoop);
-}
-
-// 게임이 끝날 때 음악 정지
-function endGame() {
-  isPlaying = false;
-  bgmAudio.pause(); // 노래 끄기
-  document.getElementById('result-score').innerText = `SCORE: ${score}`;
-  document.getElementById('result-combo').innerText = `MAX COMBO: ${maxCombo}`;
-  document.getElementById('result-screen').classList.remove('hidden');
-}
 let containerWidth, containerHeight;
 let laneWidth, judgmentLineY;
-let speed = 600; // 노트 떨어지는 속도 (px/sec)
+let speed = 600;
 
 let audioCtx = null;
+let bgmAudio = new Audio(); // BGM 오디오 객체
 let isPlaying = false;
 let gameStartTime = 0;
-let countdown = 3; // 3초 카운트다운
+let countdown = 3;
 
 let score = 0;
 let combo = 0;
@@ -268,16 +217,13 @@ let maxCombo = 0;
 let liveNotes = [];
 let effects = [];
 
-// 이미지 로딩 객체
 const loadedImages = { bg: null, notes: [] };
 
 function loadAssets() {
-  // 배경 이미지 예외 처리 로딩
   const bgImg = new Image();
   bgImg.src = ASSETS_CONFIG.bg;
   bgImg.onload = () => { loadedImages.bg = bgImg; };
 
-  // 노트 이미지 예외 처리 로딩
   ASSETS_CONFIG.notes.forEach((path, idx) => {
     const img = new Image();
     img.src = path;
@@ -286,26 +232,24 @@ function loadAssets() {
 }
 loadAssets();
 
-// 캔버스 크기 맞춤
 function resizeCanvas() {
   const container = document.getElementById('game-container');
   canvas.width = container.clientWidth;
   canvas.height = container.clientHeight;
   containerWidth = canvas.width;
   containerHeight = canvas.height;
-
   laneWidth = containerWidth / 4;
-  judgmentLineY = containerHeight * 0.82; // 판정선 위치 (하단 82% 지점)
+  judgmentLineY = containerHeight * 0.82;
 }
 window.addEventListener('resize', resizeCanvas);
 resizeCanvas();
 
-// ==========================================
-// 4. 사운드 효과 (Web Audio API)
-// ==========================================
 function initAudio() {
   if (!audioCtx) {
     audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  }
+  if (audioCtx.state === 'suspended') {
+    audioCtx.resume();
   }
 }
 
@@ -326,10 +270,15 @@ function playBeep(freq = 440, type = 'sine', duration = 0.1) {
 }
 
 // ==========================================
-// 5. 게임 루프 & 판정 로직
+// 4. 게임 시작 및 오디오 강제 재생 로직
 // ==========================================
 function startGame() {
   initAudio();
+
+  // 음악 사전 로드 및 사용자 터치 권한으로 즉시 실행 테스트
+  bgmAudio.src = ASSETS_CONFIG.audio;
+  bgmAudio.load();
+
   document.getElementById('start-screen').classList.add('hidden');
   document.getElementById('result-screen').classList.add('hidden');
 
@@ -339,7 +288,6 @@ function startGame() {
   effects = [];
   updateHUD();
 
-  // 노트 데이터 복사
   liveNotes = DEMO_SONG.notes.map(n => ({
     ...n,
     hit: false,
@@ -349,7 +297,6 @@ function startGame() {
   isPlaying = true;
   countdown = 3;
 
-  // 카운트다운 타이머
   const countInterval = setInterval(() => {
     countdown--;
     if (countdown > 0) {
@@ -357,7 +304,17 @@ function startGame() {
     } else if (countdown === 0) {
       playBeep(1200, 'triangle', 0.2);
       clearInterval(countInterval);
-      gameStartTime = performance.now(); // 실제 게임 타임 시작
+      
+      // 카운트다운 끝난 후 BGM 재생
+      bgmAudio.currentTime = 0;
+      const playPromise = bgmAudio.play();
+      if (playPromise !== undefined) {
+        playPromise.catch(error => {
+          console.log("오디오 재생 실패:", error);
+          alert("음악 파일(Gossip.mp3)을 불러오지 못했습니다. 파일명과 대소문자를 확인해 주세요!");
+        });
+      }
+      gameStartTime = performance.now();
     }
   }, 1000);
 
@@ -375,21 +332,16 @@ function handleInput(laneIndex) {
   const currentTime = (performance.now() - gameStartTime) / 1000;
   playBeep(300 + laneIndex * 100, 'square', 0.05);
 
-  // 가장 가까운 미처리 노트 찾기
   const target = liveNotes.find(n => n.lane === laneIndex && !n.hit && !n.missed);
 
   if (target) {
     const diff = Math.abs(target.time - currentTime);
-
-    // 판정 범위 (초 단위)
-    if (diff <= 0.12) { // PERFECT / GREAT
+    if (diff <= 0.12) {
       target.hit = true;
       combo++;
       if (combo > maxCombo) maxCombo = combo;
-      
       const pts = diff <= 0.06 ? 1000 : 700;
       score += pts;
-      
       addEffect(laneIndex, diff <= 0.06 ? 'PERFECT' : 'GREAT');
       updateHUD();
     }
@@ -405,13 +357,11 @@ function addEffect(lane, text) {
   });
 }
 
-// 메인 프레임 그려주기
 function gameLoop(timestamp) {
   if (!isPlaying) return;
 
   ctx.clearRect(0, 0, containerWidth, containerHeight);
 
-  // 1. 배경그리기
   if (loadedImages.bg) {
     ctx.drawImage(loadedImages.bg, 0, 0, containerWidth, containerHeight);
   } else {
@@ -419,7 +369,6 @@ function gameLoop(timestamp) {
     ctx.fillRect(0, 0, containerWidth, containerHeight);
   }
 
-  // 2. 레인 구분선 그리기
   ctx.strokeStyle = 'rgba(255, 255, 255, 0.15)';
   ctx.lineWidth = 2;
   for (let i = 1; i < 4; i++) {
@@ -429,7 +378,6 @@ function gameLoop(timestamp) {
     ctx.stroke();
   }
 
-  // 3. 판정선 그리기
   ctx.strokeStyle = '#00f0ff';
   ctx.lineWidth = 4;
   ctx.beginPath();
@@ -437,7 +385,6 @@ function gameLoop(timestamp) {
   ctx.lineTo(containerWidth, judgmentLineY);
   ctx.stroke();
 
-  // 4. 카운트다운 처리
   if (countdown > 0) {
     ctx.fillStyle = '#00f0ff';
     ctx.font = 'bold 60px sans-serif';
@@ -447,21 +394,15 @@ function gameLoop(timestamp) {
     return;
   }
 
-  // 경과 시간 계산
   const currentTime = (performance.now() - gameStartTime) / 1000;
-
-  // 5. 노트 위치 계산 및 그리기
-  let activeNotesCount = 0;
 
   liveNotes.forEach(note => {
     if (note.hit) return;
 
-    // 노트 Y 위치 = 판정선 - (노트목표시간 - 현재시간) * 속도
     const timeDiff = note.time - currentTime;
     const noteY = judgmentLineY - (timeDiff * speed);
     const noteHeight = 25;
 
-    // 미스 판정 (판정선을 너무 많이 지나쳤을 때)
     if (timeDiff < -0.2 && !note.missed) {
       note.missed = true;
       combo = 0;
@@ -469,9 +410,6 @@ function gameLoop(timestamp) {
       updateHUD();
     }
 
-    if (!note.missed) activeNotesCount++;
-
-    // 화면 범위 안의 노트만 그리기
     if (noteY > -50 && noteY < containerHeight + 50 && !note.missed) {
       const noteX = note.lane * laneWidth + 4;
       const noteW = laneWidth - 8;
@@ -479,7 +417,6 @@ function gameLoop(timestamp) {
       if (loadedImages.notes[note.lane]) {
         ctx.drawImage(loadedImages.notes[note.lane], noteX, noteY - noteHeight/2, noteW, noteHeight);
       } else {
-        // 이미지가 없을 때 대체 그리기
         ctx.fillStyle = note.lane % 2 === 0 ? '#ff0055' : '#00ccff';
         ctx.beginPath();
         ctx.roundRect(noteX, noteY - noteHeight/2, noteW, noteHeight, 6);
@@ -488,7 +425,6 @@ function gameLoop(timestamp) {
     }
   });
 
-  // 6. 이펙트 텍스트 그리기
   for (let i = effects.length - 1; i >= 0; i--) {
     const eff = effects[i];
     ctx.fillStyle = eff.text === 'MISS' ? `rgba(255, 0, 0, ${eff.alpha})` : `rgba(0, 240, 255, ${eff.alpha})`;
@@ -501,7 +437,6 @@ function gameLoop(timestamp) {
     if (eff.alpha <= 0) effects.splice(i, 1);
   }
 
-  // 7. 게임 종료 검사 (모든 노트가 지나간 후 2초 뒤)
   const lastNoteTime = DEMO_SONG.notes[DEMO_SONG.notes.length - 1].time;
   if (currentTime > lastNoteTime + 2.0) {
     endGame();
@@ -513,13 +448,16 @@ function gameLoop(timestamp) {
 
 function endGame() {
   isPlaying = false;
+  try {
+    bgmAudio.pause();
+  } catch(e) {}
   document.getElementById('result-score').innerText = `SCORE: ${score}`;
   document.getElementById('result-combo').innerText = `MAX COMBO: ${maxCombo}`;
   document.getElementById('result-screen').classList.remove('hidden');
 }
 
 // ==========================================
-// 6. 입력 이벤트 처리 (터치 및 키보드)
+// 5. 이벤트 리스너 등록
 // ==========================================
 const keyMap = { 'd': 0, 'f': 1, 'j': 2, 'k': 3, '1': 0, '2': 1, '3': 2, '4': 3 };
 
@@ -540,23 +478,25 @@ window.addEventListener('keyup', (e) => {
   }
 });
 
-// 터치 패드 이벤트
 [0, 1, 2, 3].forEach(lane => {
   const pad = document.getElementById(`pad-${lane}`);
-  
   pad.addEventListener('touchstart', (e) => {
     e.preventDefault();
     pad.classList.add('active');
     handleInput(lane);
   });
-
   pad.addEventListener('touchend', (e) => {
     e.preventDefault();
     pad.classList.remove('active');
   });
 });
 
-document.getElementById('start-btn').addEventListener('click', startGame);
+// 시작 버튼 클릭/터치 이벤트 (버튼 이미지 + 대체 버튼 둘 다 지원)
+const startBtn = document.getElementById('start-btn');
+const fallbackBtn = document.getElementById('start-btn-fallback');
+
+if (startBtn) startBtn.addEventListener('click', startGame);
+if (fallbackBtn) fallbackBtn.addEventListener('click', startGame);
 document.getElementById('retry-btn').addEventListener('click', startGame);
 </script>
 </body>
