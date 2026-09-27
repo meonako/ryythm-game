@@ -37,7 +37,7 @@
       max-width: 430px;
       height: 100vh;
       height: 100dvh;
-      background-color: #050505;
+      background-color: #000000;
       border: none;
       border-radius: 0;
       box-shadow: none;
@@ -51,7 +51,7 @@
       display: flex;
       justify-content: space-between;
       padding: 18px 15px 12px 15px;
-      background-color: rgba(17, 17, 17, 0.9);
+      background-color: #000000;
       border-bottom: 2px solid #FDC7FB;
       font-size: 0.75rem;
       z-index: 5;
@@ -72,10 +72,10 @@
       height: 100%;
       display: block;
       touch-action: none;
-      background-color: #050505; /* 기본은 검은색 */
+      background-color: #000000;
     }
 
-    /* ★ 게임 시작 후에만 적용될 플레이 화면 배경 클래스 */
+    /* 게임 시작 후에만 적용될 플레이 화면 배경 (Cover.png) */
     canvas.playing-bg {
       background-image: url('./Cover.png');
       background-size: cover;
@@ -83,10 +83,11 @@
       background-repeat: no-repeat;
     }
 
+    /* ★ 수정 포인트: 시작 화면은 투명도 없이 완전한 검은색(#000000)으로 설정하여 사진이 절대 비치지 않게 함 */
     .screen {
       position: absolute;
       top: 0; left: 0; width: 100%; height: 100%;
-      background: rgba(0, 0, 0, 0.92); /* 시작 화면은 완전한 암전(검은색) 유지 */
+      background: #000000; 
       display: flex;
       flex-direction: column;
       justify-content: center;
@@ -142,7 +143,7 @@
   <div id="canvas-wrapper">
     <canvas id="gameCanvas"></canvas>
 
-    <!-- 시작 오버레이 (여기는 검은색 배경 유지) -->
+    <!-- 시작 오버레이 (완전한 검은색 배경) -->
     <div id="start-screen" class="screen">
       <h1>ROMANTIC<br>RHYTHM</h1>
       <h2>2026 WORK BY YUNSEON</h2>
@@ -252,7 +253,7 @@ function startGame() {
   
   activeNotes = SONG_PATTERN.map(n => ({ ...n, hit: false, missed: false }));
   
-  // 시작 화면 숨기기 및 플레이 배경 클래스 부여 (이때부터 Cover.png가 배경으로 나타남)
+  // 시작 화면 숨기기 및 플레이 배경 클래스 부여 (이때부터 Cover.png 등장)
   document.getElementById('start-screen').classList.add('hidden');
   document.getElementById('result-screen').classList.add('hidden');
   canvas.classList.add('playing-bg');
@@ -298,8 +299,8 @@ function gameLoop(timestamp) {
     return;
   }
 
-  // ★ 플레이 중에는 반투명 검은색으로 잔상을 지워 Cover.png 배경이 은은하게 비치도록 함
-  ctx.fillStyle = 'rgba(5, 5, 5, 0.65)'; 
+  // 플레이 중에는 반투명 검은색으로 잔상을 지워 Cover.png 배경이 은은하게 비치도록 함
+  ctx.fillStyle = 'rgba(0, 0, 0, 0.65)'; 
   ctx.fillRect(0, 0, width, height);
 
   // 레인 구분선 그리기
@@ -423,7 +424,6 @@ function endGame() {
   isPlaying = false;
   try { bgm.pause(); } catch(e) {}
 
-  // 게임 끝나면 플레이 배경 클래스 제거 후 기본으로 복원
   canvas.classList.remove('playing-bg');
 
   const totalNotes = SONG_PATTERN.length;
