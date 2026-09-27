@@ -2,13 +2,12 @@
 <html lang="ko">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>모바일 4레인 리듬게임</title>
-  
-  <!-- Google Fonts 공식 CDN (DungGeunMo) -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pixel Rhythm Game</title>
+  <!-- 레트로 픽셀 폰트 로드 -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=DungGeunMo&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
 
   <style>
     * {
@@ -17,30 +16,50 @@
       padding: 0;
       user-select: none;
       -webkit-user-select: none;
-      touch-action: manipulation;
+      font-family: 'Press Start 2P', cursive;
     }
 
-    body, html {
-      width: 100%;
-      height: 100%;
+    body {
+      background-color: #000000;
+      color: #ffffff;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
       overflow: hidden;
-      background-color: #ffe3e8;
-      font-family: 'DungGeunMo', monospace, sans-serif !important;
-      color: #4a4a4a;
     }
 
     #game-container {
       position: relative;
       width: 100%;
-      max-width: 450px;
-      height: 100%;
-      margin: 0 auto;
-      background: linear-gradient(180deg, #fff5f7 0%, #ffe3e8 100%);
+      max-width: 400px;
+      height: 90vh;
+      max-height: 700px;
+      background-color: #050505;
+      border: 4px solid #ff69b4;
+      box-shadow: 0 0 20px rgba(255, 105, 180, 0.4);
       display: flex;
       flex-direction: column;
-      overflow: hidden;
-      box-shadow: 0 0 20px rgba(255, 182, 193, 0.5);
-      font-family: 'DungGeunMo', monospace, sans-serif;
+    }
+
+    /* 상단 HUD (점수/콤보) */
+    #hud {
+      display: flex;
+      justify-content: space-between;
+      padding: 15px;
+      background-color: #111;
+      border-bottom: 2px solid #ff69b4;
+      font-size: 0.8rem;
+    }
+
+    #score { color: #ffd700; }
+    #combo { color: #ff69b4; }
+
+    /* Canvas 및 오버레이 화면 */
+    #canvas-wrapper {
+      position: relative;
+      flex: 1;
+      width: 100%;
     }
 
     canvas {
@@ -51,364 +70,154 @@
 
     .screen {
       position: absolute;
-      top: 0; left: 0; right: 0; bottom: 0;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0, 0, 0, 0.88);
       display: flex;
       flex-direction: column;
       justify-content: center;
       align-items: center;
-      background: rgba(255, 245, 247, 0.94);
-      z-index: 10;
+      text-align: center;
       padding: 20px;
-      font-family: 'DungGeunMo', monospace, sans-serif;
+      z-index: 10;
     }
 
     .hidden { display: none !important; }
 
-    h1 { 
-      font-family: 'DungGeunMo', monospace, sans-serif;
-      font-size: 2.2rem; 
-      color: #ff8fa3; 
-      margin-bottom: 15px; 
-      text-shadow: 0 0 10px rgba(255, 143, 163, 0.4); 
-      letter-spacing: 1px;
-    }
-
-    p { 
-      font-family: 'DungGeunMo', monospace, sans-serif;
-      margin-bottom: 15px; 
-      color: #666; 
-      font-size: 1rem; 
-      text-align: center; 
-    }
-
-    .btn {
-      background: linear-gradient(135deg, #ffb6c1, #ff8fa3);
-      color: white;
-      border: none;
-      padding: 16px 36px;
+    h1 {
+      color: #ff69b4;
       font-size: 1.2rem;
-      font-family: 'DungGeunMo', monospace, sans-serif;
-      border-radius: 30px;
+      margin-bottom: 15px;
+      line-height: 1.5;
+      text-shadow: 3px 3px #8b008b;
+    }
+
+    h2 {
+      color: #ffd700;
+      font-size: 0.9rem;
+      margin-bottom: 25px;
+      text-shadow: 2px 2px #b8860b;
+    }
+
+    p {
+      font-size: 0.6rem;
+      color: #aaa;
+      margin-bottom: 20px;
+      line-height: 1.6;
+    }
+
+    .start-btn {
+      background-color: #ff69b4;
+      color: #000;
+      border: none;
+      padding: 12px 20px;
+      font-size: 0.8rem;
       cursor: pointer;
-      box-shadow: 0 4px 15px rgba(255, 143, 163, 0.4);
-      margin: 10px;
+      box-shadow: 4px 4px 0px #ffffff;
       transition: transform 0.1s;
     }
 
-    .btn:active {
-      transform: scale(0.95);
+    .start-btn:active {
+      transform: translate(2px, 2px);
+      box-shadow: 2px 2px 0px #ffffff;
     }
 
-    .song-list {
-      width: 100%;
-      max-height: 60%;
-      overflow-y: auto;
+    /* 하단 터치 패드 */
+    #touch-pads {
       display: flex;
-      flex-direction: column;
-      gap: 12px;
-      margin: 15px 0;
-      padding: 5px;
+      height: 70px;
+      background-color: #111;
+      border-top: 2px solid #ff69b4;
     }
 
-    .song-card {
-      background: rgba(255, 255, 255, 0.85);
-      border: 2px solid #ffccd5;
-      border-radius: 16px;
-      padding: 15px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      cursor: pointer;
-      transition: all 0.2s ease;
-      box-shadow: 0 2px 8px rgba(255, 182, 193, 0.2);
-      font-family: 'DungGeunMo', monospace, sans-serif;
-    }
-
-    .song-card:active {
-      background: #ffe3e8;
-      border-color: #ff8fa3;
-      transform: scale(0.98);
-    }
-
-    .song-info {
-      text-align: left;
-    }
-
-    .song-title {
-      font-family: 'DungGeunMo', monospace, sans-serif;
-      font-size: 1.2rem;
-      color: #4a4a4a;
-    }
-
-    .song-artist {
-      font-family: 'DungGeunMo', monospace, sans-serif;
-      font-size: 0.9rem;
-      color: #888;
-      margin-top: 4px;
-    }
-
-    .song-play-btn {
-      font-family: 'DungGeunMo', monospace, sans-serif;
-      background: #ff8fa3;
-      color: #fff;
-      padding: 8px 16px;
-      border-radius: 15px;
-      font-size: 0.95rem;
-      box-shadow: 0 2px 6px rgba(255, 143, 163, 0.4);
-    }
-
-    #hud {
-      position: absolute;
-      top: 15px;
-      left: 15px; right: 15px;
-      display: flex;
-      justify-content: space-between;
-      z-index: 5;
-      font-size: 1.2rem;
-      pointer-events: none;
-      font-family: 'DungGeunMo', monospace, sans-serif;
-    }
-
-    #score-display { 
-      color: #555; 
-      font-family: 'DungGeunMo', monospace, sans-serif;
-    }
-    
-    #combo-display { 
-      color: #ff8fa3; 
-      font-size: 1.4rem; 
-      text-shadow: 0 0 6px rgba(255, 143, 163, 0.3); 
-      font-family: 'DungGeunMo', monospace, sans-serif;
-    }
-
-    #touch-controls {
-      position: absolute;
-      bottom: 0; left: 0; width: 100%; height: 18%;
-      display: flex;
-      z-index: 4;
-    }
-
-    .touch-pad {
+    .pad {
       flex: 1;
-      border-top: 2px solid rgba(255, 182, 193, 0.5);
-      border-right: 1px solid rgba(255, 182, 193, 0.3);
-      background: rgba(255, 255, 255, 0.3);
+      border-right: 1px solid #333;
       display: flex;
       justify-content: center;
       align-items: center;
-      font-size: 1.3rem;
-      color: #888;
-      font-family: 'DungGeunMo', monospace, sans-serif;
+      font-size: 0.9rem;
+      color: #ff69b4;
     }
 
-    .touch-pad:active, .touch-pad.active {
-      background: rgba(255, 182, 193, 0.5);
-      color: #ff4d6d;
+    .pad:last-child { border-right: none; }
+    .pad.active {
+      background-color: #ff69b4;
+      color: #000;
     }
   </style>
 </head>
 <body>
 
 <div id="game-container">
-  <canvas id="gameCanvas"></canvas>
-
   <div id="hud">
-    <div id="score-display">000000</div>
-    <div id="combo-display"></div>
+    <div>SCORE: <span id="score">000000</span></div>
+    <div><span id="combo">0</span> COMBO</div>
   </div>
 
-  <div id="touch-controls">
-    <div class="touch-pad" id="pad-0">D</div>
-    <div class="touch-pad" id="pad-1">F</div>
-    <div class="touch-pad" id="pad-2">J</div>
-    <div class="touch-pad" id="pad-3">K</div>
-  </div>
+  <div id="canvas-wrapper">
+    <canvas id="gameCanvas"></canvas>
 
-  <!-- 1. 메인 대기 화면 -->
-  <div id="start-screen" class="screen">
-    <h1>4-LANE RHYTHM</h1>
-    <p>모바일 터치 또는 키보드 (D, F, J, K)로 플레이하세요.</p>
-    <button class="btn" id="start-btn">GAME START</button>
-  </div>
-
-  <!-- 2. 곡 선택 화면 -->
-  <div id="select-screen" class="screen hidden">
-    <h1>SELECT MUSIC</h1>
-    <p>플레이할 곡을 선택하세요.</p>
-    <div class="song-list" id="song-list-container"></div>
-  </div>
-
-  <!-- 3. 결과 화면 -->
-  <div id="result-screen" class="screen hidden">
-    <h1>CLEAR!</h1>
-    <p id="result-score" style="font-size: 1.5rem; color:#4a4a4a;"></p>
-    <p id="result-combo" style="color:#ff8fa3;"></p>
-    <div style="display: flex; gap: 10px; margin-top: 10px;">
-      <button class="btn" id="retry-btn">다시하기</button>
-      <button class="btn" id="select-menu-btn" style="background: linear-gradient(135deg, #ccc, #aaa); box-shadow: none;">곡 선택</button>
+    <!-- 시작 오버레이 -->
+    <div id="start-screen" class="screen">
+      <h1>ROMANTIC<br>RHYTHM</h1>
+      <h2>START GAME</h2>
+      <p>KEYBOARD: D - F - J - K<br>TOUCH: BOTTOM PADS</p>
+      <button class="start-btn" id="start-btn">PLAY NOW</button>
     </div>
+
+    <!-- 결과 오버레이 -->
+    <div id="result-screen" class="screen hidden">
+      <h1>STAGE CLEAR</h1>
+      <p id="final-score" style="font-size: 0.8rem; color:#ffd700;"></p>
+      <p id="final-combo" style="font-size: 0.7rem; color:#ff69b4;"></p>
+      <button class="start-btn" id="retry-btn">RETRY</button>
+    </div>
+  </div>
+
+  <!-- 하단 터치 영역 -->
+  <div id="touch-pads">
+    <div class="pad" id="pad-0">D</div>
+    <div class="pad" id="pad-1">F</div>
+    <div class="pad" id="pad-2">J</div>
+    <div class="pad" id="pad-3">K</div>
   </div>
 </div>
 
 <script>
 // ==========================================
-// 1. 이미지 에셋 설정
-// ==========================================
-const IMAGE_ASSETS = {
-  bg: './images/bg.jpg',
-  notes: [
-    './assets/note_red.png',
-    './assets/note_blue.png',
-    './assets/note_blue.png',
-    './assets/note_red.png'
-  ]
-};
-
-// ==========================================
-// 2. 곡 데이터
-// ==========================================
-const SONGS = [
-  {
-    id: 'gossip',
-    title: 'Gossip',
-    artist: '82MAJOR',
-    audioPath: './Gossip.mp3',
-    bpm: 125,
-    notes: [
-      { time: 1.2, lane: 0 }, { time: 1.7, lane: 1 }, { time: 2.2, lane: 2 }, { time: 2.7, lane: 3 },
-      { time: 3.2, lane: 1 }, { time: 3.2, lane: 2 }, { time: 3.8, lane: 0 }, { time: 4.3, lane: 3 },
-      { time: 5.0, lane: 0 }, { time: 5.4, lane: 1 }, { time: 5.8, lane: 2 }, { time: 6.2, lane: 3 },
-      { time: 7.0, lane: 0 }, { time: 7.0, lane: 3 }, { time: 7.5, lane: 1 }, { time: 8.0, lane: 2 },
-      { time: 8.5, lane: 0 }, { time: 8.8, lane: 1 }, { time: 9.1, lane: 2 }, { time: 9.4, lane: 3 },
-      { time: 10.0, lane: 0 }, { time: 10.25, lane: 1 }, { time: 10.5, lane: 2 }, { time: 10.75, lane: 3 },
-      { time: 11.2, lane: 1 }, { time: 11.5, lane: 2 }, { time: 12.0, lane: 0 }, { time: 12.4, lane: 3 },
-      { time: 13.0, lane: 0 }, { time: 13.2, lane: 1 }, { time: 13.4, lane: 2 }, { time: 13.6, lane: 3 },
-      { time: 14.0, lane: 1 }, { time: 14.0, lane: 2 }, { time: 14.5, lane: 0 }, { time: 15.0, lane: 3 },
-      { time: 15.8, lane: 0 }, { time: 16.0, lane: 1 }, { time: 16.2, lane: 2 }, { time: 16.4, lane: 3 },
-      { time: 17.0, lane: 1 }, { time: 17.4, lane: 2 }, { time: 18.0, lane: 0 }, { time: 18.0, lane: 3 },
-      { time: 18.8, lane: 0 }, { time: 19.1, lane: 1 }, { time: 19.4, lane: 2 }, { time: 19.7, lane: 3 },
-      { time: 20.2, lane: 1 }, { time: 20.6, lane: 2 }, { time: 21.0, lane: 0 }, { time: 21.5, lane: 3 },
-      { time: 22.0, lane: 0 }, { time: 22.0, lane: 3 }, { time: 22.5, lane: 1 }, { time: 22.8, lane: 2 },
-      { time: 23.2, lane: 0 }, { time: 23.5, lane: 1 }, { time: 23.8, lane: 2 }, { time: 24.1, lane: 3 },
-      { time: 24.5, lane: 1 }, { time: 24.5, lane: 2 }, { time: 25.0, lane: 0 }, { time: 25.3, lane: 1 },
-      { time: 25.6, lane: 2 }, { time: 25.9, lane: 3 }, { time: 26.5, lane: 0 }, { time: 26.5, lane: 3 },
-      { time: 27.0, lane: 1 }, { time: 27.3, lane: 2 }, { time: 27.6, lane: 1 }, { time: 27.9, lane: 0 },
-      { time: 28.5, lane: 2 }, { time: 28.8, lane: 3 }, { time: 29.2, lane: 1 }, { time: 29.6, lane: 0 },
-      { time: 30.2, lane: 0 }, { time: 30.2, lane: 2 }, { time: 30.8, lane: 1 }, { time: 30.8, lane: 3 },
-      { time: 31.5, lane: 0 }, { time: 31.8, lane: 1 }, { time: 32.1, lane: 2 }, { time: 32.4, lane: 3 },
-      { time: 33.0, lane: 0 }, { time: 33.0, lane: 3 }, { time: 33.5, lane: 1 }, { time: 34.0, lane: 2 },
-      { time: 35.0, lane: 0 }, { time: 35.25, lane: 1 }, { time: 35.5, lane: 2 }, { time: 35.75, lane: 3 },
-      { time: 36.5, lane: 1 }, { time: 36.8, lane: 2 }, { time: 37.2, lane: 0 }, { time: 37.6, lane: 3 },
-      { time: 38.5, lane: 0 }, { time: 38.8, lane: 2 }, { time: 39.1, lane: 1 }, { time: 39.4, lane: 3 },
-      { time: 40.0, lane: 0 }, { time: 40.0, lane: 1 }, { time: 40.8, lane: 2 }, { time: 40.8, lane: 3 },
-      { time: 41.8, lane: 0 }, { time: 42.1, lane: 1 }, { time: 42.4, lane: 2 }, { time: 42.7, lane: 3 },
-      { time: 43.5, lane: 1 }, { time: 43.8, lane: 0 }, { time: 44.2, lane: 2 }, { time: 44.6, lane: 3 },
-      { time: 45.5, lane: 0 }, { time: 45.8, lane: 1 }, { time: 46.1, lane: 2 }, { time: 46.4, lane: 3 },
-      { time: 47.2, lane: 1 }, { time: 47.5, lane: 2 }, { time: 48.0, lane: 0 }, { time: 48.5, lane: 3 },
-      { time: 49.2, lane: 0 }, { time: 49.5, lane: 1 }, { time: 49.8, lane: 2 },
-      { time: 50.2, lane: 0 }, { time: 50.6, lane: 1 }, { time: 51.0, lane: 2 }, { time: 51.4, lane: 3 },
-      { time: 52.2, lane: 0 }, { time: 52.2, lane: 3 }, { time: 53.0, lane: 1 }, { time: 53.0, lane: 2 },
-      { time: 54.0, lane: 0 }, { time: 54.3, lane: 1 }, { time: 54.6, lane: 2 }, { time: 54.9, lane: 3 },
-      { time: 55.8, lane: 0 }, { time: 56.0, lane: 1 }, { time: 56.2, lane: 2 }, { time: 56.4, lane: 3 },
-      { time: 57.0, lane: 0 }, { time: 57.2, lane: 1 }, { time: 57.4, lane: 2 }, { time: 57.6, lane: 3 },
-      { time: 58.2, lane: 0 }, { time: 58.2, lane: 3 }, { time: 59.0, lane: 1 }, { time: 59.0, lane: 2 },
-      { time: 60.0, lane: 0 }, { time: 60.3, lane: 1 }, { time: 60.6, lane: 2 }, { time: 61.0, lane: 3 },
-      { time: 62.0, lane: 1 }, { time: 62.4, lane: 2 }, { time: 63.0, lane: 0 }, { time: 63.5, lane: 3 },
-      { time: 65.0, lane: 0 }, { time: 65.2, lane: 1 }, { time: 65.4, lane: 2 }, { time: 65.6, lane: 3 },
-      { time: 66.2, lane: 1 }, { time: 66.2, lane: 2 }, { time: 66.8, lane: 0 }, { time: 67.2, lane: 3 },
-      { time: 68.0, lane: 0 }, { time: 68.2, lane: 1 }, { time: 68.4, lane: 2 }, { time: 68.6, lane: 3 },
-      { time: 69.2, lane: 1 }, { time: 69.6, lane: 2 }, { time: 70.2, lane: 0 }, { time: 70.2, lane: 3 },
-      { time: 71.0, lane: 0 }, { time: 71.25, lane: 1 }, { time: 71.5, lane: 2 }, { time: 71.75, lane: 3 },
-      { time: 72.5, lane: 0 }, { time: 72.5, lane: 3 }, { time: 73.2, lane: 1 }, { time: 73.6, lane: 2 },
-      { time: 74.5, lane: 0 }, { time: 74.75, lane: 1 }, { time: 75.0, lane: 2 }, { time: 75.25, lane: 3 },
-      { time: 76.0, lane: 1 }, { time: 76.4, lane: 2 }, { time: 77.0, lane: 0 }, { time: 77.5, lane: 3 },
-      { time: 78.5, lane: 0 }, { time: 78.75, lane: 1 }, { time: 79.0, lane: 2 }, { time: 79.25, lane: 3 },
-      { time: 80.0, lane: 0 }, { time: 80.0, lane: 3 }, { time: 80.8, lane: 1 }, { time: 80.8, lane: 2 },
-      { time: 82.0, lane: 0 }, { time: 82.4, lane: 1 }, { time: 82.8, lane: 2 }, { time: 83.2, lane: 3 },
-      { time: 84.0, lane: 1 }, { time: 84.4, lane: 2 }, { time: 85.0, lane: 0 }, { time: 85.5, lane: 3 },
-      { time: 86.5, lane: 0 }, { time: 86.8, lane: 1 }, { time: 87.1, lane: 2 }, { time: 87.4, lane: 3 },
-      { time: 88.5, lane: 0 }, { time: 88.5, lane: 3 },
-      { time: 89.5, lane: 1 }, { time: 89.5, lane: 2 },
-      { time: 91.0, lane: 0 }, { time: 91.0, lane: 1 }, { time: 91.0, lane: 2 }, { time: 91.0, lane: 3 }
-    ]
-  },
-  {
-    id: 'demo',
-    title: 'Demo Beat (Short)',
-    artist: 'System',
-    audioPath: '',
-    bpm: 130,
-    notes: [
-      { time: 1.0, lane: 0 }, { time: 1.5, lane: 1 }, { time: 2.0, lane: 2 }, { time: 2.5, lane: 3 },
-      { time: 3.0, lane: 1 }, { time: 3.0, lane: 2 }, { time: 3.5, lane: 0 }, { time: 4.0, lane: 3 }
-    ]
-  }
-];
-
-// ==========================================
-// 3. 변수 및 시스템 설정
+// 1. 핵심 초기화 및 설정
 // ==========================================
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
+const wrapper = document.getElementById('canvas-wrapper');
 
-let containerWidth, containerHeight;
-let laneWidth, judgmentLineY;
-let speed = 600;
+let width, height, laneWidth, judgeLineY;
 
+function resize() {
+  width = canvas.width = wrapper.clientWidth;
+  height = canvas.height = wrapper.clientHeight;
+  laneWidth = width / 4;
+  judgeLineY = height - 50;
+}
+window.addEventListener('resize', resize);
+resize();
+
+// 외부 오디오 설정
+const bgm = new Audio();
+bgm.src = './Gossip.mp3'; // 외부 MP3 파일 경로
+
+// 효과음용 Web Audio API
 let audioCtx = null;
-let bgmAudio = new Audio();
-let currentSong = null;
-let isPlaying = false;
-let gameStartTime = 0;
-let countdown = 3;
-let countInterval = null;
-
-let score = 0;
-let combo = 0;
-let maxCombo = 0;
-let liveNotes = [];
-let effects = [];
-
-const loadedImages = { bg: null, notes: [] };
-
-function loadImages() {
-  const bgImg = new Image();
-  bgImg.src = IMAGE_ASSETS.bg;
-  bgImg.onload = () => { loadedImages.bg = bgImg; };
-
-  IMAGE_ASSETS.notes.forEach((path, idx) => {
-    const img = new Image();
-    img.src = path;
-    img.onload = () => { loadedImages.notes[idx] = img; };
-  });
-}
-loadImages();
-
-function resizeCanvas() {
-  const container = document.getElementById('game-container');
-  canvas.width = container.clientWidth;
-  canvas.height = container.clientHeight;
-  containerWidth = canvas.width;
-  containerHeight = canvas.height;
-  laneWidth = containerWidth / 4;
-  judgmentLineY = containerHeight * 0.82;
-}
-window.addEventListener('resize', resizeCanvas);
-resizeCanvas();
-
 function initAudio() {
   if (!audioCtx) {
-    const AudioContextClass = window.AudioContext || window.webkitAudioContext;
-    if (AudioContextClass) {
-      audioCtx = new AudioContextClass();
-    }
+    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
   }
-  if (audioCtx && audioCtx.state === 'suspended') {
+  if (audioCtx.state === 'suspended') {
     audioCtx.resume();
   }
 }
 
-function playBeep(freq = 440, type = 'sine', duration = 0.1) {
+function playSound(freq, type = 'square', duration = 0.08) {
   if (!audioCtx) return;
   try {
     const osc = audioCtx.createOscillator();
@@ -416,7 +225,7 @@ function playBeep(freq = 440, type = 'sine', duration = 0.1) {
     osc.type = type;
     osc.frequency.value = freq;
     gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
-    gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
+    gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + duration);
     osc.connect(gain);
     gain.connect(audioCtx.destination);
     osc.start();
@@ -425,224 +234,152 @@ function playBeep(freq = 440, type = 'sine', duration = 0.1) {
 }
 
 // ==========================================
-// 4. 곡 선택 UI
+// 2. 게임 패턴 및 상태 변수
 // ==========================================
-function renderSongList() {
-  const container = document.getElementById('song-list-container');
-  container.innerHTML = '';
+const NOTE_SPEED = 350;
 
-  SONGS.forEach(song => {
-    const card = document.createElement('div');
-    card.className = 'song-card';
-    card.innerHTML = `
-      <div class="song-info">
-        <div class="song-title">${song.title}</div>
-        <div class="song-artist">${song.artist}</div>
-      </div>
-      <div class="song-play-btn">PLAY</div>
-    `;
-    card.addEventListener('click', () => {
-      selectAndStartGame(song);
-    });
-    container.appendChild(card);
-  });
-}
+// 노트 채보 패턴 (초 단위 위치)
+const SONG_PATTERN = [
+  { time: 1.2, lane: 0 }, { time: 1.7, lane: 1 }, { time: 2.2, lane: 2 }, { time: 2.7, lane: 3 },
+  { time: 3.2, lane: 1 }, { time: 3.2, lane: 2 }, { time: 3.8, lane: 0 }, { time: 4.3, lane: 3 },
+  { time: 5.0, lane: 0 }, { time: 5.4, lane: 1 }, { time: 5.8, lane: 2 }, { time: 6.2, lane: 3 },
+  { time: 7.0, lane: 0 }, { time: 7.0, lane: 3 }, { time: 7.5, lane: 1 }, { time: 8.0, lane: 2 },
+  { time: 8.5, lane: 0 }, { time: 8.8, lane: 1 }, { time: 9.1, lane: 2 }, { time: 9.4, lane: 3 },
+  { time: 10.0, lane: 0 }, { time: 10.25, lane: 1 }, { time: 10.5, lane: 2 }, { time: 10.75, lane: 3 },
+  { time: 11.2, lane: 1 }, { time: 11.5, lane: 2 }, { time: 12.0, lane: 0 }, { time: 12.4, lane: 3 }
+];
 
-function showSelectScreen() {
+let isPlaying = false;
+let startTime = 0;
+let score = 0;
+let combo = 0;
+let maxCombo = 0;
+let activeNotes = [];
+let effects = [];
+
+// ==========================================
+// 3. 게임 시작 및 오디오 재생
+// ==========================================
+function startGame() {
   initAudio();
-  renderSongList();
-  document.getElementById('start-screen').classList.add('hidden');
-  document.getElementById('result-screen').classList.add('hidden');
-  document.getElementById('select-screen').classList.remove('hidden');
-}
-
-// ==========================================
-// 5. 게임 시작 및 예외 처리 강화
-// ==========================================
-function selectAndStartGame(song) {
-  initAudio();
-  currentSong = song;
-
-  // 기존 카운트다운 타이머가 있다면 초기화
-  if (countInterval) clearInterval(countInterval);
-
-  try {
-    bgmAudio.pause();
-  } catch(e) {}
-
-  if (song.audioPath) {
-    bgmAudio.src = song.audioPath;
-    bgmAudio.load();
-  } else {
-    bgmAudio.src = '';
-  }
-
-  bgmAudio.onended = () => {
-    endGame();
-  };
-
-  document.getElementById('select-screen').classList.add('hidden');
-  document.getElementById('result-screen').classList.add('hidden');
-
+  
   score = 0;
   combo = 0;
   maxCombo = 0;
   effects = [];
+  
+  activeNotes = SONG_PATTERN.map(n => ({ ...n, hit: false, missed: false }));
+  
+  document.getElementById('start-screen').classList.add('hidden');
+  document.getElementById('result-screen').classList.add('hidden');
   updateHUD();
 
-  liveNotes = currentSong.notes.map(n => ({
-    ...n,
-    hit: false,
-    missed: false
-  }));
+  // 음원 초기화 및 재생 예외 처리
+  bgm.currentTime = 0;
+  const playPromise = bgm.play();
+  if (playPromise !== undefined) {
+    playPromise.catch(err => {
+      console.warn("오디오 재생 실패 (파일 없음 또는 정책 차단):", err);
+    });
+  }
+
+  bgm.onended = () => {
+    endGame();
+  };
 
   isPlaying = true;
-  countdown = 3;
-
-  countInterval = setInterval(() => {
-    countdown--;
-    if (countdown > 0) {
-      playBeep(600, 'sine', 0.1);
-    } else if (countdown === 0) {
-      playBeep(1200, 'triangle', 0.2);
-      clearInterval(countInterval);
-      
-      if (currentSong.audioPath) {
-        bgmAudio.currentTime = 0;
-        const playPromise = bgmAudio.play();
-        if (playPromise !== undefined) {
-          playPromise.catch(error => {
-            console.warn("음원 재생 거부됨(무음 플레이 진행):", error);
-          });
-        }
-      }
-      gameStartTime = performance.now();
-    }
-  }, 1000);
-
+  startTime = performance.now();
   requestAnimationFrame(gameLoop);
 }
 
 function updateHUD() {
-  document.getElementById('score-display').innerText = String(score).padStart(6, '0');
-  document.getElementById('combo-display').innerText = combo > 2 ? `${combo} COMBO` : '';
-}
-
-function handleInput(laneIndex) {
-  if (!isPlaying || countdown > 0) return;
-
-  const currentTime = (performance.now() - gameStartTime) / 1000;
-  playBeep(300 + laneIndex * 100, 'square', 0.05);
-
-  const target = liveNotes.find(n => n.lane === laneIndex && !n.hit && !n.missed);
-
-  if (target) {
-    const diff = Math.abs(target.time - currentTime);
-    if (diff <= 0.12) {
-      target.hit = true;
-      combo++;
-      if (combo > maxCombo) maxCombo = combo;
-      const pts = diff <= 0.06 ? 1000 : 700;
-      score += pts;
-      addEffect(laneIndex, diff <= 0.06 ? 'PERFECT' : 'GREAT');
-      updateHUD();
-    }
-  }
+  document.getElementById('score').innerText = String(score).padStart(6, '0');
+  document.getElementById('combo').innerText = combo;
 }
 
 function addEffect(lane, text) {
   effects.push({
     x: lane * laneWidth + laneWidth / 2,
-    y: judgmentLineY - 20,
+    y: judgeLineY - 15,
     text: text,
     alpha: 1.0
   });
 }
 
+// 렌더링 프레임
 function gameLoop(timestamp) {
   if (!isPlaying) return;
 
-  ctx.clearRect(0, 0, containerWidth, containerHeight);
+  const currentTime = (timestamp - startTime) / 1000;
 
-  if (loadedImages.bg) {
-    ctx.drawImage(loadedImages.bg, 0, 0, containerWidth, containerHeight);
-  } else {
-    ctx.fillStyle = '#fff0f3';
-    ctx.fillRect(0, 0, containerWidth, containerHeight);
-  }
+  // 1. 화면 소거 (검은색)
+  ctx.fillStyle = '#050505';
+  ctx.fillRect(0, 0, width, height);
 
-  ctx.strokeStyle = 'rgba(255, 182, 193, 0.4)';
+  // 2. 레인 구분선 그리기
+  ctx.strokeStyle = '#220022';
   ctx.lineWidth = 2;
   for (let i = 1; i < 4; i++) {
     ctx.beginPath();
     ctx.moveTo(i * laneWidth, 0);
-    ctx.lineTo(i * laneWidth, containerHeight);
+    ctx.lineTo(i * laneWidth, height);
     ctx.stroke();
   }
 
-  ctx.strokeStyle = '#ff8fa3';
+  // 3. 판정선 그리기 (네온 핑크)
+  ctx.strokeStyle = '#ff69b4';
   ctx.lineWidth = 4;
   ctx.beginPath();
-  ctx.moveTo(0, judgmentLineY);
-  ctx.lineTo(containerWidth, judgmentLineY);
+  ctx.moveTo(0, judgeLineY);
+  ctx.lineTo(width, judgeLineY);
   ctx.stroke();
 
-  const fontStyle = 'DungGeunMo, monospace, sans-serif';
-
-  if (countdown > 0) {
-    ctx.fillStyle = '#ff8fa3';
-    ctx.font = `bold 65px ${fontStyle}`;
-    ctx.textAlign = 'center';
-    ctx.fillText(countdown, containerWidth / 2, containerHeight / 2);
-    requestAnimationFrame(gameLoop);
-    return;
-  }
-
-  const currentTime = (performance.now() - gameStartTime) / 1000;
-
-  liveNotes.forEach(note => {
+  // 4. 노트 처리 및 그리기
+  activeNotes.forEach(note => {
     if (note.hit) return;
 
     const timeDiff = note.time - currentTime;
-    const noteY = judgmentLineY - (timeDiff * speed);
-    const noteHeight = 25;
+    const noteY = judgeLineY - (timeDiff * NOTE_SPEED);
+    const noteHeight = 16;
 
-    if (timeDiff < -0.2 && !note.missed) {
+    // 미스 판정
+    if (timeDiff < -0.18 && !note.missed) {
       note.missed = true;
       combo = 0;
       addEffect(note.lane, 'MISS');
       updateHUD();
     }
 
-    if (noteY > -50 && noteY < containerHeight + 50 && !note.missed) {
-      const noteX = note.lane * laneWidth + 4;
-      const noteW = laneWidth - 8;
+    // 노트 출력
+    if (noteY > -20 && noteY < height + 20 && !note.missed) {
+      const x = note.lane * laneWidth + 6;
+      const w = laneWidth - 12;
 
-      if (loadedImages.notes[note.lane]) {
-        ctx.drawImage(loadedImages.notes[note.lane], noteX, noteY - noteHeight/2, noteW, noteHeight);
-      } else {
-        ctx.fillStyle = note.lane % 2 === 0 ? '#ff8fa3' : '#ffccd5';
-        ctx.beginPath();
-        ctx.roundRect(noteX, noteY - noteHeight/2, noteW, noteHeight, 6);
-        ctx.fill();
-      }
+      ctx.fillStyle = (note.lane === 0 || note.lane === 3) ? '#ff69b4' : '#ffd700';
+      ctx.fillRect(x, noteY - noteHeight / 2, w, noteHeight);
+      
+      ctx.strokeStyle = '#ffffff';
+      ctx.lineWidth = 1;
+      ctx.strokeRect(x, noteY - noteHeight / 2, w, noteHeight);
     }
   });
 
+  // 5. 판정 텍스트 연출
   for (let i = effects.length - 1; i >= 0; i--) {
     const eff = effects[i];
-    ctx.fillStyle = eff.text === 'MISS' ? `rgba(255, 99, 132, ${eff.alpha})` : `rgba(255, 143, 163, ${eff.alpha})`;
-    ctx.font = `bold 24px ${fontStyle}`;
+    ctx.fillStyle = eff.text === 'MISS' ? `rgba(255, 0, 0, ${eff.alpha})` : `rgba(255, 215, 0, ${eff.alpha})`;
+    ctx.font = '12px "Press Start 2P"';
     ctx.textAlign = 'center';
     ctx.fillText(eff.text, eff.x, eff.y);
 
     eff.y -= 1;
-    eff.alpha -= 0.03;
+    eff.alpha -= 0.04;
     if (eff.alpha <= 0) effects.splice(i, 1);
   }
 
-  const lastNoteTime = currentSong.notes[currentSong.notes.length - 1].time;
-  if (currentTime > lastNoteTime + 3.0) {
+  // 6. 게임 종료 체크 (노트가 모두 끝나고 2초 뒤)
+  const lastNote = SONG_PATTERN[SONG_PATTERN.length - 1];
+  if (currentTime > lastNote.time + 2.0) {
     endGame();
     return;
   }
@@ -650,62 +387,90 @@ function gameLoop(timestamp) {
   requestAnimationFrame(gameLoop);
 }
 
+// ==========================================
+// 4. 입력 및 판정
+// ==========================================
+function triggerInput(lane) {
+  if (!isPlaying) return;
+
+  const currentTime = (performance.now() - startTime) / 1000;
+  
+  playSound(300 + lane * 100, 'square', 0.05);
+
+  const target = activeNotes.find(n => n.lane === lane && !n.hit && !n.missed);
+
+  if (target) {
+    const diff = Math.abs(target.time - currentTime);
+    
+    if (diff <= 0.15) {
+      target.hit = true;
+      combo++;
+      if (combo > maxCombo) maxCombo = combo;
+      
+      const isPerfect = diff <= 0.07;
+      score += isPerfect ? 1000 : 500;
+      
+      addEffect(lane, isPerfect ? 'PERFECT' : 'GREAT');
+      playSound(isPerfect ? 800 : 600, 'triangle', 0.1);
+      updateHUD();
+    }
+  }
+}
+
 function endGame() {
   isPlaying = false;
   try {
-    bgmAudio.pause();
+    bgm.pause();
   } catch(e) {}
-  document.getElementById('result-score').innerText = `SCORE: ${score}`;
-  document.getElementById('result-combo').innerText = `MAX COMBO: ${maxCombo}`;
+  document.getElementById('final-score').innerText = `SCORE: ${score}`;
+  document.getElementById('final-combo').innerText = `MAX COMBO: ${maxCombo}`;
   document.getElementById('result-screen').classList.remove('hidden');
 }
 
 // ==========================================
-// 6. 이벤트 연결
+// 5. 키보드 & 터치 이벤트
 // ==========================================
-const keyMap = { 'd': 0, 'f': 1, 'j': 2, 'k': 3, '1': 0, '2': 1, '3': 2, '4': 3 };
+const keyMap = { 'd': 0, 'f': 1, 'j': 2, 'k': 3, 'D': 0, 'F': 1, 'J': 2, 'K': 3 };
 
 window.addEventListener('keydown', (e) => {
-  const lane = keyMap[e.key.toLowerCase()];
+  if (e.repeat) return;
+  const lane = keyMap[e.key];
   if (lane !== undefined) {
-    const pad = document.getElementById(`pad-${lane}`);
-    if (pad) pad.classList.add('active');
-    handleInput(lane);
+    document.getElementById(`pad-${lane}`)?.classList.add('active');
+    triggerInput(lane);
   }
 });
 
 window.addEventListener('keyup', (e) => {
-  const lane = keyMap[e.key.toLowerCase()];
+  const lane = keyMap[e.key];
   if (lane !== undefined) {
-    const pad = document.getElementById(`pad-${lane}`);
-    if (pad) pad.classList.remove('active');
+    document.getElementById(`pad-${lane}`)?.classList.remove('active');
   }
 });
 
 [0, 1, 2, 3].forEach(lane => {
   const pad = document.getElementById(`pad-${lane}`);
-  pad.addEventListener('touchstart', (e) => {
+  
+  const handleTouchStart = (e) => {
     e.preventDefault();
     pad.classList.add('active');
-    handleInput(lane);
-  });
-  pad.addEventListener('touchend', (e) => {
+    triggerInput(lane);
+  };
+  
+  const handleTouchEnd = (e) => {
     e.preventDefault();
     pad.classList.remove('active');
-  });
+  };
+
+  pad.addEventListener('touchstart', handleTouchStart);
+  pad.addEventListener('touchend', handleTouchEnd);
+  pad.addEventListener('mousedown', handleTouchStart);
+  pad.addEventListener('mouseup', handleTouchEnd);
 });
 
-// 시작 버튼 클릭 시 오디오 초기화와 함께 곡 선택 화면으로 전환
-document.getElementById('start-btn').addEventListener('click', () => {
-  initAudio();
-  showSelectScreen();
-});
-
-document.getElementById('retry-btn').addEventListener('click', () => {
-  if (currentSong) selectAndStartGame(currentSong);
-});
-
-document.getElementById('select-menu-btn').addEventListener('click', showSelectScreen);
+document.getElementById('start-btn').addEventListener('click', startGame);
+document.getElementById('retry-btn').addEventListener('click', startGame);
 </script>
+
 </body>
 </html>
