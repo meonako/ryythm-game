@@ -15,7 +15,6 @@
       padding: 0;
       user-select: none;
       -webkit-user-select: none;
-      font-family: 'Press Start 2P', cursive;
     }
 
     body {
@@ -26,6 +25,7 @@
       align-items: center;
       min-height: 100vh;
       overflow: hidden;
+      font-family: 'Press Start 2P', cursive;
     }
 
     #game-container {
@@ -99,6 +99,7 @@
       padding: 12px 20px;
       font-size: 1.0rem;
       cursor: pointer;
+      font-family: 'Press Start 2P', cursive;
     }
 
     .start-btn:active {
@@ -111,20 +112,19 @@
       margin-bottom: 25px;
     }
 
-    /* 박스 없는 심플한 곡 선택 텍스트 버튼 */
+    /* 곡 선택 버튼 크기 및 폰트 강제 고정 (한글/영문 크기 동일화) */
     .song-select-btn {
-  background-color: transparent;
-  color: #ffffff;
-  border: none;
-  font-family: 'Press Start 2P', sans-serif; /* 폰트 통일 */
-  font-size: 1.0rem;
-  cursor: pointer;
-  margin-bottom: 20px;
-  padding: 10px;
-  /* 한글이 깨지지 않고 영문과 크기가 비슷하게 보이도록 설정 */
-  word-break: keep-all;
-  transition: color 0.1s, transform 0.1s;
-}
+      background-color: transparent;
+      color: #ffffff;
+      border: none;
+      font-family: 'Press Start 2P', sans-serif;
+      font-size: 1.0rem;
+      cursor: pointer;
+      margin-bottom: 20px;
+      padding: 10px;
+      word-break: keep-all;
+      transition: color 0.1s, transform 0.1s;
+    }
 
     .song-select-btn:hover, .song-select-btn:active {
       color: #FF69C7;
@@ -150,7 +150,7 @@
       <button class="start-btn" onclick="goToSongSelect()">START GAME</button>
     </div>
 
-    <!-- 2단계: 곡 선택 화면 (박스 제거, 심플 흰색 텍스트 스타일) -->
+    <!-- 2단계: 곡 선택 화면 -->
     <div id="song-select-screen" class="screen hidden">
       <h1>SELECT SONG</h1>
       <h2>CHOOSE YOUR TRACK</h2>
@@ -185,20 +185,21 @@ let isBgLoaded = false;
 bgImage.onload = () => { isBgLoaded = true; };
 bgImage.src = './Cover.png';
 
-// 곡 설정 (각각 다른 음악 파일과 패턴 연결 가능)
+// 곡 설정 (각 곡별 배경 이미지와 음원 연결)
 const songs = {
   gossip: {
     src: './Gossip.mp3',
-    bg: './Cover.png', // Gossip 배경 이미지
+    bg: './Cover.png',
     pattern: generatePattern()
   },
-  떨리는 맘: {
-    src: './떨리는 맘.mp3', // 필요시 '떨리는 맘' 음원 파일명으로 변경하세요
-    bg: './Cover2.png', // Gossip 배경 이미지
+  trembling: {
+    src: './떨리는 맘.mp3',
+    bg: './Cover2.png', // 떨리는 맘 전용 배경 이미지
     pattern: generatePattern()
   }
 };
 
+let activeSongKey = 'gossip';
 let currentBgm = new Audio();
 const NOTE_SPEED = 550;
 
@@ -263,7 +264,7 @@ function startGame(songKey) {
   
   const selectedSong = songs[songKey];
   
-  // [추가] 곡별 배경 이미지 동적 로드
+  // 곡별 배경 이미지 동적 로드 적용
   isBgLoaded = false;
   bgImage.src = selectedSong.bg;
   bgImage.onload = () => { isBgLoaded = true; };
@@ -286,6 +287,7 @@ function startGame(songKey) {
   startTime = performance.now();
   requestAnimationFrame(gameLoop);
 }
+
 function updateHUD() {
   document.getElementById('score').innerText = String(score).padStart(6, '0');
   document.getElementById('combo').innerText = combo;
@@ -355,7 +357,7 @@ function gameLoop(timestamp) {
     if (noteY > -20 && noteY < height + 20 && !note.missed) {
       const x = note.lane * laneWidth + 6;
       const w = laneWidth - 12;
-      const mainColor = (note.lane === 0 || note.lane === 3) ? '##FDC7FB' : '#FD5DBD ';
+      const mainColor = (note.lane === 0 || note.lane === 3) ? '#FDC7FB' : '#FD5DBD';
 
       ctx.save();
       ctx.shadowColor = mainColor;
