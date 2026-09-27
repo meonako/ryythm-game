@@ -114,11 +114,12 @@
     /* 곡 선택 카드 스타일 */
     .song-card {
       border: 2px solid #FF69C7;
-      padding: 20px;
-      width: 80%;
-      max-width: 300px;
+      padding: 15px 20px;
+      width: 85%;
+      max-width: 320px;
       background: rgba(255, 105, 199, 0.05);
       cursor: pointer;
+      margin-bottom: 15px;
       transition: transform 0.1s, background 0.1s;
     }
 
@@ -139,18 +140,20 @@
   <div id="canvas-wrapper">
     <canvas id="gameCanvas"></canvas>
 
-    <!-- 1단계: 기존 시작 화면 -->
+    <!-- 1단계: 시작 화면 -->
     <div id="start-screen" class="screen">
       <h1>82 RHYTHM</h1>
       <h2>2026 WORK BY YUN</h2>
-      <button class="start-btn" onclick="showSongSelect()">START GAME</button>
+      <button class="start-btn" onclick="goToSongSelect()">START GAME</button>
     </div>
 
-    <!-- 2단계: 새로 추가된 곡 선택 화면 -->
+    <!-- 2단계: 곡 선택 화면 -->
     <div id="song-select-screen" class="screen hidden">
-      <h1 style="font-size: 1.5rem; margin-bottom: 30px;">SELECT SONG</h1>
+      <h1 style="font-size: 1.5rem; margin-bottom: 10px;">SELECT SONG</h1>
+      <h2 style="margin-bottom: 25px;">CHOOSE YOUR TRACK</h2>
+      
       <div class="song-card" onclick="startGame()">
-        <p style="color: #ffd700; font-size: 0.8rem; margin-bottom: 15px;">GOSSIP</p>
+        <p style="color: #ffd700; font-size: 0.75rem; margin-bottom: 8px;">1. GOSSIP</p>
         <p style="color: #fcd3f2; font-size: 0.5rem;">TAP TO PLAY</p>
       </div>
     </div>
@@ -231,13 +234,14 @@ let missCount = 0;
 let activeNotes = [];
 let effects = [];
 
-// 시작 화면 -> 곡 선택 화면으로 전환
-function showSongSelect() {
+// [시작 화면] -> [곡 선택 화면] 이동
+function goToSongSelect() {
   document.getElementById('start-screen').classList.add('hidden');
   document.getElementById('song-select-screen').classList.remove('hidden');
+  document.getElementById('result-screen').classList.add('hidden');
 }
 
-// 곡 선택 화면 -> 게임 시작
+// [곡 선택 화면] -> [게임 화면] 진입 및 플레이 시작
 function startGame() {
   score = 0;
   combo = 0;
@@ -249,6 +253,7 @@ function startGame() {
   
   activeNotes = SONG_PATTERN.map(n => ({ ...n, hit: false, missed: false }));
   
+  // 모든 오버레이 화면 숨기기 (게임 화면 진입)
   document.getElementById('start-screen').classList.add('hidden');
   document.getElementById('song-select-screen').classList.add('hidden');
   document.getElementById('result-screen').classList.add('hidden');
@@ -405,7 +410,7 @@ function endGame() {
       <p style="color:#ff4444;">MISS    : ${missCount}</p>
       <p style="color:#ffffff;">MAX COMBO : ${maxCombo}</p>
     </div>
-    <div><button class="start-btn" onclick="showSongSelect()">SELECT SONG</button></div>
+    <div><button class="start-btn" onclick="goToSongSelect()">SELECT SONG</button></div>
   `;
   resultScreen.classList.remove('hidden');
 }
