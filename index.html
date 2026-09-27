@@ -4,7 +4,6 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>82 Rhythm</title>
-  <!-- 레트로 픽셀 폰트 로드 -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
@@ -26,7 +25,6 @@
       justify-content: center;
       align-items: center;
       min-height: 100vh;
-      min-height: 100dvh;
       overflow: hidden;
     }
 
@@ -35,7 +33,6 @@
       width: 100%;
       max-width: 430px;
       height: 100vh;
-      height: 100dvh;
       background-color: #000000;
       display: flex;
       flex-direction: column;
@@ -82,7 +79,7 @@
       align-items: center;
       text-align: center;
       padding: 20px;
-      z-index: 10;
+      z-index: 999; /* 화면이 무조건 맨 위에 오도록 설정 */
     }
 
     .hidden { display: none !important; }
@@ -92,18 +89,16 @@
       font-size: 2.0rem;
       margin-bottom: 15px;
       line-height: 1.5;
-      -webkit-text-stroke: 1px #000000;
       text-shadow: 3px 3px #FF69C7;
     }
 
     .start-btn {
       background-color: transparent;
       color: #ffffff;
-      border: none;
+      border: 2px solid #ffffff;
       padding: 12px 20px;
       font-size: 1.0rem;
       cursor: pointer;
-      transition: transform 0.1s;
     }
 
     .start-btn:active {
@@ -114,7 +109,6 @@
       color: #ffffff;
       font-size: 0.75rem;
       margin-bottom: 25px;
-      text-shadow: none;
     }
   </style>
 </head>
@@ -129,10 +123,11 @@
   <div id="canvas-wrapper">
     <canvas id="gameCanvas"></canvas>
 
+    <!-- ★ onclick을 직접 박아서 버튼 인식이 안 될 수가 없게 만듦 -->
     <div id="start-screen" class="screen">
       <h1>82 RHYTHM</h1>
       <h2>2026 WORK BY YUN</h2>
-      <button class="start-btn" id="start-btn">START GAME</button>
+      <button class="start-btn" onclick="startGame()">START GAME</button>
     </div>
 
     <div id="result-screen" class="screen hidden"></div>
@@ -155,19 +150,14 @@ function resize() {
 window.addEventListener('resize', resize);
 resize();
 
-// 배경 이미지 로드 (없어도 에러 안 나게 처리)
 const bgImage = new Image();
 let isBgLoaded = false;
 bgImage.onload = () => { isBgLoaded = true; };
-bgImage.onerror = () => { console.warn("Cover.png를 찾을 수 없습니다. 검은색 배경으로 실행합니다."); };
 bgImage.src = './Cover.png';
 
-// 오디오 설정 (없어도 에러 안 나게 처리)
 const bgm = new Audio();
-bgm.onerror = () => { console.warn("Gossip.mp3를 찾을 수 없습니다. 음악 없이 실행합니다."); };
 bgm.src = './Gossip.mp3';
 
-// 채보 데이터 생성
 const NOTE_SPEED = 550;
 
 function generatePattern() {
@@ -215,40 +205,32 @@ let missCount = 0;
 let activeNotes = [];
 let effects = [];
 
+// ★ 무조건 실행되는 시작 함수
 function startGame() {
-  try {
-    score = 0;
-    combo = 0;
-    maxCombo = 0;
-    perfectCount = 0;
-    greatCount = 0;
-    missCount = 0;
-    effects = [];
-    
-    activeNotes = SONG_PATTERN.map(n => ({ ...n, hit: false, missed: false }));
-    
-    document.getElementById('start-screen').classList.add('hidden');
-    document.getElementById('result-screen').classList.add('hidden');
+  score = 0;
+  combo = 0;
+  maxCombo = 0;
+  perfectCount = 0;
+  greatCount = 0;
+  missCount = 0;
+  effects = [];
+  
+  activeNotes = SONG_PATTERN.map(n => ({ ...n, hit: false, missed: false }));
+  
+  // 화면 강제 숨기기
+  document.getElementById('start-screen').classList.add('hidden');
+  document.getElementById('result-screen').classList.add('hidden');
 
-    if (document.getElementById('score')) {
-      document.getElementById('score').innerText = '000000';
-      document.getElementById('combo').innerText = '0';
-    }
+  document.getElementById('score').innerText = '000000';
+  document.getElementById('combo').innerText = '0';
 
-    bgm.currentTime = 0;
-    bgm.play().catch(err => {
-      console.warn("오디오 재생 건너뜀:", err);
-    });
+  bgm.currentTime = 0;
+  bgm.play().catch(err => console.log(err));
+  bgm.onended = () => { endGame(); };
 
-    bgm.onended = () => { endGame(); };
-
-    isPlaying = true;
-    startTime = performance.now();
-    requestAnimationFrame(gameLoop);
-  } catch (e) {
-    console.error("게임 시작 중 오류 발생:", e);
-    alert("게임 시작 중 에러가 발생했습니다. F12 콘솔을 확인해주세요.");
-  }
+  isPlaying = true;
+  startTime = performance.now();
+  requestAnimationFrame(gameLoop);
 }
 
 function updateHUD() {
@@ -326,23 +308,8 @@ function gameLoop(timestamp) {
       ctx.shadowColor = mainColor;
       ctx.shadowBlur = 15;
 
-      const gradient = ctx.createLinearGradient(x, noteY - noteHeight / 2, x, noteY + noteHeight / 2);
-      gradient.addColorStop(0, '#ffffff');
-      gradient.addColorStop(0.3, mainColor);
-      gradient.addColorStop(1, '#111111');
-
-      ctx.fillStyle = gradient;
-
-      ctx.beginPath();
-      if (ctx.roundRect) {
-        ctx.roundRect(x, noteY - noteHeight / 2, w, noteHeight, 4);
-      } else {
-        ctx.fillRect(x, noteY - noteHeight / 2, w, noteHeight);
-      }
-      ctx.fill();
-
-      ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
-      ctx.fillRect(x + 4, noteY - 2, w - 8, 3);
+      ctx.fillStyle = mainColor;
+      ctx.fillRect(x, noteY - noteHeight / 2, w, noteHeight);
 
       ctx.restore();
     }
@@ -397,28 +364,17 @@ function endGame() {
   isPlaying = false;
   try { bgm.pause(); } catch(e) {}
 
-  const totalNotes = SONG_PATTERN.length;
-  let rank = 'F', message = 'KEEP TRYING!', rankColor = '#ff4444';
-
-  if (perfectCount === totalNotes) { rank = 'S'; message = 'ALL PERFECT!!'; rankColor = '#ffd700'; }
-  else if (missCount === 0) { rank = 'S'; message = 'GREAT JOB! NO MISS!'; rankColor = '#ffd700'; }
-  else if (missCount <= 5) { rank = 'A'; message = 'EXCELLENT!'; rankColor = '#fcd3f2'; }
-  else if (missCount <= 12) { rank = 'B'; message = 'NICE CLEAR!'; rankColor = '#00ffff'; }
-
   const resultScreen = document.getElementById('result-screen');
   resultScreen.innerHTML = `
-    <div style="color: #ffffff; font-size: 4.5rem; margin-bottom: 10px; text-shadow: 0 0 15px ${rankColor};">${rank}</div>
-    <p style="color: #ffffff; font-size: 0.55rem; margin-bottom: 25px;">"${message}"</p>
-    <div style="font-size: 0.65rem; line-height: 2.2; margin-bottom: 30px; text-align: left; display: inline-block;">
+    <div style="color: #ffffff; font-size: 3.5rem; margin-bottom: 10px;">CLEAR!</div>
+    <div style="font-size: 0.65rem; line-height: 2.2; margin-bottom: 30px;">
       <p style="color:#ffd700;">PERFECT : ${perfectCount}</p>
       <p style="color:#fcd3f2;">GREAT   : ${greatCount}</p>
       <p style="color:#ff4444;">MISS    : ${missCount}</p>
-      <p style="color:#ffffff; border-top: 1px solid #444; margin-top: 8px; padding-top: 8px;">MAX COMBO : ${maxCombo}</p>
+      <p style="color:#ffffff;">MAX COMBO : ${maxCombo}</p>
     </div>
-    <div><button class="start-btn" id="retry-btn">RETRY</button></div>
+    <div><button class="start-btn" onclick="startGame()">RETRY</button></div>
   `;
-
-  document.getElementById('retry-btn').addEventListener('click', startGame);
   resultScreen.classList.remove('hidden');
 }
 
@@ -429,18 +385,20 @@ window.addEventListener('keydown', (e) => {
   if (lane !== undefined) triggerInput(lane);
 });
 
-function handlePointerDown(e) {
+canvas.addEventListener('touchstart', (e) => {
   if (!isPlaying) return;
   e.preventDefault();
   const rect = canvas.getBoundingClientRect();
-  const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-  const lane = Math.floor((clientX - rect.left) / laneWidth);
+  const lane = Math.floor((e.touches[0].clientX - rect.left) / laneWidth);
   if (lane >= 0 && lane < 4) triggerInput(lane);
-}
+}, { passive: false });
 
-canvas.addEventListener('touchstart', handlePointerDown, { passive: false });
-canvas.addEventListener('mousedown', handlePointerDown);
-document.getElementById('start-btn').addEventListener('click', startGame);
+canvas.addEventListener('mousedown', (e) => {
+  if (!isPlaying) return;
+  const rect = canvas.getBoundingClientRect();
+  const lane = Math.floor((e.clientX - rect.left) / laneWidth);
+  if (lane >= 0 && lane < 4) triggerInput(lane);
+});
 </script>
 
 </body>
