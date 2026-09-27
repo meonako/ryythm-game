@@ -5,8 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>모바일 4레인 리듬게임</title>
   
-  <!-- 둥근모꼴 웹폰트 불러오기 -->
-  <link href="https://fonts.googleapis.com/css2?family=DungGeunMo&display=swap" rel="stylesheet">
+  <!-- 둥근모꼴 폰트 CDN (확실하게 호환되는 주소로 변경) -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2001@1.1/NeoDunggeunmo.css">
 
   <style>
     * {
@@ -22,9 +22,9 @@
       width: 100%;
       height: 100%;
       overflow: hidden;
-      background-color: #111;
-      font-family: 'DungGeunMo', sans-serif; /* 둥근모꼴 적용 */
-      color: #fff;
+      background-color: #ffe3e8;
+      font-family: 'NeoDunggeunmo', sans-serif; /* 둥근모꼴 확실한 폰트명 */
+      color: #4a4a4a;
     }
 
     #game-container {
@@ -33,10 +33,11 @@
       max-width: 450px;
       height: 100%;
       margin: 0 auto;
-      background: #1a1a24;
+      background: linear-gradient(180deg, #fff5f7 0%, #ffe3e8 100%); /* 밝은 파스텔 핑크 배경 */
       display: flex;
       flex-direction: column;
       overflow: hidden;
+      box-shadow: 0 0 20px rgba(255, 182, 193, 0.5);
     }
 
     canvas {
@@ -52,36 +53,36 @@
       flex-direction: column;
       justify-content: center;
       align-items: center;
-      background: rgba(15, 15, 25, 0.94);
+      background: rgba(255, 245, 247, 0.92); /* 밝은 반투명 배경 */
       z-index: 10;
       padding: 20px;
     }
 
     .hidden { display: none !important; }
 
-    /* 네온 핑크 타이틀 */
+    /* 베이비 핑크 타이틀 */
     h1 { 
       font-size: 2.2rem; 
-      color: #ff007f; 
+      color: #ff8fa3; 
       margin-bottom: 15px; 
-      text-shadow: 0 0 12px #ff007f, 0 0 20px #ff007f; 
+      text-shadow: 0 0 10px rgba(255, 143, 163, 0.4); 
       letter-spacing: 1px;
     }
 
-    p { margin-bottom: 15px; color: #ccc; font-size: 1rem; text-align: center; }
+    p { margin-bottom: 15px; color: #666; font-size: 1rem; text-align: center; }
 
-    /* 네온 핑크 버튼 스타일 */
+    /* 베이비 핑크 버튼 스타일 */
     .btn {
-      background: linear-gradient(135deg, #ff007f, #7000ff);
+      background: linear-gradient(135deg, #ffb6c1, #ff8fa3);
       color: white;
       border: none;
       padding: 16px 36px;
       font-size: 1.2rem;
       font-weight: bold;
-      font-family: 'DungGeunMo', sans-serif;
+      font-family: 'NeoDunggeunmo', sans-serif;
       border-radius: 30px;
       cursor: pointer;
-      box-shadow: 0 0 15px rgba(255, 0, 127, 0.5);
+      box-shadow: 0 4px 15px rgba(255, 143, 163, 0.4);
       margin: 10px;
       transition: transform 0.1s;
     }
@@ -103,20 +104,21 @@
     }
 
     .song-card {
-      background: rgba(255, 255, 255, 0.08);
-      border: 1px solid rgba(255, 0, 127, 0.4);
-      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.8);
+      border: 2px solid #ffccd5;
+      border-radius: 16px;
       padding: 15px;
       display: flex;
       justify-content: space-between;
       align-items: center;
       cursor: pointer;
       transition: all 0.2s ease;
+      box-shadow: 0 2px 8px rgba(255, 182, 193, 0.2);
     }
 
     .song-card:active {
-      background: rgba(255, 0, 127, 0.25);
-      border-color: #ff007f;
+      background: #ffe3e8;
+      border-color: #ff8fa3;
       transform: scale(0.98);
     }
 
@@ -126,22 +128,22 @@
 
     .song-title {
       font-size: 1.2rem;
-      color: #fff;
+      color: #4a4a4a;
     }
 
     .song-artist {
       font-size: 0.9rem;
-      color: #aaa;
+      color: #888;
       margin-top: 4px;
     }
 
     .song-play-btn {
-      background: #ff007f;
+      background: #ff8fa3;
       color: #fff;
       padding: 8px 16px;
       border-radius: 15px;
       font-size: 0.95rem;
-      box-shadow: 0 0 8px rgba(255, 0, 127, 0.6);
+      box-shadow: 0 2px 6px rgba(255, 143, 163, 0.4);
     }
 
     #hud {
@@ -155,8 +157,8 @@
       pointer-events: none;
     }
 
-    #score-display { color: #fff; }
-    #combo-display { color: #ff007f; font-size: 1.4rem; text-shadow: 0 0 8px #ff007f; }
+    #score-display { color: #555; }
+    #combo-display { color: #ff8fa3; font-size: 1.4rem; text-shadow: 0 0 6px rgba(255, 143, 163, 0.3); }
 
     #touch-controls {
       position: absolute;
@@ -167,19 +169,20 @@
 
     .touch-pad {
       flex: 1;
-      border-top: 2px solid rgba(255,255,255,0.3);
-      border-right: 1px solid rgba(255,255,255,0.1);
-      background: rgba(255,255,255,0.05);
+      border-top: 2px solid rgba(255, 182, 193, 0.5);
+      border-right: 1px solid rgba(255, 182, 193, 0.3);
+      background: rgba(255, 255, 255, 0.3);
       display: flex;
       justify-content: center;
       align-items: center;
       font-size: 1.3rem;
-      color: rgba(255,255,255,0.6);
-      font-family: 'DungGeunMo', sans-serif;
+      color: #888;
+      font-family: 'NeoDunggeunmo', sans-serif;
     }
 
     .touch-pad:active, .touch-pad.active {
-      background: rgba(255, 0, 127, 0.3);
+      background: rgba(255, 182, 193, 0.5);
+      color: #ff4d6d;
     }
   </style>
 </head>
@@ -205,7 +208,6 @@
     <h1>4-LANE RHYTHM</h1>
     <p>모바일 터치 또는 키보드 (D, F, J, K)로 플레이하세요.</p>
     
-    <!-- 원래 CSS 전용 게임 시작 버튼으로 원복 -->
     <button class="btn" id="start-btn">GAME START</button>
   </div>
 
@@ -222,11 +224,11 @@
   <!-- 3. 결과 화면 -->
   <div id="result-screen" class="screen hidden">
     <h1>CLEAR!</h1>
-    <p id="result-score" style="font-size: 1.5rem; color:#fff;"></p>
-    <p id="result-combo" style="color:#ff007f; text-shadow: 0 0 8px #ff007f;"></p>
+    <p id="result-score" style="font-size: 1.5rem; color:#4a4a4a;"></p>
+    <p id="result-combo" style="color:#ff8fa3;"></p>
     <div style="display: flex; gap: 10px; margin-top: 10px;">
       <button class="btn" id="retry-btn">다시하기</button>
-      <button class="btn" id="select-menu-btn" style="background: linear-gradient(135deg, #444, #888); box-shadow: none;">곡 선택</button>
+      <button class="btn" id="select-menu-btn" style="background: linear-gradient(135deg, #ccc, #aaa); box-shadow: none;">곡 선택</button>
     </div>
   </div>
 </div>
@@ -536,15 +538,16 @@ function gameLoop(timestamp) {
 
   ctx.clearRect(0, 0, containerWidth, containerHeight);
 
+  // 배경 (이미지 없으면 파스텔 핑크 밝은 톤)
   if (loadedImages.bg) {
     ctx.drawImage(loadedImages.bg, 0, 0, containerWidth, containerHeight);
   } else {
-    ctx.fillStyle = '#11111d';
+    ctx.fillStyle = '#fff0f3';
     ctx.fillRect(0, 0, containerWidth, containerHeight);
   }
 
-  // 레인 구분선
-  ctx.strokeStyle = 'rgba(255, 255, 255, 0.15)';
+  // 레인 구분선 (은은하게)
+  ctx.strokeStyle = 'rgba(255, 182, 193, 0.4)';
   ctx.lineWidth = 2;
   for (let i = 1; i < 4; i++) {
     ctx.beginPath();
@@ -553,18 +556,18 @@ function gameLoop(timestamp) {
     ctx.stroke();
   }
 
-  // 판정선 (네온 핑크 테두리)
-  ctx.strokeStyle = '#ff007f';
+  // 판정선 (베이비 핑크)
+  ctx.strokeStyle = '#ff8fa3';
   ctx.lineWidth = 4;
   ctx.beginPath();
   ctx.moveTo(0, judgmentLineY);
   ctx.lineTo(containerWidth, judgmentLineY);
   ctx.stroke();
 
-  // 카운트다운 (둥근모꼴 폰트 적용)
+  // 카운트다운 (NeoDunggeunmo 폰트 적용)
   if (countdown > 0) {
-    ctx.fillStyle = '#ff007f';
-    ctx.font = 'bold 65px DungGeunMo';
+    ctx.fillStyle = '#ff8fa3';
+    ctx.font = 'bold 65px NeoDunggeunmo';
     ctx.textAlign = 'center';
     ctx.fillText(countdown, containerWidth / 2, containerHeight / 2);
     requestAnimationFrame(gameLoop);
@@ -594,7 +597,7 @@ function gameLoop(timestamp) {
       if (loadedImages.notes[note.lane]) {
         ctx.drawImage(loadedImages.notes[note.lane], noteX, noteY - noteHeight/2, noteW, noteHeight);
       } else {
-        ctx.fillStyle = note.lane % 2 === 0 ? '#ff007f' : '#00f0ff';
+        ctx.fillStyle = note.lane % 2 === 0 ? '#ff8fa3' : '#ffccd5';
         ctx.beginPath();
         ctx.roundRect(noteX, noteY - noteHeight/2, noteW, noteHeight, 6);
         ctx.fill();
@@ -602,11 +605,11 @@ function gameLoop(timestamp) {
     }
   });
 
-  // 판정 이펙트 텍스트 (둥근모꼴 폰트 적용)
+  // 판정 이펙트 텍스트 (NeoDunggeunmo 폰트 적용)
   for (let i = effects.length - 1; i >= 0; i--) {
     const eff = effects[i];
-    ctx.fillStyle = eff.text === 'MISS' ? `rgba(255, 0, 0, ${eff.alpha})` : `rgba(255, 0, 127, ${eff.alpha})`;
-    ctx.font = 'bold 24px DungGeunMo';
+    ctx.fillStyle = eff.text === 'MISS' ? `rgba(255, 99, 132, ${eff.alpha})` : `rgba(255, 143, 163, ${eff.alpha})`;
+    ctx.font = 'bold 24px NeoDunggeunmo';
     ctx.textAlign = 'center';
     ctx.fillText(eff.text, eff.x, eff.y);
 
