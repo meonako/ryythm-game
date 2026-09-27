@@ -5,17 +5,12 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>모바일 4레인 리듬게임</title>
   
-  <!-- Google Fonts 공식 CDN으로 변경 (DungGeunMo) -->
+  <!-- Google Fonts 공식 CDN (DungGeunMo) -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DungGeunMo&display=swap" rel="stylesheet">
 
   <style>
-    /* 폰트 정의 및 적용 */
-    @font-family {
-      font-family: 'DungGeunMo';
-    }
-
     * {
       box-sizing: border-box;
       margin: 0;
@@ -30,8 +25,7 @@
       height: 100%;
       overflow: hidden;
       background-color: #ffe3e8;
-      /* 둥근모 폰트 적용 + 대체 폰트 지정 */
-      font-family: 'DungGeunMo', 'Galmuri11', 'Courier New', monospace, sans-serif !important;
+      font-family: 'DungGeunMo', monospace, sans-serif !important;
       color: #4a4a4a;
     }
 
@@ -70,7 +64,6 @@
 
     .hidden { display: none !important; }
 
-    /* 베이비 핑크 타이틀 */
     h1 { 
       font-family: 'DungGeunMo', monospace, sans-serif;
       font-size: 2.2rem; 
@@ -88,7 +81,6 @@
       text-align: center; 
     }
 
-    /* 베이비 핑크 버튼 스타일 */
     .btn {
       background: linear-gradient(135deg, #ffb6c1, #ff8fa3);
       color: white;
@@ -236,7 +228,6 @@
   <div id="start-screen" class="screen">
     <h1>4-LANE RHYTHM</h1>
     <p>모바일 터치 또는 키보드 (D, F, J, K)로 플레이하세요.</p>
-    
     <button class="btn" id="start-btn">GAME START</button>
   </div>
 
@@ -244,10 +235,7 @@
   <div id="select-screen" class="screen hidden">
     <h1>SELECT MUSIC</h1>
     <p>플레이할 곡을 선택하세요.</p>
-    
-    <div class="song-list" id="song-list-container">
-      <!-- JavaScript로 동적 생성됨 -->
-    </div>
+    <div class="song-list" id="song-list-container"></div>
   </div>
 
   <!-- 3. 결과 화면 -->
@@ -263,11 +251,6 @@
 </div>
 
 <script>
-// 웹폰트 로딩 대기 처리
-document.fonts.ready.then(() => {
-  console.log("DungGeunMo 폰트 로드 완료");
-});
-
 // ==========================================
 // 1. 이미지 에셋 설정
 // ==========================================
@@ -282,7 +265,7 @@ const IMAGE_ASSETS = {
 };
 
 // ==========================================
-// 2. 곡 데이터 (수정된 싱크 반영)
+// 2. 곡 데이터
 // ==========================================
 const SONGS = [
   {
@@ -378,6 +361,7 @@ let currentSong = null;
 let isPlaying = false;
 let gameStartTime = 0;
 let countdown = 3;
+let countInterval = null;
 
 let score = 0;
 let combo = 0;
@@ -414,9 +398,12 @@ resizeCanvas();
 
 function initAudio() {
   if (!audioCtx) {
-    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+    if (AudioContextClass) {
+      audioCtx = new AudioContextClass();
+    }
   }
-  if (audioCtx.state === 'suspended') {
+  if (audioCtx && audioCtx.state === 'suspended') {
     audioCtx.resume();
   }
 }
@@ -470,13 +457,19 @@ function showSelectScreen() {
 }
 
 // ==========================================
-// 5. 게임 시작 및 메인 루프
+// 5. 게임 시작 및 예외 처리 강화
 // ==========================================
 function selectAndStartGame(song) {
   initAudio();
   currentSong = song;
 
-  bgmAudio.pause();
+  // 기존 카운트다운 타이머가 있다면 초기화
+  if (countInterval) clearInterval(countInterval);
+
+  try {
+    bgmAudio.pause();
+  } catch(e) {}
+
   if (song.audioPath) {
     bgmAudio.src = song.audioPath;
     bgmAudio.load();
@@ -506,7 +499,7 @@ function selectAndStartGame(song) {
   isPlaying = true;
   countdown = 3;
 
-  const countInterval = setInterval(() => {
+  countInterval = setInterval(() => {
     countdown--;
     if (countdown > 0) {
       playBeep(600, 'sine', 0.1);
@@ -519,7 +512,7 @@ function selectAndStartGame(song) {
         const playPromise = bgmAudio.play();
         if (playPromise !== undefined) {
           playPromise.catch(error => {
-            console.warn("오디오 재생 오류:", error);
+            console.warn("음원 재생 거부됨(무음 플레이 진행):", error);
           });
         }
       }
@@ -571,7 +564,6 @@ function gameLoop(timestamp) {
 
   ctx.clearRect(0, 0, containerWidth, containerHeight);
 
-  // 배경 렌더링
   if (loadedImages.bg) {
     ctx.drawImage(loadedImages.bg, 0, 0, containerWidth, containerHeight);
   } else {
@@ -579,7 +571,6 @@ function gameLoop(timestamp) {
     ctx.fillRect(0, 0, containerWidth, containerHeight);
   }
 
-  // 레인 구분을 위한 가이드 라인
   ctx.strokeStyle = 'rgba(255, 182, 193, 0.4)';
   ctx.lineWidth = 2;
   for (let i = 1; i < 4; i++) {
@@ -589,7 +580,6 @@ function gameLoop(timestamp) {
     ctx.stroke();
   }
 
-  // 판정선
   ctx.strokeStyle = '#ff8fa3';
   ctx.lineWidth = 4;
   ctx.beginPath();
@@ -597,10 +587,8 @@ function gameLoop(timestamp) {
   ctx.lineTo(containerWidth, judgmentLineY);
   ctx.stroke();
 
-  // 캔버스 내 DungGeunMo 폰트 명시적 지정
   const fontStyle = 'DungGeunMo, monospace, sans-serif';
 
-  // 카운트다운
   if (countdown > 0) {
     ctx.fillStyle = '#ff8fa3';
     ctx.font = `bold 65px ${fontStyle}`;
@@ -612,7 +600,6 @@ function gameLoop(timestamp) {
 
   const currentTime = (performance.now() - gameStartTime) / 1000;
 
-  // 노트 그리기
   liveNotes.forEach(note => {
     if (note.hit) return;
 
@@ -642,7 +629,6 @@ function gameLoop(timestamp) {
     }
   });
 
-  // 판정 텍스트 렌더링
   for (let i = effects.length - 1; i >= 0; i--) {
     const eff = effects[i];
     ctx.fillStyle = eff.text === 'MISS' ? `rgba(255, 99, 132, ${eff.alpha})` : `rgba(255, 143, 163, ${eff.alpha})`;
@@ -675,7 +661,7 @@ function endGame() {
 }
 
 // ==========================================
-// 6. 키보드 & 터치 입력 이벤트
+// 6. 이벤트 연결
 // ==========================================
 const keyMap = { 'd': 0, 'f': 1, 'j': 2, 'k': 3, '1': 0, '2': 1, '3': 2, '4': 3 };
 
@@ -709,11 +695,16 @@ window.addEventListener('keyup', (e) => {
   });
 });
 
-// 버튼 연결
-document.getElementById('start-btn').addEventListener('click', showSelectScreen);
+// 시작 버튼 클릭 시 오디오 초기화와 함께 곡 선택 화면으로 전환
+document.getElementById('start-btn').addEventListener('click', () => {
+  initAudio();
+  showSelectScreen();
+});
+
 document.getElementById('retry-btn').addEventListener('click', () => {
   if (currentSong) selectAndStartGame(currentSong);
 });
+
 document.getElementById('select-menu-btn').addEventListener('click', showSelectScreen);
 </script>
 </body>
