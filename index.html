@@ -48,27 +48,86 @@
       flex-direction: column;
       justify-content: center;
       align-items: center;
-      background: rgba(15, 15, 25, 0.92);
+      background: rgba(15, 15, 25, 0.94);
       z-index: 10;
       padding: 20px;
     }
 
     .hidden { display: none !important; }
 
-    h1 { font-size: 2rem; color: #00f0ff; margin-bottom: 20px; text-shadow: 0 0 10px #00f0ff; }
+    h1 { font-size: 2rem; color: #00f0ff; margin-bottom: 15px; text-shadow: 0 0 10px #00f0ff; }
     p { margin-bottom: 15px; color: #ccc; font-size: 0.95rem; text-align: center; }
 
     .btn {
       background: linear-gradient(135deg, #00f0ff, #7000ff);
       color: white;
       border: none;
-      padding: 15px 35px;
-      font-size: 1.2rem;
+      padding: 14px 30px;
+      font-size: 1.1rem;
       font-weight: bold;
       border-radius: 30px;
       cursor: pointer;
       box-shadow: 0 0 15px rgba(0,240,255,0.4);
       margin: 8px;
+    }
+
+    .btn:active {
+      transform: scale(0.96);
+    }
+
+    /* 곡 선택 카드 스타일 */
+    .song-list {
+      width: 100%;
+      max-height: 60%;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin: 15px 0;
+      padding: 5px;
+    }
+
+    .song-card {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(0, 240, 255, 0.3);
+      border-radius: 12px;
+      padding: 15px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .song-card:active {
+      background: rgba(0, 240, 255, 0.25);
+      border-color: #00f0ff;
+      transform: scale(0.98);
+    }
+
+    .song-info {
+      text-align: left;
+    }
+
+    .song-title {
+      font-size: 1.1rem;
+      font-weight: bold;
+      color: #fff;
+    }
+
+    .song-artist {
+      font-size: 0.85rem;
+      color: #aaa;
+      margin-top: 3px;
+    }
+
+    .song-play-btn {
+      background: #00f0ff;
+      color: #000;
+      font-weight: bold;
+      padding: 6px 14px;
+      border-radius: 15px;
+      font-size: 0.85rem;
     }
 
     #hud {
@@ -132,7 +191,7 @@
     <div class="touch-pad" id="pad-3">K</div>
   </div>
 
-  <!-- 메인 대기 화면 -->
+  <!-- 1. 메인 대기 화면 -->
   <div id="start-screen" class="screen">
     <h1>4-LANE RHYTHM</h1>
     <p>모바일 터치 또는 키보드 (D, F, J, K)로 플레이하세요.</p>
@@ -144,22 +203,34 @@
     <button class="btn" id="start-btn-fallback" style="display: none;">GAME START</button>
   </div>
 
-  <!-- 결과 화면 -->
+  <!-- 2. 곡 선택 화면 -->
+  <div id="select-screen" class="screen hidden">
+    <h1>SELECT MUSIC</h1>
+    <p>플레이할 곡을 선택하세요.</p>
+    
+    <div class="song-list" id="song-list-container">
+      <!-- JavaScript로 동적 생성됨 -->
+    </div>
+  </div>
+
+  <!-- 3. 결과 화면 -->
   <div id="result-screen" class="screen hidden">
     <h1>CLEAR!</h1>
     <p id="result-score" style="font-size: 1.5rem; color:#fff;"></p>
     <p id="result-combo" style="color:#ff007f;"></p>
-    <button class="btn" id="retry-btn">RETRY</button>
+    <div style="display: flex; gap: 10px; margin-top: 10px;">
+      <button class="btn" id="retry-btn">다시하기</button>
+      <button class="btn" id="select-menu-btn" style="background: linear-gradient(135deg, #444, #888);">곡 선택</button>
+    </div>
   </div>
 </div>
 
 <script>
 // ==========================================
-// 1. 에셋 경로 설정 (최상위 파일 경로로 복원)
+// 1. 이미지 에셋 설정
 // ==========================================
-const ASSETS_CONFIG = {
-  bg: './images/bg.jpg', 
-  audio: './Gossip.mp3', // 최상위에 배치된 mp3 경로
+const IMAGE_ASSETS = {
+  bg: './images/bg.jpg',
   notes: [
     './assets/note_red.png',
     './assets/note_blue.png',
@@ -169,67 +240,86 @@ const ASSETS_CONFIG = {
 };
 
 // ==========================================
-// 2. 82MAJOR - Gossip (1분 33초 맞춤 채보 데이터)
+// 2. 다중 음악 및 채보 데이터 베이스 (SONGS)
 // ==========================================
-const DEMO_SONG = {
-  bpm: 125,
-  notes: [
-    // [0 ~ 10초: Intro]
-    { time: 2.0, lane: 0 }, { time: 2.5, lane: 1 }, { time: 3.0, lane: 2 }, { time: 3.5, lane: 3 },
-    { time: 4.0, lane: 1 }, { time: 4.0, lane: 2 }, { time: 4.5, lane: 0 }, { time: 5.0, lane: 3 },
-    { time: 6.0, lane: 0 }, { time: 6.5, lane: 1 }, { time: 7.0, lane: 2 }, { time: 7.5, lane: 3 },
-    { time: 8.0, lane: 0 }, { time: 8.0, lane: 3 }, { time: 8.5, lane: 1 }, { time: 9.0, lane: 2 },
+const SONGS = [
+  {
+    id: 'gossip',
+    title: 'Gossip',
+    artist: '82MAJOR',
+    audioPath: './Gossip.mp3',
+    bpm: 125,
+    notes: [
+      // [0 ~ 10초: Intro]
+      { time: 2.0, lane: 0 }, { time: 2.5, lane: 1 }, { time: 3.0, lane: 2 }, { time: 3.5, lane: 3 },
+      { time: 4.0, lane: 1 }, { time: 4.0, lane: 2 }, { time: 4.5, lane: 0 }, { time: 5.0, lane: 3 },
+      { time: 6.0, lane: 0 }, { time: 6.5, lane: 1 }, { time: 7.0, lane: 2 }, { time: 7.5, lane: 3 },
+      { time: 8.0, lane: 0 }, { time: 8.0, lane: 3 }, { time: 8.5, lane: 1 }, { time: 9.0, lane: 2 },
 
-    // [10 ~ 22초: Verse 1]
-    { time: 10.0, lane: 0 }, { time: 10.4, lane: 1 }, { time: 10.8, lane: 2 }, { time: 11.2, lane: 3 },
-    { time: 12.0, lane: 1 }, { time: 12.4, lane: 2 }, { time: 13.0, lane: 0 }, { time: 13.5, lane: 3 },
-    { time: 14.0, lane: 1 }, { time: 14.4, lane: 0 }, { time: 14.8, lane: 2 }, { time: 15.2, lane: 3 },
-    { time: 16.0, lane: 0 }, { time: 16.0, lane: 2 }, { time: 16.5, lane: 1 }, { time: 17.0, lane: 3 },
-    { time: 18.0, lane: 0 }, { time: 18.5, lane: 1 }, { time: 19.0, lane: 2 }, { time: 19.5, lane: 3 },
-    { time: 20.0, lane: 0 }, { time: 20.0, lane: 3 }, { time: 21.0, lane: 1 }, { time: 21.5, lane: 2 },
+      // [10 ~ 22초: Verse 1]
+      { time: 10.0, lane: 0 }, { time: 10.4, lane: 1 }, { time: 10.8, lane: 2 }, { time: 11.2, lane: 3 },
+      { time: 12.0, lane: 1 }, { time: 12.4, lane: 2 }, { time: 13.0, lane: 0 }, { time: 13.5, lane: 3 },
+      { time: 14.0, lane: 1 }, { time: 14.4, lane: 0 }, { time: 14.8, lane: 2 }, { time: 15.2, lane: 3 },
+      { time: 16.0, lane: 0 }, { time: 16.0, lane: 2 }, { time: 16.5, lane: 1 }, { time: 17.0, lane: 3 },
+      { time: 18.0, lane: 0 }, { time: 18.5, lane: 1 }, { time: 19.0, lane: 2 }, { time: 19.5, lane: 3 },
+      { time: 20.0, lane: 0 }, { time: 20.0, lane: 3 }, { time: 21.0, lane: 1 }, { time: 21.5, lane: 2 },
 
-    // [22 ~ 35초: Chorus / 훅]
-    { time: 22.0, lane: 0 }, { time: 22.4, lane: 1 }, { time: 22.8, lane: 2 }, { time: 23.2, lane: 3 },
-    { time: 23.6, lane: 1 }, { time: 24.0, lane: 0 }, { time: 24.0, lane: 3 },
-    { time: 24.5, lane: 2 }, { time: 24.8, lane: 1 }, { time: 25.2, lane: 0 }, { time: 25.6, lane: 3 },
-    { time: 26.0, lane: 1 }, { time: 26.0, lane: 2 }, { time: 26.5, lane: 0 }, { time: 26.8, lane: 3 },
-    { time: 27.2, lane: 1 }, { time: 27.6, lane: 2 }, { time: 28.0, lane: 0 }, { time: 28.3, lane: 1 },
-    { time: 28.6, lane: 2 }, { time: 29.0, lane: 3 }, { time: 30.0, lane: 0 }, { time: 30.5, lane: 3 },
-    { time: 31.0, lane: 1 }, { time: 31.5, lane: 2 }, { time: 32.0, lane: 0 }, { time: 32.0, lane: 3 },
+      // [22 ~ 35초: Chorus / 훅]
+      { time: 22.0, lane: 0 }, { time: 22.4, lane: 1 }, { time: 22.8, lane: 2 }, { time: 23.2, lane: 3 },
+      { time: 23.6, lane: 1 }, { time: 24.0, lane: 0 }, { time: 24.0, lane: 3 },
+      { time: 24.5, lane: 2 }, { time: 24.8, lane: 1 }, { time: 25.2, lane: 0 }, { time: 25.6, lane: 3 },
+      { time: 26.0, lane: 1 }, { time: 26.0, lane: 2 }, { time: 26.5, lane: 0 }, { time: 26.8, lane: 3 },
+      { time: 27.2, lane: 1 }, { time: 27.6, lane: 2 }, { time: 28.0, lane: 0 }, { time: 28.3, lane: 1 },
+      { time: 28.6, lane: 2 }, { time: 29.0, lane: 3 }, { time: 30.0, lane: 0 }, { time: 30.5, lane: 3 },
+      { time: 31.0, lane: 1 }, { time: 31.5, lane: 2 }, { time: 32.0, lane: 0 }, { time: 32.0, lane: 3 },
 
-    // [35 ~ 50초: Verse 2 / 랩 파트]
-    { time: 35.0, lane: 0 }, { time: 35.3, lane: 1 }, { time: 35.6, lane: 2 }, { time: 36.0, lane: 3 },
-    { time: 37.0, lane: 1 }, { time: 37.4, lane: 2 }, { time: 38.0, lane: 0 }, { time: 38.4, lane: 3 },
-    { time: 39.5, lane: 0 }, { time: 39.8, lane: 2 }, { time: 40.2, lane: 1 }, { time: 40.5, lane: 3 },
-    { time: 42.0, lane: 0 }, { time: 42.0, lane: 1 }, { time: 43.0, lane: 2 }, { time: 43.0, lane: 3 },
-    { time: 44.5, lane: 0 }, { time: 45.0, lane: 1 }, { time: 45.5, lane: 2 }, { time: 46.0, lane: 3 },
-    { time: 47.0, lane: 1 }, { time: 47.5, lane: 2 }, { time: 48.0, lane: 0 }, { time: 48.5, lane: 3 },
+      // [35 ~ 50초: Verse 2]
+      { time: 35.0, lane: 0 }, { time: 35.3, lane: 1 }, { time: 35.6, lane: 2 }, { time: 36.0, lane: 3 },
+      { time: 37.0, lane: 1 }, { time: 37.4, lane: 2 }, { time: 38.0, lane: 0 }, { time: 38.4, lane: 3 },
+      { time: 39.5, lane: 0 }, { time: 39.8, lane: 2 }, { time: 40.2, lane: 1 }, { time: 40.5, lane: 3 },
+      { time: 42.0, lane: 0 }, { time: 42.0, lane: 1 }, { time: 43.0, lane: 2 }, { time: 43.0, lane: 3 },
+      { time: 44.5, lane: 0 }, { time: 45.0, lane: 1 }, { time: 45.5, lane: 2 }, { time: 46.0, lane: 3 },
+      { time: 47.0, lane: 1 }, { time: 47.5, lane: 2 }, { time: 48.0, lane: 0 }, { time: 48.5, lane: 3 },
 
-    // [50 ~ 65초: 브릿지 & 빌드업]
-    { time: 50.0, lane: 0 }, { time: 50.5, lane: 1 }, { time: 51.0, lane: 2 }, { time: 51.5, lane: 3 },
-    { time: 52.5, lane: 0 }, { time: 52.5, lane: 3 }, { time: 53.5, lane: 1 }, { time: 53.5, lane: 2 },
-    { time: 55.0, lane: 0 }, { time: 55.3, lane: 1 }, { time: 55.6, lane: 2 }, { time: 56.0, lane: 3 },
-    { time: 57.0, lane: 0 }, { time: 57.25, lane: 1 }, { time: 57.5, lane: 2 }, { time: 57.75, lane: 3 },
-    { time: 58.0, lane: 0 }, { time: 58.25, lane: 1 }, { time: 58.5, lane: 2 }, { time: 58.75, lane: 3 },
-    { time: 59.0, lane: 0 }, { time: 59.0, lane: 3 }, { time: 60.0, lane: 1 }, { time: 60.0, lane: 2 },
+      // [50 ~ 65초: 브릿지]
+      { time: 50.0, lane: 0 }, { time: 50.5, lane: 1 }, { time: 51.0, lane: 2 }, { time: 51.5, lane: 3 },
+      { time: 52.5, lane: 0 }, { time: 52.5, lane: 3 }, { time: 53.5, lane: 1 }, { time: 53.5, lane: 2 },
+      { time: 55.0, lane: 0 }, { time: 55.3, lane: 1 }, { time: 55.6, lane: 2 }, { time: 56.0, lane: 3 },
+      { time: 57.0, lane: 0 }, { time: 57.25, lane: 1 }, { time: 57.5, lane: 2 }, { time: 57.75, lane: 3 },
+      { time: 58.0, lane: 0 }, { time: 58.25, lane: 1 }, { time: 58.5, lane: 2 }, { time: 58.75, lane: 3 },
+      { time: 59.0, lane: 0 }, { time: 59.0, lane: 3 }, { time: 60.0, lane: 1 }, { time: 60.0, lane: 2 },
 
-    // [65 ~ 82초: 하이라이트 메인 훅]
-    { time: 65.0, lane: 0 }, { time: 65.4, lane: 1 }, { time: 65.8, lane: 2 }, { time: 66.2, lane: 3 },
-    { time: 67.0, lane: 1 }, { time: 67.0, lane: 2 }, { time: 67.5, lane: 0 }, { time: 68.0, lane: 3 },
-    { time: 69.0, lane: 0 }, { time: 69.3, lane: 1 }, { time: 69.6, lane: 2 }, { time: 70.0, lane: 3 },
-    { time: 71.0, lane: 1 }, { time: 71.5, lane: 2 }, { time: 72.0, lane: 0 }, { time: 72.0, lane: 3 },
-    { time: 73.5, lane: 0 }, { time: 73.8, lane: 1 }, { time: 74.2, lane: 2 }, { time: 74.5, lane: 3 },
-    { time: 76.0, lane: 0 }, { time: 76.5, lane: 3 }, { time: 77.0, lane: 1 }, { time: 77.5, lane: 2 },
-    { time: 79.0, lane: 0 }, { time: 79.3, lane: 1 }, { time: 79.6, lane: 2 }, { time: 80.0, lane: 3 },
-    { time: 81.0, lane: 0 }, { time: 81.0, lane: 3 }, { time: 82.0, lane: 1 }, { time: 82.0, lane: 2 },
+      // [65 ~ 82초: 절정 하이라이트]
+      { time: 65.0, lane: 0 }, { time: 65.4, lane: 1 }, { time: 65.8, lane: 2 }, { time: 66.2, lane: 3 },
+      { time: 67.0, lane: 1 }, { time: 67.0, lane: 2 }, { time: 67.5, lane: 0 }, { time: 68.0, lane: 3 },
+      { time: 69.0, lane: 0 }, { time: 69.3, lane: 1 }, { time: 69.6, lane: 2 }, { time: 70.0, lane: 3 },
+      { time: 71.0, lane: 1 }, { time: 71.5, lane: 2 }, { time: 72.0, lane: 0 }, { time: 72.0, lane: 3 },
+      { time: 73.5, lane: 0 }, { time: 73.8, lane: 1 }, { time: 74.2, lane: 2 }, { time: 74.5, lane: 3 },
+      { time: 76.0, lane: 0 }, { time: 76.5, lane: 3 }, { time: 77.0, lane: 1 }, { time: 77.5, lane: 2 },
+      { time: 79.0, lane: 0 }, { time: 79.3, lane: 1 }, { time: 79.6, lane: 2 }, { time: 80.0, lane: 3 },
+      { time: 81.0, lane: 0 }, { time: 81.0, lane: 3 }, { time: 82.0, lane: 1 }, { time: 82.0, lane: 2 },
 
-    // [82 ~ 92초: 아웃트로 & 피날레]
-    { time: 84.0, lane: 0 }, { time: 84.5, lane: 1 }, { time: 85.0, lane: 2 }, { time: 85.5, lane: 3 },
-    { time: 87.0, lane: 0 }, { time: 87.5, lane: 2 }, { time: 88.0, lane: 1 }, { time: 88.5, lane: 3 },
-    { time: 90.0, lane: 0 }, { time: 90.0, lane: 3 },
-    { time: 91.5, lane: 1 }, { time: 91.5, lane: 2 }
-  ]
-};
+      // [82 ~ 92초: 피날레]
+      { time: 84.0, lane: 0 }, { time: 84.5, lane: 1 }, { time: 85.0, lane: 2 }, { time: 85.5, lane: 3 },
+      { time: 87.0, lane: 0 }, { time: 87.5, lane: 2 }, { time: 88.0, lane: 1 }, { time: 88.5, lane: 3 },
+      { time: 90.0, lane: 0 }, { time: 90.0, lane: 3 },
+      { time: 91.5, lane: 1 }, { time: 91.5, lane: 2 }
+    ]
+  },
+  {
+    id: 'demo',
+    title: 'Demo Beat (Short)',
+    artist: 'System',
+    audioPath: '', // 음원 파일 없이 효과음으로 플레이 가능한 테스트 곡
+    bpm: 130,
+    notes: [
+      { time: 1.0, lane: 0 }, { time: 1.5, lane: 1 }, { time: 2.0, lane: 2 }, { time: 2.5, lane: 3 },
+      { time: 3.0, lane: 1 }, { time: 3.0, lane: 2 }, { time: 3.5, lane: 0 }, { time: 4.0, lane: 3 },
+      { time: 5.0, lane: 0 }, { time: 5.3, lane: 1 }, { time: 5.6, lane: 2 }, { time: 6.0, lane: 3 },
+      { time: 7.0, lane: 1 }, { time: 7.0, lane: 2 }, { time: 8.0, lane: 0 }, { time: 8.0, lane: 3 }
+    ]
+  }
+];
 
 // ==========================================
 // 3. 변수 및 시스템 설정
@@ -243,6 +333,7 @@ let speed = 600;
 
 let audioCtx = null;
 let bgmAudio = new Audio();
+let currentSong = null;
 let isPlaying = false;
 let gameStartTime = 0;
 let countdown = 3;
@@ -255,18 +346,18 @@ let effects = [];
 
 const loadedImages = { bg: null, notes: [] };
 
-function loadAssets() {
+function loadImages() {
   const bgImg = new Image();
-  bgImg.src = ASSETS_CONFIG.bg;
+  bgImg.src = IMAGE_ASSETS.bg;
   bgImg.onload = () => { loadedImages.bg = bgImg; };
 
-  ASSETS_CONFIG.notes.forEach((path, idx) => {
+  IMAGE_ASSETS.notes.forEach((path, idx) => {
     const img = new Image();
     img.src = path;
     img.onload = () => { loadedImages.notes[idx] = img; };
   });
 }
-loadAssets();
+loadImages();
 
 function resizeCanvas() {
   const container = document.getElementById('game-container');
@@ -280,6 +371,7 @@ function resizeCanvas() {
 window.addEventListener('resize', resizeCanvas);
 resizeCanvas();
 
+// 안전한 오디오 컨텍스트 초기화
 function initAudio() {
   if (!audioCtx) {
     audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -306,20 +398,59 @@ function playBeep(freq = 440, type = 'sine', duration = 0.1) {
 }
 
 // ==========================================
-// 4. 게임 시작 및 실행 제어
+// 4. 곡 선택 UI 생성 및 이동
 // ==========================================
-function startGame() {
+function renderSongList() {
+  const container = document.getElementById('song-list-container');
+  container.innerHTML = '';
+
+  SONGS.forEach(song => {
+    const card = document.createElement('div');
+    card.className = 'song-card';
+    card.innerHTML = `
+      <div class="song-info">
+        <div class="song-title">${song.title}</div>
+        <div class="song-artist">${song.artist}</div>
+      </div>
+      <div class="song-play-btn">PLAY</div>
+    `;
+    card.addEventListener('click', () => {
+      selectAndStartGame(song);
+    });
+    container.appendChild(card);
+  });
+}
+
+function showSelectScreen() {
   initAudio();
+  renderSongList();
+  document.getElementById('start-screen').classList.add('hidden');
+  document.getElementById('result-screen').classList.add('hidden');
+  document.getElementById('select-screen').classList.remove('hidden');
+}
 
-  bgmAudio.src = ASSETS_CONFIG.audio;
-  bgmAudio.load();
+// ==========================================
+// 5. 게임 시작 및 실행 제어 (오류 방지)
+// ==========================================
+function selectAndStartGame(song) {
+  initAudio();
+  currentSong = song;
 
-  // 음원 재생 종료 시 자동 게임 종료 이벤트 등록
+  // 음원 설정 및 사전 로드
+  bgmAudio.pause();
+  if (song.audioPath) {
+    bgmAudio.src = song.audioPath;
+    bgmAudio.load();
+  } else {
+    bgmAudio.src = '';
+  }
+
+  // 음악이 완전히 끝났을 때 자동 게임 종료
   bgmAudio.onended = () => {
     endGame();
   };
 
-  document.getElementById('start-screen').classList.add('hidden');
+  document.getElementById('select-screen').classList.add('hidden');
   document.getElementById('result-screen').classList.add('hidden');
 
   score = 0;
@@ -328,7 +459,7 @@ function startGame() {
   effects = [];
   updateHUD();
 
-  liveNotes = DEMO_SONG.notes.map(n => ({
+  liveNotes = currentSong.notes.map(n => ({
     ...n,
     hit: false,
     missed: false
@@ -337,6 +468,7 @@ function startGame() {
   isPlaying = true;
   countdown = 3;
 
+  // 카운트다운 타이머
   const countInterval = setInterval(() => {
     countdown--;
     if (countdown > 0) {
@@ -345,12 +477,15 @@ function startGame() {
       playBeep(1200, 'triangle', 0.2);
       clearInterval(countInterval);
       
-      bgmAudio.currentTime = 0;
-      const playPromise = bgmAudio.play();
-      if (playPromise !== undefined) {
-        playPromise.catch(error => {
-          console.warn("오디오 재생 실패 (터치 권한 또는 캐시 지연):", error);
-        });
+      // 음악 재생 시도 (실패해도 게임 흐름이 끊기지 않도록 안전 로직)
+      if (currentSong.audioPath) {
+        bgmAudio.currentTime = 0;
+        const playPromise = bgmAudio.play();
+        if (playPromise !== undefined) {
+          playPromise.catch(error => {
+            console.warn("오디오 재생 지연 또는 권한 대기 중:", error);
+          });
+        }
       }
       gameStartTime = performance.now();
     }
@@ -400,6 +535,7 @@ function gameLoop(timestamp) {
 
   ctx.clearRect(0, 0, containerWidth, containerHeight);
 
+  // 배경 이미지
   if (loadedImages.bg) {
     ctx.drawImage(loadedImages.bg, 0, 0, containerWidth, containerHeight);
   } else {
@@ -407,6 +543,7 @@ function gameLoop(timestamp) {
     ctx.fillRect(0, 0, containerWidth, containerHeight);
   }
 
+  // 레인 구분선
   ctx.strokeStyle = 'rgba(255, 255, 255, 0.15)';
   ctx.lineWidth = 2;
   for (let i = 1; i < 4; i++) {
@@ -416,6 +553,7 @@ function gameLoop(timestamp) {
     ctx.stroke();
   }
 
+  // 판정선
   ctx.strokeStyle = '#00f0ff';
   ctx.lineWidth = 4;
   ctx.beginPath();
@@ -423,6 +561,7 @@ function gameLoop(timestamp) {
   ctx.lineTo(containerWidth, judgmentLineY);
   ctx.stroke();
 
+  // 카운트다운 출력
   if (countdown > 0) {
     ctx.fillStyle = '#00f0ff';
     ctx.font = 'bold 60px sans-serif';
@@ -434,6 +573,7 @@ function gameLoop(timestamp) {
 
   const currentTime = (performance.now() - gameStartTime) / 1000;
 
+  // 노트 그리기 및 판정
   liveNotes.forEach(note => {
     if (note.hit) return;
 
@@ -463,6 +603,7 @@ function gameLoop(timestamp) {
     }
   });
 
+  // 판정 텍스트 이펙트
   for (let i = effects.length - 1; i >= 0; i--) {
     const eff = effects[i];
     ctx.fillStyle = eff.text === 'MISS' ? `rgba(255, 0, 0, ${eff.alpha})` : `rgba(0, 240, 255, ${eff.alpha})`;
@@ -475,9 +616,9 @@ function gameLoop(timestamp) {
     if (eff.alpha <= 0) effects.splice(i, 1);
   }
 
-  // 마지막 노트가 통과한 후 오디오 종료 대기 (최대 안전 종료 타임아웃)
-  const lastNoteTime = DEMO_SONG.notes[DEMO_SONG.notes.length - 1].time;
-  if (currentTime > lastNoteTime + 4.0) {
+  // 안전 종료 조건 (음악이 없거나 끝부분 노트 통과 후 3초 뒤 자동 종료)
+  const lastNoteTime = currentSong.notes[currentSong.notes.length - 1].time;
+  if (currentTime > lastNoteTime + 3.0) {
     endGame();
     return;
   }
@@ -496,7 +637,7 @@ function endGame() {
 }
 
 // ==========================================
-// 5. 이벤트 바인딩
+// 6. 키보드 & 터치 이벤트 연결
 // ==========================================
 const keyMap = { 'd': 0, 'f': 1, 'j': 2, 'k': 3, '1': 0, '2': 1, '3': 2, '4': 3 };
 
@@ -530,12 +671,17 @@ window.addEventListener('keyup', (e) => {
   });
 });
 
+// 버튼 연결
 const startBtn = document.getElementById('start-btn');
 const fallbackBtn = document.getElementById('start-btn-fallback');
 
-if (startBtn) startBtn.addEventListener('click', startGame);
-if (fallbackBtn) fallbackBtn.addEventListener('click', startGame);
-document.getElementById('retry-btn').addEventListener('click', startGame);
+if (startBtn) startBtn.addEventListener('click', showSelectScreen);
+if (fallbackBtn) fallbackBtn.addEventListener('click', showSelectScreen);
+
+document.getElementById('retry-btn').addEventListener('click', () => {
+  if (currentSong) selectAndStartGame(currentSong);
+});
+document.getElementById('select-menu-btn').addEventListener('click', showSelectScreen);
 </script>
 </body>
 </html>
