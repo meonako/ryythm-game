@@ -30,7 +30,6 @@
       overflow: hidden;
     }
 
-    /* 여백 없이 전체 화면을 채우는 컨테이너 */
     #game-container {
       position: relative;
       width: 100%;
@@ -38,15 +37,11 @@
       height: 100vh;
       height: 100dvh;
       background-color: #000000;
-      border: none;
-      border-radius: 0;
-      box-shadow: none;
       display: flex;
       flex-direction: column;
       overflow: hidden;
     }
 
-    /* 상단 HUD (점수/콤보) */
     #hud {
       display: flex;
       justify-content: space-between;
@@ -60,7 +55,6 @@
     #score { color: #ffd700; }
     #combo { color: #fcd3f2; }
 
-    /* Canvas 및 오버레이 화면 */
     #canvas-wrapper {
       position: relative;
       flex: 1;
@@ -78,7 +72,6 @@
       z-index: 2;
     }
 
-    /* 시작 화면 (완전한 검은색) */
     .screen {
       position: absolute;
       top: 0; left: 0; width: 100%; height: 100%;
@@ -94,7 +87,6 @@
 
     .hidden { display: none !important; }
 
-    /* 메인 타이틀 */
     h1 {
       color: #fcd3f2;
       font-size: 2.0rem;
@@ -104,7 +96,6 @@
       text-shadow: 3px 3px #FF69C7;
     }
 
-    /* 시작 및 다시시작 버튼 */
     .start-btn {
       background-color: transparent;
       color: #ffffff;
@@ -119,7 +110,6 @@
       transform: scale(0.98);
     }
      
-    /* 서브 타이틀 */
     h2 {
       color: #ffffff;
       font-size: 0.75rem;
@@ -139,22 +129,17 @@
   <div id="canvas-wrapper">
     <canvas id="gameCanvas"></canvas>
 
-    <!-- 시작 오버레이 (완전한 검은색 배경) -->
     <div id="start-screen" class="screen">
       <h1>82 RHYTHM</h1>
       <h2>2026 WORK BY YUN</h2>
       <button class="start-btn" id="start-btn">START GAME</button>
     </div>
 
-    <!-- 결과 오버레이 -->
     <div id="result-screen" class="screen hidden"></div>
   </div>
 </div>
 
 <script>
-// ==========================================
-// 1. 핵심 초기화 및 설정
-// ==========================================
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
 const wrapper = document.getElementById('canvas-wrapper');
@@ -165,57 +150,41 @@ function resize() {
   width = canvas.width = wrapper.clientWidth;
   height = canvas.height = wrapper.clientHeight;
   laneWidth = width / 4;
-  judgeLineY = height - 105; // 하단 주소창을 고려한 판정선 위치
+  judgeLineY = height - 105;
 }
 window.addEventListener('resize', resize);
 resize();
 
-// ★ 배경 이미지 객체 로드
+// 배경 이미지 로드 (없어도 에러 안 나게 처리)
 const bgImage = new Image();
-bgImage.src = './Cover.png';
 let isBgLoaded = false;
-bgImage.onload = () => {
-  isBgLoaded = true;
-};
+bgImage.onload = () => { isBgLoaded = true; };
+bgImage.onerror = () => { console.warn("Cover.png를 찾을 수 없습니다. 검은색 배경으로 실행합니다."); };
+bgImage.src = './Cover.png';
 
-// 외부 오디오 설정
+// 오디오 설정 (없어도 에러 안 나게 처리)
 const bgm = new Audio();
+bgm.onerror = () => { console.warn("Gossip.mp3를 찾을 수 없습니다. 음악 없이 실행합니다."); };
 bgm.src = './Gossip.mp3';
 
-// 효과음용 Web Audio API
-let audioCtx = null;
-function initAudio() {
-  if (!audioCtx) {
-    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-  }
-  if (audioCtx.state === 'suspended') {
-    audioCtx.resume();
-  }
-}
-
-// ==========================================
-// 2. 보컬 박자 맞춤 & 반복 없는 수작업 다채로운 채보 생성 함수
-// ==========================================
-const NOTE_SPEED = 550; // 빠른 노트 낙하 속도
+// 채보 데이터 생성
+const NOTE_SPEED = 550;
 
 function generatePattern() {
   const rawData = [
     {t: 4.2, l: 0}, {t: 4.9, l: 3}, {t: 5.4, l: 1}, {t: 6.1, l: 2}, {t: 7.0, l: 0},
     {t: 7.8, l: 3}, {t: 8.6, l: 2}, {t: 9.2, l: 1}, {t: 10.1, l: 0}, {t: 10.9, l: 3},
     {t: 11.6, l: 1}, {t: 12.4, l: 2}, {t: 13.2, l: 0}, {t: 14.0, l: 3}, {t: 14.8, l: 1},
-    
     {t: 15.3, l: 2}, {t: 15.7, l: 0}, {t: 16.4, l: 3}, {t: 17.1, l: 1}, {t: 17.7, l: 2},
     {t: 18.4, l: 0}, {t: 19.1, l: 3}, {t: 19.8, l: 1}, {t: 20.5, l: 2}, {t: 21.2, l: 0},
     {t: 21.9, l: 3}, {t: 22.5, l: 1}, {t: 23.2, l: 2}, {t: 24.0, l: 0}, {t: 24.7, l: 3},
     {t: 25.4, l: 1}, {t: 26.1, l: 2}, {t: 26.9, l: 0}, {t: 27.6, l: 3}, {t: 28.3, l: 1},
     {t: 29.0, l: 2}, {t: 29.8, l: 0}, {t: 30.5, l: 3}, {t: 31.2, l: 1}, {t: 31.9, l: 2},
-    
     {t: 32.5, l: 0}, {t: 33.0, l: 3}, {t: 33.7, l: 2}, {t: 34.3, l: 1}, {t: 35.0, l: 0},
     {t: 35.7, l: 3}, {t: 36.4, l: 1}, {t: 37.1, l: 2}, {t: 37.8, l: 0}, {t: 38.5, l: 3},
     {t: 39.2, l: 1}, {t: 39.9, l: 2}, {t: 40.6, l: 0}, {t: 41.3, l: 3}, {t: 42.0, l: 1},
     {t: 42.7, l: 2}, {t: 43.4, l: 0}, {t: 44.1, l: 3}, {t: 44.8, l: 1}, {t: 45.5, l: 2},
     {t: 46.2, l: 0}, {t: 46.9, l: 3}, {t: 47.6, l: 1},
-    
     {t: 48.2, l: 0}, {t: 48.2, l: 2}, {t: 49.0, l: 1}, {t: 49.7, l: 3}, {t: 50.4, l: 0},
     {t: 51.1, l: 2}, {t: 51.8, l: 1}, {t: 51.8, l: 3}, {t: 52.6, l: 0}, {t: 53.3, l: 2},
     {t: 54.0, l: 1}, {t: 54.7, l: 3}, {t: 55.4, l: 0}, {t: 55.4, l: 1}, {t: 56.2, l: 2},
@@ -225,13 +194,11 @@ function generatePattern() {
     {t: 66.2, l: 1}, {t: 66.2, l: 3}, {t: 67.0, l: 0}, {t: 67.7, l: 2}, {t: 68.4, l: 1},
     {t: 69.1, l: 3}, {t: 69.8, l: 0}, {t: 69.8, l: 2}, {t: 70.6, l: 1}, {t: 71.3, l: 3},
     {t: 72.0, l: 0}, {t: 72.7, l: 2}, {t: 73.4, l: 1}, {t: 74.1, l: 3}, {t: 74.8, l: 0},
-    
     {t: 75.5, l: 2}, {t: 76.3, l: 1}, {t: 77.2, l: 3}, {t: 78.1, l: 0}, {t: 79.0, l: 2},
     {t: 79.9, l: 1}, {t: 80.8, l: 3}, {t: 81.7, l: 0}, {t: 82.6, l: 2}, {t: 83.6, l: 1},
     {t: 84.7, l: 3}, {t: 85.8, l: 0}, {t: 87.0, l: 2}, {t: 88.2, l: 1}, {t: 89.5, l: 3},
     {t: 90.9, l: 0}, {t: 92.3, l: 2}
   ];
-
   return rawData.map(item => ({ time: item.t, lane: item.l }));
 }
 
@@ -245,45 +212,43 @@ let maxCombo = 0;
 let perfectCount = 0;
 let greatCount = 0;
 let missCount = 0;
-
 let activeNotes = [];
 let effects = [];
 
-// ==========================================
-// 3. 게임 시작 및 음원 연동
-// ==========================================
 function startGame() {
-  initAudio();
-  
-  score = 0;
-  combo = 0;
-  maxCombo = 0;
-  perfectCount = 0;
-  greatCount = 0;
-  missCount = 0;
-  effects = [];
-  
-  activeNotes = SONG_PATTERN.map(n => ({ ...n, hit: false, missed: false }));
-  
-  // 시작 화면 숨기기
-  document.getElementById('start-screen').classList.add('hidden');
-  document.getElementById('result-screen').classList.add('hidden');
+  try {
+    score = 0;
+    combo = 0;
+    maxCombo = 0;
+    perfectCount = 0;
+    greatCount = 0;
+    missCount = 0;
+    effects = [];
+    
+    activeNotes = SONG_PATTERN.map(n => ({ ...n, hit: false, missed: false }));
+    
+    document.getElementById('start-screen').classList.add('hidden');
+    document.getElementById('result-screen').classList.add('hidden');
 
-  updateHUD();
+    if (document.getElementById('score')) {
+      document.getElementById('score').innerText = '000000';
+      document.getElementById('combo').innerText = '0';
+    }
 
-  bgm.currentTime = 0;
-  const playPromise = bgm.play();
-  if (playPromise !== undefined) {
-    playPromise.catch(err => {
-      console.warn("오디오 재생 실패:", err);
+    bgm.currentTime = 0;
+    bgm.play().catch(err => {
+      console.warn("오디오 재생 건너뜀:", err);
     });
+
+    bgm.onended = () => { endGame(); };
+
+    isPlaying = true;
+    startTime = performance.now();
+    requestAnimationFrame(gameLoop);
+  } catch (e) {
+    console.error("게임 시작 중 오류 발생:", e);
+    alert("게임 시작 중 에러가 발생했습니다. F12 콘솔을 확인해주세요.");
   }
-
-  bgm.onended = () => { endGame(); };
-
-  isPlaying = true;
-  startTime = performance.now();
-  requestAnimationFrame(gameLoop);
 }
 
 function updateHUD() {
@@ -310,13 +275,10 @@ function gameLoop(timestamp) {
     return;
   }
 
-  // 화면 초기화
   ctx.clearRect(0, 0, width, height);
 
-  // ★ 배경 이미지(Cover.png)를 캔버스에 직접 렌더링
   if (isBgLoaded) {
     ctx.drawImage(bgImage, 0, 0, width, height);
-    // 노트가 잘 보이도록 배경 위에 살짝 어두운 필터 씌우기
     ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
     ctx.fillRect(0, 0, width, height);
   } else {
@@ -324,7 +286,6 @@ function gameLoop(timestamp) {
     ctx.fillRect(0, 0, width, height);
   }
 
-  // 레인 구분선 그리기
   ctx.strokeStyle = 'rgba(255, 105, 199, 0.25)';
   ctx.lineWidth = 2;
   for (let i = 1; i < 4; i++) {
@@ -334,7 +295,6 @@ function gameLoop(timestamp) {
     ctx.stroke();
   }
 
-  // 판정선 그리기
   ctx.strokeStyle = '#FF69C7';
   ctx.lineWidth = 4;
   ctx.beginPath();
@@ -342,7 +302,6 @@ function gameLoop(timestamp) {
   ctx.lineTo(width, judgeLineY);
   ctx.stroke();
 
-  // 노트 그리기
   activeNotes.forEach(note => {
     if (note.hit) return;
 
@@ -389,7 +348,6 @@ function gameLoop(timestamp) {
     }
   });
 
-  // 판정 텍스트 연출
   for (let i = effects.length - 1; i >= 0; i--) {
     const eff = effects[i];
     ctx.fillStyle = eff.text === 'MISS' ? `rgba(255, 0, 0, ${eff.alpha})` : `rgba(255, 215, 0, ${eff.alpha})`;
@@ -405,9 +363,6 @@ function gameLoop(timestamp) {
   requestAnimationFrame(gameLoop);
 }
 
-// ==========================================
-// 4. 입력 판정
-// ==========================================
 function triggerInput(lane) {
   if (!isPlaying) return;
 
@@ -437,113 +392,54 @@ function triggerInput(lane) {
   }
 }
 
-// ==========================================
-// 5. 게임 종료 및 결과 처리
-// ==========================================
 function endGame() {
   if (!isPlaying) return;
   isPlaying = false;
   try { bgm.pause(); } catch(e) {}
 
   const totalNotes = SONG_PATTERN.length;
+  let rank = 'F', message = 'KEEP TRYING!', rankColor = '#ff4444';
 
-  let rank = 'F';
-  let message = 'KEEP TRYING!';
-  let rankColor = '#ff4444';
-
-  if (perfectCount === totalNotes) {
-    rank = 'S';
-    message = 'ALL PERFECT!! PERFECT GAME!';
-    rankColor = '#ffd700';
-  } else if (missCount === 0) {
-    rank = 'S';
-    message = 'GREAT JOB! NO MISS!';
-    rankColor = '#ffd700';
-  } else if (missCount <= 5) {
-    rank = 'A';
-    message = 'EXCELLENT PERFORMANCE!';
-    rankColor = '#fcd3f2';
-  } else if (missCount <= 12) {
-    rank = 'B';
-    message = 'NICE CLEAR!';
-    rankColor = '#00ffff';
-  } else {
-    rank = 'F';
-    message = 'STAGE FAILED... TRY AGAIN!';
-    rankColor = '#ff4444';
-  }
+  if (perfectCount === totalNotes) { rank = 'S'; message = 'ALL PERFECT!!'; rankColor = '#ffd700'; }
+  else if (missCount === 0) { rank = 'S'; message = 'GREAT JOB! NO MISS!'; rankColor = '#ffd700'; }
+  else if (missCount <= 5) { rank = 'A'; message = 'EXCELLENT!'; rankColor = '#fcd3f2'; }
+  else if (missCount <= 12) { rank = 'B'; message = 'NICE CLEAR!'; rankColor = '#00ffff'; }
 
   const resultScreen = document.getElementById('result-screen');
   resultScreen.innerHTML = `
-    <div style="
-      color: #ffffff; 
-      font-size: 4.5rem; 
-      margin-bottom: 10px; 
-      font-family: 'Press Start 2P', cursive;
-      text-shadow: 
-        0 0 7px #ffffff,
-        0 0 15px ${rankColor},
-        0 0 30px ${rankColor},
-        0 0 50px ${rankColor};
-      line-height: 1;
-    ">
-      ${rank}
-    </div>
-
+    <div style="color: #ffffff; font-size: 4.5rem; margin-bottom: 10px; text-shadow: 0 0 15px ${rankColor};">${rank}</div>
     <p style="color: #ffffff; font-size: 0.55rem; margin-bottom: 25px;">"${message}"</p>
-    
-    <div style="
-      font-size: 0.65rem; 
-      line-height: 2.2; 
-      margin-bottom: 30px; 
-      text-align: left; 
-      display: inline-block;
-    ">
+    <div style="font-size: 0.65rem; line-height: 2.2; margin-bottom: 30px; text-align: left; display: inline-block;">
       <p style="color:#ffd700;">PERFECT : ${perfectCount}</p>
       <p style="color:#fcd3f2;">GREAT   : ${greatCount}</p>
       <p style="color:#ff4444;">MISS    : ${missCount}</p>
       <p style="color:#ffffff; border-top: 1px solid #444; margin-top: 8px; padding-top: 8px;">MAX COMBO : ${maxCombo}</p>
     </div>
-
-    <div>
-      <button class="start-btn" id="retry-btn">RETRY</button>
-    </div>
+    <div><button class="start-btn" id="retry-btn">RETRY</button></div>
   `;
 
   document.getElementById('retry-btn').addEventListener('click', startGame);
   resultScreen.classList.remove('hidden');
 }
 
-// ==========================================
-// 6. 이벤트 바인딩
-// ==========================================
 const keyMap = { 'd': 0, 'f': 1, 'j': 2, 'k': 3, 'D': 0, 'F': 1, 'J': 2, 'K': 3 };
-
 window.addEventListener('keydown', (e) => {
   if (e.repeat) return;
   const lane = keyMap[e.key];
-  if (lane !== undefined) {
-    triggerInput(lane);
-  }
+  if (lane !== undefined) triggerInput(lane);
 });
 
 function handlePointerDown(e) {
   if (!isPlaying) return;
   e.preventDefault();
-  
   const rect = canvas.getBoundingClientRect();
   const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-  const touchX = clientX - rect.left;
-  
-  const lane = Math.floor(touchX / laneWidth);
-  if (lane >= 0 && lane < 4) {
-    triggerInput(lane);
-  }
+  const lane = Math.floor((clientX - rect.left) / laneWidth);
+  if (lane >= 0 && lane < 4) triggerInput(lane);
 }
 
 canvas.addEventListener('touchstart', handlePointerDown, { passive: false });
 canvas.addEventListener('mousedown', handlePointerDown);
-
 document.getElementById('start-btn').addEventListener('click', startGame);
 </script>
 
