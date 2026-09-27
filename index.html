@@ -5,10 +5,17 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>모바일 4레인 리듬게임</title>
   
-  <!-- 둥근모꼴 폰트 CDN (확실하게 호환되는 주소로 변경) -->
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2001@1.1/NeoDunggeunmo.css">
+  <!-- Google Fonts 공식 CDN으로 변경 (DungGeunMo) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DungGeunMo&display=swap" rel="stylesheet">
 
   <style>
+    /* 폰트 정의 및 적용 */
+    @font-family {
+      font-family: 'DungGeunMo';
+    }
+
     * {
       box-sizing: border-box;
       margin: 0;
@@ -23,7 +30,8 @@
       height: 100%;
       overflow: hidden;
       background-color: #ffe3e8;
-      font-family: 'NeoDunggeunmo', sans-serif; /* 둥근모꼴 확실한 폰트명 */
+      /* 둥근모 폰트 적용 + 대체 폰트 지정 */
+      font-family: 'DungGeunMo', 'Galmuri11', 'Courier New', monospace, sans-serif !important;
       color: #4a4a4a;
     }
 
@@ -33,11 +41,12 @@
       max-width: 450px;
       height: 100%;
       margin: 0 auto;
-      background: linear-gradient(180deg, #fff5f7 0%, #ffe3e8 100%); /* 밝은 파스텔 핑크 배경 */
+      background: linear-gradient(180deg, #fff5f7 0%, #ffe3e8 100%);
       display: flex;
       flex-direction: column;
       overflow: hidden;
       box-shadow: 0 0 20px rgba(255, 182, 193, 0.5);
+      font-family: 'DungGeunMo', monospace, sans-serif;
     }
 
     canvas {
@@ -53,15 +62,17 @@
       flex-direction: column;
       justify-content: center;
       align-items: center;
-      background: rgba(255, 245, 247, 0.92); /* 밝은 반투명 배경 */
+      background: rgba(255, 245, 247, 0.94);
       z-index: 10;
       padding: 20px;
+      font-family: 'DungGeunMo', monospace, sans-serif;
     }
 
     .hidden { display: none !important; }
 
     /* 베이비 핑크 타이틀 */
     h1 { 
+      font-family: 'DungGeunMo', monospace, sans-serif;
       font-size: 2.2rem; 
       color: #ff8fa3; 
       margin-bottom: 15px; 
@@ -69,7 +80,13 @@
       letter-spacing: 1px;
     }
 
-    p { margin-bottom: 15px; color: #666; font-size: 1rem; text-align: center; }
+    p { 
+      font-family: 'DungGeunMo', monospace, sans-serif;
+      margin-bottom: 15px; 
+      color: #666; 
+      font-size: 1rem; 
+      text-align: center; 
+    }
 
     /* 베이비 핑크 버튼 스타일 */
     .btn {
@@ -78,8 +95,7 @@
       border: none;
       padding: 16px 36px;
       font-size: 1.2rem;
-      font-weight: bold;
-      font-family: 'NeoDunggeunmo', sans-serif;
+      font-family: 'DungGeunMo', monospace, sans-serif;
       border-radius: 30px;
       cursor: pointer;
       box-shadow: 0 4px 15px rgba(255, 143, 163, 0.4);
@@ -91,7 +107,6 @@
       transform: scale(0.95);
     }
 
-    /* 곡 선택 카드 스타일 */
     .song-list {
       width: 100%;
       max-height: 60%;
@@ -104,7 +119,7 @@
     }
 
     .song-card {
-      background: rgba(255, 255, 255, 0.8);
+      background: rgba(255, 255, 255, 0.85);
       border: 2px solid #ffccd5;
       border-radius: 16px;
       padding: 15px;
@@ -114,6 +129,7 @@
       cursor: pointer;
       transition: all 0.2s ease;
       box-shadow: 0 2px 8px rgba(255, 182, 193, 0.2);
+      font-family: 'DungGeunMo', monospace, sans-serif;
     }
 
     .song-card:active {
@@ -127,17 +143,20 @@
     }
 
     .song-title {
+      font-family: 'DungGeunMo', monospace, sans-serif;
       font-size: 1.2rem;
       color: #4a4a4a;
     }
 
     .song-artist {
+      font-family: 'DungGeunMo', monospace, sans-serif;
       font-size: 0.9rem;
       color: #888;
       margin-top: 4px;
     }
 
     .song-play-btn {
+      font-family: 'DungGeunMo', monospace, sans-serif;
       background: #ff8fa3;
       color: #fff;
       padding: 8px 16px;
@@ -155,10 +174,20 @@
       z-index: 5;
       font-size: 1.2rem;
       pointer-events: none;
+      font-family: 'DungGeunMo', monospace, sans-serif;
     }
 
-    #score-display { color: #555; }
-    #combo-display { color: #ff8fa3; font-size: 1.4rem; text-shadow: 0 0 6px rgba(255, 143, 163, 0.3); }
+    #score-display { 
+      color: #555; 
+      font-family: 'DungGeunMo', monospace, sans-serif;
+    }
+    
+    #combo-display { 
+      color: #ff8fa3; 
+      font-size: 1.4rem; 
+      text-shadow: 0 0 6px rgba(255, 143, 163, 0.3); 
+      font-family: 'DungGeunMo', monospace, sans-serif;
+    }
 
     #touch-controls {
       position: absolute;
@@ -177,7 +206,7 @@
       align-items: center;
       font-size: 1.3rem;
       color: #888;
-      font-family: 'NeoDunggeunmo', sans-serif;
+      font-family: 'DungGeunMo', monospace, sans-serif;
     }
 
     .touch-pad:active, .touch-pad.active {
@@ -234,6 +263,11 @@
 </div>
 
 <script>
+// 웹폰트 로딩 대기 처리
+document.fonts.ready.then(() => {
+  console.log("DungGeunMo 폰트 로드 완료");
+});
+
 // ==========================================
 // 1. 이미지 에셋 설정
 // ==========================================
@@ -248,25 +282,21 @@ const IMAGE_ASSETS = {
 };
 
 // ==========================================
-// 2. 다중 음악 및 채보 데이터 베이스 (SONGS)
+// 2. 곡 데이터 (수정된 싱크 반영)
 // ==========================================
-
 const SONGS = [
   {
     id: 'gossip',
     title: 'Gossip',
     artist: '82MAJOR',
-    audioPath: './Gossip.mp3', // 편집하신 4초~1분37초 음원 파일 경로
+    audioPath: './Gossip.mp3',
     bpm: 125,
     notes: [
-      // [00:00 ~ 00:10] Intro (비트 박자 감잡기)
       { time: 1.2, lane: 0 }, { time: 1.7, lane: 1 }, { time: 2.2, lane: 2 }, { time: 2.7, lane: 3 },
       { time: 3.2, lane: 1 }, { time: 3.2, lane: 2 }, { time: 3.8, lane: 0 }, { time: 4.3, lane: 3 },
       { time: 5.0, lane: 0 }, { time: 5.4, lane: 1 }, { time: 5.8, lane: 2 }, { time: 6.2, lane: 3 },
       { time: 7.0, lane: 0 }, { time: 7.0, lane: 3 }, { time: 7.5, lane: 1 }, { time: 8.0, lane: 2 },
       { time: 8.5, lane: 0 }, { time: 8.8, lane: 1 }, { time: 9.1, lane: 2 }, { time: 9.4, lane: 3 },
-
-      // [00:10 ~ 00:22] Verse 1 (빠른 랩 플로우 스타트 - 16비트 연타 적용)
       { time: 10.0, lane: 0 }, { time: 10.25, lane: 1 }, { time: 10.5, lane: 2 }, { time: 10.75, lane: 3 },
       { time: 11.2, lane: 1 }, { time: 11.5, lane: 2 }, { time: 12.0, lane: 0 }, { time: 12.4, lane: 3 },
       { time: 13.0, lane: 0 }, { time: 13.2, lane: 1 }, { time: 13.4, lane: 2 }, { time: 13.6, lane: 3 },
@@ -275,21 +305,15 @@ const SONGS = [
       { time: 17.0, lane: 1 }, { time: 17.4, lane: 2 }, { time: 18.0, lane: 0 }, { time: 18.0, lane: 3 },
       { time: 18.8, lane: 0 }, { time: 19.1, lane: 1 }, { time: 19.4, lane: 2 }, { time: 19.7, lane: 3 },
       { time: 20.2, lane: 1 }, { time: 20.6, lane: 2 }, { time: 21.0, lane: 0 }, { time: 21.5, lane: 3 },
-
-      // [00:22 ~ 00:35] Chorus / Hook (메인 비트 & 동시치기)
-      { time: 22.0, lane: 0 }, { time: 22.0, lane: 3 },
-      { time: 22.5, lane: 1 }, { time: 22.8, lane: 2 },
+      { time: 22.0, lane: 0 }, { time: 22.0, lane: 3 }, { time: 22.5, lane: 1 }, { time: 22.8, lane: 2 },
       { time: 23.2, lane: 0 }, { time: 23.5, lane: 1 }, { time: 23.8, lane: 2 }, { time: 24.1, lane: 3 },
-      { time: 24.5, lane: 1 }, { time: 24.5, lane: 2 },
-      { time: 25.0, lane: 0 }, { time: 25.3, lane: 1 }, { time: 25.6, lane: 2 }, { time: 25.9, lane: 3 },
-      { time: 26.5, lane: 0 }, { time: 26.5, lane: 3 },
+      { time: 24.5, lane: 1 }, { time: 24.5, lane: 2 }, { time: 25.0, lane: 0 }, { time: 25.3, lane: 1 },
+      { time: 25.6, lane: 2 }, { time: 25.9, lane: 3 }, { time: 26.5, lane: 0 }, { time: 26.5, lane: 3 },
       { time: 27.0, lane: 1 }, { time: 27.3, lane: 2 }, { time: 27.6, lane: 1 }, { time: 27.9, lane: 0 },
       { time: 28.5, lane: 2 }, { time: 28.8, lane: 3 }, { time: 29.2, lane: 1 }, { time: 29.6, lane: 0 },
       { time: 30.2, lane: 0 }, { time: 30.2, lane: 2 }, { time: 30.8, lane: 1 }, { time: 30.8, lane: 3 },
       { time: 31.5, lane: 0 }, { time: 31.8, lane: 1 }, { time: 32.1, lane: 2 }, { time: 32.4, lane: 3 },
       { time: 33.0, lane: 0 }, { time: 33.0, lane: 3 }, { time: 33.5, lane: 1 }, { time: 34.0, lane: 2 },
-
-      // [00:35 ~ 00:50] Verse 2 (변박 및 랩 라임 타격)
       { time: 35.0, lane: 0 }, { time: 35.25, lane: 1 }, { time: 35.5, lane: 2 }, { time: 35.75, lane: 3 },
       { time: 36.5, lane: 1 }, { time: 36.8, lane: 2 }, { time: 37.2, lane: 0 }, { time: 37.6, lane: 3 },
       { time: 38.5, lane: 0 }, { time: 38.8, lane: 2 }, { time: 39.1, lane: 1 }, { time: 39.4, lane: 3 },
@@ -299,8 +323,6 @@ const SONGS = [
       { time: 45.5, lane: 0 }, { time: 45.8, lane: 1 }, { time: 46.1, lane: 2 }, { time: 46.4, lane: 3 },
       { time: 47.2, lane: 1 }, { time: 47.5, lane: 2 }, { time: 48.0, lane: 0 }, { time: 48.5, lane: 3 },
       { time: 49.2, lane: 0 }, { time: 49.5, lane: 1 }, { time: 49.8, lane: 2 },
-
-      // [00:50 ~ 01:05] Bridge (빌드업 구간)
       { time: 50.2, lane: 0 }, { time: 50.6, lane: 1 }, { time: 51.0, lane: 2 }, { time: 51.4, lane: 3 },
       { time: 52.2, lane: 0 }, { time: 52.2, lane: 3 }, { time: 53.0, lane: 1 }, { time: 53.0, lane: 2 },
       { time: 54.0, lane: 0 }, { time: 54.3, lane: 1 }, { time: 54.6, lane: 2 }, { time: 54.9, lane: 3 },
@@ -309,8 +331,6 @@ const SONGS = [
       { time: 58.2, lane: 0 }, { time: 58.2, lane: 3 }, { time: 59.0, lane: 1 }, { time: 59.0, lane: 2 },
       { time: 60.0, lane: 0 }, { time: 60.3, lane: 1 }, { time: 60.6, lane: 2 }, { time: 61.0, lane: 3 },
       { time: 62.0, lane: 1 }, { time: 62.4, lane: 2 }, { time: 63.0, lane: 0 }, { time: 63.5, lane: 3 },
-
-      // [01:05 ~ 01:25] Highlight / Climax (하이라이트 폭타)
       { time: 65.0, lane: 0 }, { time: 65.2, lane: 1 }, { time: 65.4, lane: 2 }, { time: 65.6, lane: 3 },
       { time: 66.2, lane: 1 }, { time: 66.2, lane: 2 }, { time: 66.8, lane: 0 }, { time: 67.2, lane: 3 },
       { time: 68.0, lane: 0 }, { time: 68.2, lane: 1 }, { time: 68.4, lane: 2 }, { time: 68.6, lane: 3 },
@@ -321,8 +341,6 @@ const SONGS = [
       { time: 76.0, lane: 1 }, { time: 76.4, lane: 2 }, { time: 77.0, lane: 0 }, { time: 77.5, lane: 3 },
       { time: 78.5, lane: 0 }, { time: 78.75, lane: 1 }, { time: 79.0, lane: 2 }, { time: 79.25, lane: 3 },
       { time: 80.0, lane: 0 }, { time: 80.0, lane: 3 }, { time: 80.8, lane: 1 }, { time: 80.8, lane: 2 },
-
-      // [01:25 ~ 01:33] Outro / Finale (곡 마무리)
       { time: 82.0, lane: 0 }, { time: 82.4, lane: 1 }, { time: 82.8, lane: 2 }, { time: 83.2, lane: 3 },
       { time: 84.0, lane: 1 }, { time: 84.4, lane: 2 }, { time: 85.0, lane: 0 }, { time: 85.5, lane: 3 },
       { time: 86.5, lane: 0 }, { time: 86.8, lane: 1 }, { time: 87.1, lane: 2 }, { time: 87.4, lane: 3 },
@@ -339,22 +357,7 @@ const SONGS = [
     bpm: 130,
     notes: [
       { time: 1.0, lane: 0 }, { time: 1.5, lane: 1 }, { time: 2.0, lane: 2 }, { time: 2.5, lane: 3 },
-      { time: 3.0, lane: 1 }, { time: 3.0, lane: 2 }, { time: 3.5, lane: 0 }, { time: 4.0, lane: 3 },
-      { time: 5.0, lane: 0 }, { time: 5.3, lane: 1 }, { time: 5.6, lane: 2 }, { time: 6.0, lane: 3 },
-      { time: 7.0, lane: 1 }, { time: 7.0, lane: 2 }, { time: 8.0, lane: 0 }, { time: 8.0, lane: 3 }
-    ]
-  }
-];
-    id: 'demo',
-    title: 'Demo Beat (Short)',
-    artist: 'System',
-    audioPath: '', // 음원 없이 효과음으로 플레이 가능한 테스트 곡
-    bpm: 130,
-    notes: [
-      { time: 1.0, lane: 0 }, { time: 1.5, lane: 1 }, { time: 2.0, lane: 2 }, { time: 2.5, lane: 3 },
-      { time: 3.0, lane: 1 }, { time: 3.0, lane: 2 }, { time: 3.5, lane: 0 }, { time: 4.0, lane: 3 },
-      { time: 5.0, lane: 0 }, { time: 5.3, lane: 1 }, { time: 5.6, lane: 2 }, { time: 6.0, lane: 3 },
-      { time: 7.0, lane: 1 }, { time: 7.0, lane: 2 }, { time: 8.0, lane: 0 }, { time: 8.0, lane: 3 }
+      { time: 3.0, lane: 1 }, { time: 3.0, lane: 2 }, { time: 3.5, lane: 0 }, { time: 4.0, lane: 3 }
     ]
   }
 ];
@@ -435,7 +438,7 @@ function playBeep(freq = 440, type = 'sine', duration = 0.1) {
 }
 
 // ==========================================
-// 4. 곡 선택 UI 생성 및 이동
+// 4. 곡 선택 UI
 // ==========================================
 function renderSongList() {
   const container = document.getElementById('song-list-container');
@@ -467,7 +470,7 @@ function showSelectScreen() {
 }
 
 // ==========================================
-// 5. 게임 시작 및 실행 제어
+// 5. 게임 시작 및 메인 루프
 // ==========================================
 function selectAndStartGame(song) {
   initAudio();
@@ -516,7 +519,7 @@ function selectAndStartGame(song) {
         const playPromise = bgmAudio.play();
         if (playPromise !== undefined) {
           playPromise.catch(error => {
-            console.warn("오디오 재생 지연 또는 권한 대기 중:", error);
+            console.warn("오디오 재생 오류:", error);
           });
         }
       }
@@ -568,7 +571,7 @@ function gameLoop(timestamp) {
 
   ctx.clearRect(0, 0, containerWidth, containerHeight);
 
-  // 배경 (이미지 없으면 파스텔 핑크 밝은 톤)
+  // 배경 렌더링
   if (loadedImages.bg) {
     ctx.drawImage(loadedImages.bg, 0, 0, containerWidth, containerHeight);
   } else {
@@ -576,7 +579,7 @@ function gameLoop(timestamp) {
     ctx.fillRect(0, 0, containerWidth, containerHeight);
   }
 
-  // 레인 구분선 (은은하게)
+  // 레인 구분을 위한 가이드 라인
   ctx.strokeStyle = 'rgba(255, 182, 193, 0.4)';
   ctx.lineWidth = 2;
   for (let i = 1; i < 4; i++) {
@@ -586,7 +589,7 @@ function gameLoop(timestamp) {
     ctx.stroke();
   }
 
-  // 판정선 (베이비 핑크)
+  // 판정선
   ctx.strokeStyle = '#ff8fa3';
   ctx.lineWidth = 4;
   ctx.beginPath();
@@ -594,10 +597,13 @@ function gameLoop(timestamp) {
   ctx.lineTo(containerWidth, judgmentLineY);
   ctx.stroke();
 
-  // 카운트다운 (NeoDunggeunmo 폰트 적용)
+  // 캔버스 내 DungGeunMo 폰트 명시적 지정
+  const fontStyle = 'DungGeunMo, monospace, sans-serif';
+
+  // 카운트다운
   if (countdown > 0) {
     ctx.fillStyle = '#ff8fa3';
-    ctx.font = 'bold 65px NeoDunggeunmo';
+    ctx.font = `bold 65px ${fontStyle}`;
     ctx.textAlign = 'center';
     ctx.fillText(countdown, containerWidth / 2, containerHeight / 2);
     requestAnimationFrame(gameLoop);
@@ -606,6 +612,7 @@ function gameLoop(timestamp) {
 
   const currentTime = (performance.now() - gameStartTime) / 1000;
 
+  // 노트 그리기
   liveNotes.forEach(note => {
     if (note.hit) return;
 
@@ -635,11 +642,11 @@ function gameLoop(timestamp) {
     }
   });
 
-  // 판정 이펙트 텍스트 (NeoDunggeunmo 폰트 적용)
+  // 판정 텍스트 렌더링
   for (let i = effects.length - 1; i >= 0; i--) {
     const eff = effects[i];
     ctx.fillStyle = eff.text === 'MISS' ? `rgba(255, 99, 132, ${eff.alpha})` : `rgba(255, 143, 163, ${eff.alpha})`;
-    ctx.font = 'bold 24px NeoDunggeunmo';
+    ctx.font = `bold 24px ${fontStyle}`;
     ctx.textAlign = 'center';
     ctx.fillText(eff.text, eff.x, eff.y);
 
@@ -668,7 +675,7 @@ function endGame() {
 }
 
 // ==========================================
-// 6. 키보드 & 터치 이벤트 연결
+// 6. 키보드 & 터치 입력 이벤트
 // ==========================================
 const keyMap = { 'd': 0, 'f': 1, 'j': 2, 'k': 3, '1': 0, '2': 1, '3': 2, '4': 3 };
 
