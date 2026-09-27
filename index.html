@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Pixel Rhythm Game</title>
+  <title>82 Rhythm Game</title>
   <!-- 레트로 픽셀 폰트 로드 -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -19,29 +19,32 @@
       font-family: 'Press Start 2P', cursive;
     }
 
-    body {
+ body {
       background-color: #000000;
       color: #ffffff;
       display: flex;
       justify-content: center;
       align-items: center;
       min-height: 100vh;
+      min-height: 100dvh; /* 모바일 브라우저 가변 높이 반영 */
       overflow: hidden;
     }
 
-#game-container {
+    /* 하단 주소창에 가리지 않도록 최대 높이 조정 및 비율 완화 */
+    #game-container {
       position: relative;
-      width: 100%;
-      max-width: 400px;
-      height: 90vh;
-      max-height: 700px;
+      width: 92vw;
+      max-width: 390px;
+      height: 82dvh; /* 화면 높이에 맞춰 반응형 높이 적용 */
+      max-height: 720px;
       background-color: #050505;
       border: 4px solid #FDC7FB;
+      border-radius: 24px;
       box-shadow: 0 0 20px rgba(255, 105, 199, 0.4);
       display: flex;
       flex-direction: column;
+      overflow: hidden;
     }
-
     /* 상단 HUD (점수/콤보) */
     #hud {
       display: flex;
@@ -131,7 +134,7 @@
 
     <!-- 시작 오버레이 -->
     <div id="start-screen" class="screen">
-      <h1>ROMANTIC<br>RHYTHM</h1>
+      <h1>82 RHYTHM</h1>
       <h2>2026 WORK BY YUNSEON</h2>
       <button class="start-btn" id="start-btn">START GAME</button>
     </div>
@@ -155,7 +158,7 @@ function resize() {
   width = canvas.width = wrapper.clientWidth;
   height = canvas.height = wrapper.clientHeight;
   laneWidth = width / 4;
-  judgeLineY = height - 100; // 판정선을 캔버스 최하단 영역으로 통합
+  judgeLineY = height - 60; // 판정선을 캔버스 최하단 영역으로 통합
 }
 window.addEventListener('resize', resize);
 resize();
