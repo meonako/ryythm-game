@@ -137,7 +137,7 @@
   <!-- 메인 대기 화면 -->
   <div id="start-screen" class="screen">
     <h1>4-LANE RHYTHM</h1>
-    <p>모바일 터치 또는 키보드 (D, F, J, K)로 플레이하세요.</p>
+    <p>윤대통령 That's me</p>
     <button class="btn" id="start-btn">GAME START</button>
   </div>
 
@@ -157,7 +157,7 @@
 const ASSETS_CONFIG = {
   // 이미지가 없거나 경로가 틀려도 오류가 나지 않게 구성되었습니다.
   bg: './images/bg.jpg',
-  audio: './audio/Gossip.mp3',
+
   notes: [
     './images/note_red.png',   // 레인 0
     './images/note_blue.png',  // 레인 1
@@ -169,7 +169,7 @@ const ASSETS_CONFIG = {
 // ==========================================
 // 2. 기본 곡 및 노트 배치 데이터 (1초, 2초, 3초...)
 // ==========================================
-const DEMO_SONG = {
+const DEMO_SONG = {'./audio/Gossip.mp3',
   bpm: 120,
   notes: [
     { time: 1.0, lane: 0 },
