@@ -564,7 +564,7 @@ function gameLoop(timestamp) {
   // 카운트다운 출력
   if (countdown > 0) {
     ctx.fillStyle = '#00f0ff';
-    ctx.font = 'bold 60px sans-serif';
+    ctx.font = 'bold 60px DungGeunMo';
     ctx.textAlign = 'center';
     ctx.fillText(countdown, containerWidth / 2, containerHeight / 2);
     requestAnimationFrame(gameLoop);
@@ -607,7 +607,7 @@ function gameLoop(timestamp) {
   for (let i = effects.length - 1; i >= 0; i--) {
     const eff = effects[i];
     ctx.fillStyle = eff.text === 'MISS' ? `rgba(255, 0, 0, ${eff.alpha})` : `rgba(0, 240, 255, ${eff.alpha})`;
-    ctx.font = 'bold 22px sans-serif';
+    ctx.font = 'bold 22px DungGeunMo';
     ctx.textAlign = 'center';
     ctx.fillText(eff.text, eff.x, eff.y);
 
