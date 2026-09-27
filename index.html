@@ -116,26 +116,7 @@
       transform: scale(0.98);
     }
 
-    /* 하단 터치 패드 */
-    #touch-pads {
-      display: flex;
-      height: 70px;
-      background-color: #111;
-      border-top: 2px solid #FF69C7;
-    }
 
-    .pad {
-      flex: 1;
-      border-right: 1px solid #333;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-    }
-
-    .pad:last-child { border-right: none; }
-    .pad.active {
-      background-color: #FF69C7;
-    }
   </style>
 </head>
 <body>
@@ -160,13 +141,7 @@
     <div id="result-screen" class="screen hidden"></div>
   </div>
 
-  <!-- 하단 터치 영역 (글자 제거됨) -->
-  <div id="touch-pads">
-    <div class="pad" id="pad-0"></div>
-    <div class="pad" id="pad-1"></div>
-    <div class="pad" id="pad-2"></div>
-    <div class="pad" id="pad-3"></div>
-  </div>
+
 </div>
 
 <script>
