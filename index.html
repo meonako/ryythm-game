@@ -286,7 +286,7 @@ function gameLoop(timestamp) {
   const currentTime = (timestamp - startTime) / 1000;
 
   // 1. 화면 소거 (반투명 검은색으로 덮어 배경 사진이 보이면서 노트 시인성 확보)
-  ctx.fillStyle = 'rgba(5, 5, 5, 0.3)'; // 숫자가 낮을수록 배경 사진이 더 선명하게 보입니다 (0.0 ~ 1.0)
+  ctx.fillStyle = 'rgba(5, 5, 5, 0.75)'; // 숫자가 낮을수록 배경 사진이 더 선명하게 보입니다 (0.0 ~ 1.0)
   ctx.fillRect(0, 0, width, height);
   
   // 2. 레인 구분선 그리기
