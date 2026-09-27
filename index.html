@@ -68,31 +68,13 @@
       background-color: #000000;
     }
 
-    /* ★ 배경 이미지 전용 레이어 */
-    #bg-layer {
-      position: absolute;
-      top: 0; left: 0; width: 100%; height: 100%;
-      background-color: #000000;
-      z-index: 1;
-      display: none; /* 평소엔 숨김 */
-    }
-
-    /* 게임 시작 시 활성화될 클래스 (Cover.png 배경) */
-    #bg-layer.playing-bg {
-      display: block;
-      background-image: url('./Cover.png');
-      background-size: cover;
-      background-position: center;
-      background-repeat: no-repeat;
-    }
-
     canvas {
       position: relative;
       width: 100%;
       height: 100%;
       display: block;
       touch-action: none;
-      background: transparent; /* 투명하게 설정하여 뒤의 bg-layer 이미지가 비치도록 함 */
+      background-color: #000000;
       z-index: 2;
     }
 
@@ -154,9 +136,6 @@
   </div>
 
   <div id="canvas-wrapper">
-    <!-- ★ 배경 이미지 레이어 -->
-    <div id="bg-layer"></div>
-
     <canvas id="gameCanvas"></canvas>
 
     <!-- 시작 오버레이 (완전한 검은색 배경) -->
@@ -178,7 +157,6 @@
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
 const wrapper = document.getElementById('canvas-wrapper');
-const bgLayer = document.getElementById('bg-layer');
 
 let width, height, laneWidth, judgeLineY;
 
@@ -190,6 +168,14 @@ function resize() {
 }
 window.addEventListener('resize', resize);
 resize();
+
+// ★ 배경 이미지 객체 로드
+const bgImage = new Image();
+bgImage.src = './Cover.png';
+let isBgLoaded = false;
+bgImage.onload = () => {
+  isBgLoaded = true;
+};
 
 // 외부 오디오 설정
 const bgm = new Audio();
@@ -270,10 +256,9 @@ function startGame() {
   
   activeNotes = SONG_PATTERN.map(n => ({ ...n, hit: false, missed: false }));
   
-  // 시작 화면 숨기기 및 배경 레이어(Cover.png) 활성화
+  // 시작 화면 숨기기
   document.getElementById('start-screen').classList.add('hidden');
   document.getElementById('result-screen').classList.add('hidden');
-  bgLayer.classList.add('playing-bg');
 
   updateHUD();
 
@@ -316,8 +301,19 @@ function gameLoop(timestamp) {
     return;
   }
 
-  // ★ 중요: 배경(Cover.png)이 선명하게 보이도록 검은색 사각형으로 덮지 않고 완전 투명하게 클리어
+  // 화면 초기화
   ctx.clearRect(0, 0, width, height);
+
+  // ★ 배경 이미지(Cover.png)를 캔버스에 직접 렌더링
+  if (isBgLoaded) {
+    ctx.drawImage(bgImage, 0, 0, width, height);
+    // 노트가 잘 보이도록 배경 위에 살짝 어두운 필터 씌우기 (투명도 조절 가능)
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
+    ctx.fillRect(0, 0, width, height);
+  } else {
+    ctx.fillStyle = '#000000';
+    ctx.fillRect(0, 0, width, height);
+  }
 
   // 레인 구분선 그리기 (약간 반투명한 분홍빛)
   ctx.strokeStyle = 'rgba(255, 105, 199, 0.25)';
@@ -439,8 +435,6 @@ function endGame() {
   if (!isPlaying) return;
   isPlaying = false;
   try { bgm.pause(); } catch(e) {}
-
-  bgLayer.classList.remove('playing-bg');
 
   const totalNotes = SONG_PATTERN.length;
 
