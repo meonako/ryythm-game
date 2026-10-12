@@ -535,12 +535,28 @@ document.querySelectorAll('.song-select-btn').forEach(btn => {
   });
 });
 
-const keyMap = { 'd': 0, 'f': 1, 'j': 2, 'k': 3, 'D': 0, 'F': 1, 'J': 2, 'K': 3 };
+
+const keyMap = {
+  d: 0,
+  f: 1,
+  j: 2,
+  k: 3
+};
+
 window.addEventListener('keydown', (e) => {
-  if (e.repeat) return;
-  const lane = keyMap[e.key];
-  if (lane !== undefined) triggerInput(lane);
+  const key = e.key.toLowerCase();
+
+  if (keyMap[key] === undefined) return;
+
+  e.preventDefault();
+
+  console.log('키보드 입력:', key, '레인:', keyMap[key]);
+
+  if (isPlaying) {
+    triggerInput(keyMap[key]);
+  }
 });
+
 
 canvas.addEventListener('touchstart', (e) => {
   if (!isPlaying) return;
