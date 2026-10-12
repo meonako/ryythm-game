@@ -536,26 +536,23 @@ document.querySelectorAll('.song-select-btn').forEach(btn => {
 });
 
 
+
 const keyMap = {
-  d: 0,
-  f: 1,
-  j: 2,
-  k: 3
+  d: 0, f: 1, j: 2, k: 3
 };
 
-window.addEventListener('keydown', (e) => {
+document.addEventListener('keydown', (e) => {
   const key = e.key.toLowerCase();
 
-  if (keyMap[key] === undefined) return;
+  if (!(key in keyMap)) return;
 
   e.preventDefault();
 
-  console.log('키보드 입력:', key, '레인:', keyMap[key]);
+  if (!isPlaying) return;
 
-  if (isPlaying) {
-    triggerInput(keyMap[key]);
-  }
+  triggerInput(keyMap[key]);
 });
+
 
 
 canvas.addEventListener('touchstart', (e) => {
