@@ -374,12 +374,7 @@ function drawEffects(delta) {
       const inner = 12 + p * 10;
       const outer = 27 + p * 35;
 
-      ctx.beginPath();
-      ctx.moveTo(e.x + Math.cos(angle)*inner, e.y + Math.sin(angle)*inner);
-      ctx.lineTo(e.x + Math.cos(angle)*outer, e.y + Math.sin(angle)*outer);
-      ctx.strokeStyle = '#fff';
-      ctx.lineWidth = j % 2 === 0 ? 2 : 1;
-      ctx.stroke();
+      
     }
 
     /* 흰색 별 + 핑크 발광: 테두리 별도 색상 없음 */
