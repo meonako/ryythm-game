@@ -4,7 +4,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>チェキ☆Rhythm</title>
+<title>チェキ☆リズム</title>
 <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
 
 <style>
@@ -89,7 +89,7 @@ canvas {
 
 h1 {
   color: #fcd3f2;
-  font-size: 24px;
+  font-size: 45px;
   line-height: 1.5;
   margin-bottom: 16px;
   text-shadow: 3px 3px #FF69C7;
@@ -131,7 +131,7 @@ h2 {
     <canvas id="gameCanvas"></canvas>
 
     <div id="start-screen" class="screen">
-      <h1>チェキ☆Rhythm</h1>
+      <h1>チェキ☆リズム</h1>
       <h2>2026 WORK BY YUN</h2>
       <button id="start-game-btn" class="start-btn">START GAME</button>
     </div>
@@ -368,13 +368,6 @@ function drawEffects(delta) {
     ctx.arc(e.x,e.y,42*(1-p)+3,0,Math.PI*2);
     ctx.fill();
 
-    /* 간결한 광선 */
-    for (let j = 0; j < 8; j++) {
-      const angle = j * Math.PI / 4;
-      const inner = 12 + p * 10;
-      const outer = 27 + p * 35;
-
-      
     }
 
     /* 흰색 별 + 핑크 발광: 테두리 별도 색상 없음 */
@@ -458,6 +451,8 @@ function gameLoop(timestamp) {
   ctx.restore();
 
   /* 반투명 사이버 네온 타일 */
+  
+  /* 하트 십자 네온 타일 */
   for (const note of activeNotes) {
     if (note.hit || note.missed) continue;
 
@@ -472,59 +467,54 @@ function gameLoop(timestamp) {
       continue;
     }
 
-    if (noteY > -30 && noteY < height+30) {
-      const x = note.lane*laneWidth+7;
-      const y = noteY-9;
-      const w = laneWidth-14;
-      const h = 18;
-
-      const cyan = note.lane===1 || note.lane===2;
-      const main = cyan ? '#70efff' : '#ff8fe8';
+    if (noteY > -40 && noteY < height+40) {
+      const x = note.lane*laneWidth + laneWidth/2;
+      const y = noteY;
 
       ctx.save();
+      ctx.translate(x, y);
 
-      /* 외부의 은은한 발광 */
-      ctx.shadowColor = main;
-      ctx.shadowBlur = 10;
+      // 레인 폭과 노트 높이에 맞춰 모양 크기 조절
+      const s = Math.min((laneWidth-18)/100, 0.28);
+      ctx.scale(s, s);
 
-      /* 유리 같은 반투명 그라데이션 */
-      const tileGradient = ctx.createLinearGradient(x,y,x+w,y+h);
-      tileGradient.addColorStop(0, cyan
-        ? 'rgba(90,225,255,0.35)'
-        : 'rgba(255,115,225,0.35)');
-      tileGradient.addColorStop(0.5, 'rgba(255,255,255,0.13)');
-      tileGradient.addColorStop(1, cyan
-        ? 'rgba(90,225,255,0.22)'
-        : 'rgba(255,115,225,0.22)');
+      // 판정선과 어울리는 연핑크 발광
+      ctx.strokeStyle = '#ffc4f2';
+      ctx.lineWidth = 7;
+      ctx.lineCap = 'round';
+      ctx.lineJoin = 'round';
+      ctx.shadowColor = '#ff69c7';
+      ctx.shadowBlur = 18;
 
-      ctx.fillStyle = tileGradient;
-      ctx.fillRect(x,y,w,h);
-
-      /* 얇고 투명한 네온 테두리 */
-      ctx.shadowBlur = 0;
-      ctx.strokeStyle = cyan
-        ? 'rgba(130,240,255,0.85)'
-        : 'rgba(255,165,240,0.85)';
-      ctx.lineWidth = 1;
-      ctx.strokeRect(x+0.5,y+0.5,w-1,h-1);
-
-      /* 상단 유리 반사광 */
-      ctx.strokeStyle = 'rgba(255,255,255,0.55)';
-      ctx.lineWidth = 1;
       ctx.beginPath();
-      ctx.moveTo(x+3,y+2);
-      ctx.lineTo(x+w-3,y+2);
-      ctx.stroke();
 
-      /* 중앙의 가는 빛줄기 */
-      ctx.fillStyle = cyan
-        ? 'rgba(180,250,255,0.25)'
-        : 'rgba(255,210,250,0.25)';
-      ctx.fillRect(x+2,y+h/2-1,w-4,2);
+      // 위쪽 세로 막대와 하트 윗부분
+      ctx.moveTo(0, -28);
+      ctx.lineTo(0, -8);
+
+      ctx.moveTo(0, -8);
+      ctx.bezierCurveTo(-12, -23, -37, -22, -37, -3);
+      ctx.bezierCurveTo(-37, 10, -17, 25, 0, 38);
+      ctx.bezierCurveTo(17, 25, 37, 10, 37, -3);
+      ctx.bezierCurveTo(37, -22, 12, -23, 0, -8);
+
+      // 아래쪽 세로 막대
+      ctx.moveTo(0, 24);
+      ctx.lineTo(0, 43);
+
+      // 좌우 가로 막대
+      ctx.moveTo(-47, 3);
+      ctx.lineTo(-25, 3);
+
+      ctx.moveTo(25, 3);
+      ctx.lineTo(47, 3);
+
+      ctx.stroke();
 
       ctx.restore();
     }
   }
+
 
   drawEffects(delta);
   requestAnimationFrame(gameLoop);
