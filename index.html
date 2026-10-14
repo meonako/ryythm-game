@@ -38,7 +38,7 @@ body {
   flex-direction: column;
   overflow: hidden;
   border: none
-  box-shadow: none
+  box-shadow: none;
   background: #000;
 }
 
@@ -342,6 +342,7 @@ function addEffect(lane) {
   });
 }
 
+
 function drawEffects(delta) {
   for (let i = effects.length - 1; i >= 0; i--) {
     const e = effects[i];
@@ -354,10 +355,10 @@ function drawEffects(delta) {
     ctx.save();
     ctx.globalCompositeOperation = 'lighter';
 
-    /* 핑크빛 발광 원형 파동 */
+    // 핑크빛 발광 원형 파동
     ctx.globalAlpha = alpha;
     ctx.strokeStyle = '#ff9cf4';
-    ctx.lineWidth = Math.max(1, 4 * (1-p));
+    ctx.lineWidth = Math.max(1, 4 * (1 - p));
     ctx.shadowColor = '#ff69e8';
     ctx.shadowBlur = 22;
 
@@ -365,20 +366,22 @@ function drawEffects(delta) {
     ctx.ellipse(e.x, e.y, radius, radius * 0.45, 0, 0, Math.PI * 2);
     ctx.stroke();
 
-    /* 중심부의 핑크빛 조명 */
-    const glow = ctx.createRadialGradient(e.x,e.y,0,e.x,e.y,38*(1-p)+3);
+    // 중심부의 핑크빛 조명
+    const glow = ctx.createRadialGradient(
+      e.x, e.y, 0,
+      e.x, e.y, 38 * (1 - p) + 3
+    );
+
     glow.addColorStop(0, `rgba(255,255,255,${alpha})`);
-    glow.addColorStop(0.3, `rgba(255,160,245,${alpha*0.75})`);
+    glow.addColorStop(0.3, `rgba(255,160,245,${alpha * 0.75})`);
     glow.addColorStop(1, 'rgba(255,80,220,0)');
 
     ctx.fillStyle = glow;
     ctx.beginPath();
-    ctx.arc(e.x,e.y,42*(1-p)+3,0,Math.PI*2);
+    ctx.arc(e.x, e.y, 42 * (1 - p) + 3, 0, Math.PI * 2);
     ctx.fill();
 
-    }
-
-    /* 흰색 별 + 핑크 발광: 테두리 별도 색상 없음 */
+    // 흰색 별 + 핑크 발광
     for (const star of e.stars) {
       const dist = star.distance * (0.35 + p * 1.1);
       const sx = e.x + Math.cos(star.angle) * dist;
@@ -396,9 +399,12 @@ function drawEffects(delta) {
 
     ctx.restore();
 
-    if (e.age >= e.duration) effects.splice(i, 1);
+    if (e.age >= e.duration) {
+      effects.splice(i, 1);
+    }
   }
 }
+
 
 let lastFrameTime = 0;
 
