@@ -4,9 +4,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>82 Rhythm</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<title> Type Ryhthm </title>
 <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
 
 <style>
@@ -20,7 +18,7 @@
 
 body {
   background: #000;
-  color: #fff;
+  color: white;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -36,24 +34,23 @@ body {
   max-width: 430px;
   height: 100vh;
   height: 100dvh;
-  background: #000;
   display: flex;
   flex-direction: column;
   overflow: hidden;
   border: 2px solid #FF69C7;
-  box-shadow: 0 0 20px rgba(255,105,199,.4);
+  box-shadow: 0 0 20px #ff69c766;
+  background: #000;
 }
 
 #hud {
   height: 45px;
   flex-shrink: 0;
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  padding: 0 15px;
-  background: #000;
+  justify-content: space-between;
+  padding: 0 12px;
   border-bottom: 2px solid #FDC7FB;
-  font-size: .7rem;
+  font-size: 9px;
   z-index: 10;
 }
 
@@ -62,78 +59,64 @@ body {
 
 #canvas-wrapper {
   position: relative;
-  width: 100%;
   flex: 1;
   min-height: 0;
-  background: #000;
   overflow: hidden;
+  background: #000;
 }
 
 canvas {
-  position: absolute;
-  inset: 0;
+  display: block;
   width: 100%;
   height: 100%;
-  display: block;
   touch-action: none;
-  background: #000;
-  z-index: 2;
 }
 
 .screen {
   position: absolute;
   inset: 0;
-  background: rgba(0,0,0,.95);
+  z-index: 20;
+  background: rgba(0,0,0,.94);
   display: flex;
   flex-direction: column;
-  justify-content: center;
   align-items: center;
+  justify-content: center;
   text-align: center;
   padding: 20px;
-  z-index: 999;
 }
 
 .hidden { display: none !important; }
 
 h1 {
   color: #fcd3f2;
-  font-size: 2rem;
-  margin-bottom: 15px;
+  font-size: 24px;
   line-height: 1.5;
+  margin-bottom: 16px;
   text-shadow: 3px 3px #FF69C7;
 }
 
 h2 {
-  color: #fff;
-  font-size: .75rem;
+  font-size: 10px;
+  line-height: 1.8;
   margin-bottom: 25px;
 }
 
-.start-btn,
-.song-select-btn {
+.start-btn, .song-select-btn {
   background: transparent;
-  color: #fff;
+  color: white;
   border: none;
-  font-family: 'Press Start 2P', cursive;
+  font-family: inherit;
   cursor: pointer;
-  padding: 12px 20px;
-  margin: 8px 0;
-  transition: .1s;
+  padding: 12px;
+  margin: 5px;
+  font-size: 11px;
 }
 
-.start-btn { font-size: .9rem; }
-
-.song-select-btn {
-  font-size: 1rem;
-  margin-bottom: 20px;
-  word-break: keep-all;
-}
-
-.start-btn:active,
-.song-select-btn:active {
+.start-btn:active, .song-select-btn:active {
   color: #FF69C7;
-  transform: scale(1.05);
 }
+
+.song-select-btn { font-size: 13px; }
 </style>
 </head>
 
@@ -148,7 +131,7 @@ h2 {
     <canvas id="gameCanvas"></canvas>
 
     <div id="start-screen" class="screen">
-      <h1>82 RHYTHM</h1>
+      <h1>Type Rhythm</h1>
       <h2>2026 WORK BY YUN</h2>
       <button id="start-game-btn" class="start-btn">START GAME</button>
     </div>
@@ -156,8 +139,8 @@ h2 {
     <div id="song-select-screen" class="screen hidden">
       <h1>SELECT SONG</h1>
       <h2>CHOOSE YOUR TRACK</h2>
-      <button class="song-select-btn" data-song="gossip">&gt; GOSSIP</button>
-      <button class="song-select-btn" data-song="trembling">&gt; 떨리는 맘</button>
+      <button class="song-select-btn" data-song="gossip">GOSSIP</button>
+      <button class="song-select-btn" data-song="trembling">떨리는 맘</button>
     </div>
 
     <div id="result-screen" class="screen hidden"></div>
@@ -191,78 +174,8 @@ function resize() {
 window.addEventListener('resize', resize);
 resize();
 
-/* ---------- 배경 ---------- */
-
 const bgImage = new Image();
 let isBgLoaded = false;
-
-bgImage.onload = () => { isBgLoaded = true; };
-bgImage.onerror = () => { isBgLoaded = false; };
-bgImage.src = './cover.png';
-
-/* ---------- 채보 ---------- */
-
-function generatePattern(duration, bpm, offset, seed) {
-  const pattern = [];
-  const beat = 60 / bpm;
-
-  let state = seed >>> 0;
-  let previousLane = -1;
-  let previousDouble = -1;
-
-  function rand() {
-    state = (state * 1664525 + 1013904223) >>> 0;
-    return state / 4294967296;
-  }
-
-  function pickLane(exclude = []) {
-    const choices = [0,1,2,3].filter(
-      lane => !exclude.includes(lane)
-    );
-    return choices[Math.floor(rand() * choices.length)];
-  }
-
-  let beatIndex = 0;
-
-  for (
-    let time = offset;
-    time < duration - 0.2;
-    time += beat, beatIndex++
-  ) {
-    const variation = rand();
-
-    if (variation < 0.10 && beatIndex % 4 !== 0) {
-      continue;
-    }
-
-    const lane = pickLane([previousLane]);
-    pattern.push({ t: time, l: lane });
-    previousLane = lane;
-
-    if (rand() < 0.30) {
-      const offbeat = time + beat / 2;
-
-      if (offbeat < duration - 0.2) {
-        const nextLane = pickLane([previousLane]);
-        pattern.push({ t: offbeat, l: nextLane });
-        previousLane = nextLane;
-      }
-    }
-
-    if (rand() < 0.13 && beatIndex !== previousDouble) {
-      const secondLane = pickLane([lane]);
-      pattern.push({ t: time, l: secondLane });
-      previousDouble = beatIndex;
-    }
-  }
-
-  return pattern
-    .sort((a, b) => a.t - b.t || a.l - b.l)
-    .map(note => ({
-      time: Number(note.t.toFixed(3)),
-      lane: note.l
-    }));
-}
 
 const songs = {
   gossip: {
@@ -279,8 +192,53 @@ const songs = {
 
 let activeSongKey = 'gossip';
 let currentBgm = new Audio();
-currentBgm.preload = 'auto';
 const NOTE_SPEED = 550;
+
+function generatePattern(duration, bpm, offset, seed) {
+  const pattern = [];
+  const beat = 60 / bpm;
+  let state = seed >>> 0;
+  let previousLane = -1;
+  let previousDouble = -1;
+
+  function rand() {
+    state = (state * 1664525 + 1013904223) >>> 0;
+    return state / 4294967296;
+  }
+
+  function pickLane(exclude = []) {
+    const choices = [0,1,2,3].filter(l => !exclude.includes(l));
+    return choices[Math.floor(rand() * choices.length)];
+  }
+
+  let beatIndex = 0;
+
+  for (let time = offset; time < duration - 0.2; time += beat, beatIndex++) {
+    if (rand() < 0.10 && beatIndex % 4 !== 0) continue;
+
+    const lane = pickLane([previousLane]);
+    pattern.push({t: time, l: lane});
+    previousLane = lane;
+
+    if (rand() < 0.30) {
+      const offbeat = time + beat / 2;
+      if (offbeat < duration - 0.2) {
+        const nextLane = pickLane([previousLane]);
+        pattern.push({t: offbeat, l: nextLane});
+        previousLane = nextLane;
+      }
+    }
+
+    if (rand() < 0.13 && beatIndex !== previousDouble) {
+      pattern.push({t: time, l: pickLane([lane])});
+      previousDouble = beatIndex;
+    }
+  }
+
+  return pattern
+    .sort((a,b) => a.t - b.t || a.l - b.l)
+    .map(n => ({time: Number(n.t.toFixed(3)), lane: n.l}));
+}
 
 let isPlaying = false;
 let score = 0;
@@ -289,57 +247,29 @@ let maxCombo = 0;
 let perfectCount = 0;
 let greatCount = 0;
 let missCount = 0;
-
 let activeNotes = [];
-let effects = [];
-let lastFrameTime = 0;
 
-/* ---------- 화면 전환 ---------- */
+/* 이펙트는 사용자가 성공 판정을 냈을 때만 생성 */
+let effects = [];
 
 function goToSongSelect() {
-  isPlaying = false;
-  currentBgm.pause();
-
   document.getElementById('start-screen').classList.add('hidden');
   document.getElementById('song-select-screen').classList.remove('hidden');
   document.getElementById('result-screen').classList.add('hidden');
 }
 
-function updateHUD() {
-  document.getElementById('score').innerText =
-    String(score).padStart(6, '0');
-
-  document.getElementById('combo').innerText = combo;
-}
-
-/* ---------- 게임 시작 ---------- */
-
 function startGame(songKey) {
-  const selectedSong = songs[songKey];
-  if (!selectedSong) return;
-
-  isPlaying = false;
-  currentBgm.pause();
+  const song = songs[songKey];
+  if (!song) return;
 
   activeSongKey = songKey;
-  score = 0;
-  combo = 0;
-  maxCombo = 0;
-  perfectCount = 0;
-  greatCount = 0;
-  missCount = 0;
+  score = combo = maxCombo = 0;
+  perfectCount = greatCount = missCount = 0;
   effects = [];
 
-  activeNotes = selectedSong.pattern.map(note => ({
-    ...note,
-    hit: false,
-    missed: false
+  activeNotes = song.pattern.map(n => ({
+    ...n, hit: false, missed: false
   }));
-
-  isBgLoaded = false;
-  bgImage.onload = () => { isBgLoaded = true; };
-  bgImage.onerror = () => { isBgLoaded = false; };
-  bgImage.src = selectedSong.bg;
 
   document.getElementById('start-screen').classList.add('hidden');
   document.getElementById('song-select-screen').classList.add('hidden');
@@ -347,457 +277,265 @@ function startGame(songKey) {
 
   updateHUD();
 
-  currentBgm.src = selectedSong.src;
-  currentBgm.currentTime = 0;
+  bgImage.onload = () => { isBgLoaded = true; };
+  bgImage.onerror = () => { isBgLoaded = false; };
+  isBgLoaded = false;
+  bgImage.src = song.bg;
+
+  currentBgm.pause();
+  currentBgm = new Audio(song.src);
   currentBgm.onended = endGame;
 
   isPlaying = true;
-  lastFrameTime = 0;
-
-  currentBgm.play().catch(error => {
-    console.error('Audio playback error:', error);
-  });
+  currentBgm.play().catch(err => console.log('Audio error:', err));
 
   requestAnimationFrame(gameLoop);
 }
 
-/* ---------- 배경과 레인 ---------- */
-
-function drawBackground() {
-  ctx.fillStyle = '#000';
-  ctx.fillRect(0, 0, width, height);
-
-  if (isBgLoaded && bgImage.complete && bgImage.naturalWidth > 0) {
-    ctx.drawImage(bgImage, 0, 0, width, height);
-
-    ctx.fillStyle = 'rgba(0,0,0,0.5)';
-    ctx.fillRect(0, 0, width, height);
-  }
-
-  for (let i = 1; i < 4; i++) {
-    ctx.strokeStyle = 'rgba(255,105,199,0.25)';
-    ctx.lineWidth = 2;
-    ctx.beginPath();
-    ctx.moveTo(i * laneWidth, 0);
-    ctx.lineTo(i * laneWidth, height);
-    ctx.stroke();
-  }
-
-  ctx.save();
-  ctx.shadowColor = '#FF69C7';
-  ctx.shadowBlur = 12;
-  ctx.strokeStyle = '#FF69C7';
-  ctx.lineWidth = 4;
-  ctx.beginPath();
-  ctx.moveTo(0, judgeLineY);
-  ctx.lineTo(width, judgeLineY);
-  ctx.stroke();
-  ctx.restore();
+function updateHUD() {
+  document.getElementById('score').textContent = String(score).padStart(6,'0');
+  document.getElementById('combo').textContent = combo;
 }
 
-/* ---------- 노트 ---------- */
-
-function drawNotes(currentTime) {
-  activeNotes.forEach(note => {
-    if (note.hit || note.missed) return;
-
-    const timeDiff = note.time - currentTime;
-    const noteY = judgeLineY - timeDiff * NOTE_SPEED;
-    const noteHeight = 18;
-
-    if (timeDiff < -0.18) {
-      note.missed = true;
-      combo = 0;
-      missCount++;
-      updateHUD();
-
-      // MISS에는 별이나 링 이펙트를 만들지 않는다.
-      return;
-    }
-
-    if (noteY < -20 || noteY > height + 20) return;
-
-    const x = note.lane * laneWidth + 6;
-    const w = laneWidth - 12;
-
-    const mainColor =
-      (note.lane === 0 || note.lane === 3)
-      ? '#FDC7FB'
-      : '#45EFFF';
-
-    ctx.save();
-    ctx.shadowColor = mainColor;
-    ctx.shadowBlur = 15;
-
-    const gradient = ctx.createLinearGradient(
-      x, noteY - noteHeight / 2,
-      x, noteY + noteHeight / 2
-    );
-
-    gradient.addColorStop(0, '#FFFFFF');
-    gradient.addColorStop(0.35, mainColor);
-    gradient.addColorStop(1, '#FD5DBD');
-
-    ctx.fillStyle = gradient;
-    ctx.fillRect(x, noteY - noteHeight / 2, w, noteHeight);
-
-    ctx.restore();
-  });
-}
-
-/* ---------- 선명한 5각 별 ---------- */
-
-function drawStar(x, y, outerRadius, innerRadius, rotation, color) {
-  ctx.save();
-  ctx.translate(x, y);
-  ctx.rotate(rotation);
-
+/* 별 모양을 확실하게 그리는 함수 */
+function drawStar(x, y, outerRadius, innerRadius, rotation = 0) {
   ctx.beginPath();
 
   for (let i = 0; i < 10; i++) {
-    const angle = -Math.PI / 2 + i * Math.PI / 5;
+    const angle = rotation - Math.PI / 2 + i * Math.PI / 5;
     const radius = i % 2 === 0 ? outerRadius : innerRadius;
-
-    const px = Math.cos(angle) * radius;
-    const py = Math.sin(angle) * radius;
+    const px = x + Math.cos(angle) * radius;
+    const py = y + Math.sin(angle) * radius;
 
     if (i === 0) ctx.moveTo(px, py);
     else ctx.lineTo(px, py);
   }
 
   ctx.closePath();
-  ctx.fillStyle = color;
-  ctx.shadowColor = color;
-  ctx.shadowBlur = 8;
-  ctx.fill();
-
-  ctx.lineWidth = 1.5;
-  ctx.strokeStyle = '#FFFFFF';
-  ctx.stroke();
-
-  ctx.restore();
 }
 
-/* ---------- 성공 판정 이펙트만 생성 ---------- */
-
-function addHitEffect(lane, type) {
+/* 눌렀을 때만 호출: 별 + 광선 + 원형 충격파 */
+function addEffect(lane) {
   const x = lane * laneWidth + laneWidth / 2;
   const y = judgeLineY;
-  const perfect = type === 'PERFECT';
-
-  const colors = perfect
-    ? ['#FFFFFF', '#FFB9F4', '#FF69C7', '#7DF9FF']
-    : ['#FFFFFF', '#7DF9FF', '#45DFFF', '#FFB9F4'];
 
   effects.push({
-    kind: 'burst',
     x, y,
     age: 0,
-    duration: perfect ? 0.62 : 0.45,
-    perfect,
-    colors
-  });
+    duration: 520,
+    stars: Array.from({length: 11}, (_, i) => {
+      const angle = Math.PI * 2 * i / 11 + Math.random() * 0.25;
+      const distance = 24 + Math.random() * 42;
 
-  // 뾰족한 별 파티클
-  const count = perfect ? 16 : 10;
-
-  for (let i = 0; i < count; i++) {
-    const angle =
-      (Math.PI * 2 * i / count) +
-      (Math.random() - 0.5) * 0.2;
-
-    const speed =
-      (perfect ? 130 : 90) + Math.random() * 100;
-
-    effects.push({
-      kind: 'particle',
-      x, y,
-      vx: Math.cos(angle) * speed,
-      vy: Math.sin(angle) * speed,
-      age: 0,
-      duration: 0.55 + Math.random() * 0.2,
-      size: perfect
-        ? 9 + Math.random() * 7
-        : 7 + Math.random() * 5,
-      rotation: Math.random() * Math.PI,
-      spin: (Math.random() - 0.5) * 5,
-      color: [
-        '#FFFFFF',
-        '#FFB9F4',
-        '#FF69C7',
-        '#7DF9FF'
-      ][Math.floor(Math.random() * 4)]
-    });
-  }
-
-  effects.push({
-    kind: 'flash',
-    x, y,
-    age: 0,
-    duration: 0.22,
-    color: perfect ? '#FFB9F4' : '#7DF9FF'
-  });
-
-  effects.push({
-    kind: 'text',
-    x,
-    y: y - 30,
-    text: type,
-    age: 0,
-    duration: 0.55,
-    color: perfect ? '#FFFFFF' : '#7DF9FF'
+      return {
+        angle,
+        distance,
+        size: 5 + Math.random() * 10,
+        rotation: Math.random() * Math.PI
+      };
+    })
   });
 }
 
-/* ---------- 이펙트 애니메이션 ---------- */
-
-function drawEffects(dt) {
+function drawEffects(delta) {
   for (let i = effects.length - 1; i >= 0; i--) {
-    const effect = effects[i];
-    effect.age += dt;
+    const e = effects[i];
+    e.age += delta;
 
-    const progress = Math.min(
-      effect.age / effect.duration, 1
-    );
+    const p = Math.min(e.age / e.duration, 1);
+    const alpha = 1 - p;
+    const radius = 12 + p * 72;
 
-    const alpha = Math.max(0, 1 - progress);
+    ctx.save();
+    ctx.globalCompositeOperation = 'lighter';
 
-    if (progress >= 1) {
-      effects.splice(i, 1);
-      continue;
+    /* 분홍색 원형 충격파 */
+    ctx.globalAlpha = alpha;
+    ctx.strokeStyle = '#ffb9fa';
+    ctx.lineWidth = Math.max(1, 5 * (1-p));
+    ctx.shadowColor = '#ff69e8';
+    ctx.shadowBlur = 22;
+    ctx.beginPath();
+    ctx.ellipse(e.x, e.y, radius, radius * 0.48, 0, 0, Math.PI * 2);
+    ctx.stroke();
+
+    /* 중심의 강한 빛 */
+    const glow = ctx.createRadialGradient(e.x,e.y,0,e.x,e.y,42*(1-p)+4);
+    glow.addColorStop(0, `rgba(255,255,255,${alpha})`);
+    glow.addColorStop(0.25, `rgba(255,180,250,${alpha*0.9})`);
+    glow.addColorStop(1, 'rgba(255,80,220,0)');
+
+    ctx.fillStyle = glow;
+    ctx.beginPath();
+    ctx.arc(e.x,e.y,45*(1-p)+4,0,Math.PI*2);
+    ctx.fill();
+
+    /* 뾰족한 광선 */
+    for (let j = 0; j < 12; j++) {
+      const angle = j * Math.PI / 6;
+      const inner = 12 + p * 12;
+      const outer = 30 + p * 48;
+
+      ctx.beginPath();
+      ctx.moveTo(e.x + Math.cos(angle)*inner, e.y + Math.sin(angle)*inner);
+      ctx.lineTo(e.x + Math.cos(angle)*outer, e.y + Math.sin(angle)*outer);
+      ctx.strokeStyle = j % 2 ? '#ffffff' : '#ffb5fa';
+      ctx.lineWidth = j % 3 === 0 ? 3 : 1.5;
+      ctx.stroke();
     }
 
-    if (effect.kind === 'burst') {
-      drawBurst(effect, progress, alpha);
-    } else if (effect.kind === 'particle') {
-      drawParticle(effect, dt, alpha);
-    } else if (effect.kind === 'flash') {
-      drawFlash(effect, progress, alpha);
-    } else if (effect.kind === 'text') {
-      drawJudgement(effect, progress, alpha);
+    /* 눈에 잘 보이는 다섯 갈래 별 */
+    for (const star of e.stars) {
+      const dist = star.distance * (0.35 + p * 1.1);
+      const sx = e.x + Math.cos(star.angle) * dist;
+      const sy = e.y + Math.sin(star.angle) * dist * 0.6;
+      const size = star.size * (1 - p * 0.65);
+
+      ctx.globalAlpha = alpha;
+      ctx.fillStyle = '#ffffff';
+      ctx.shadowColor = '#ff9af2';
+      ctx.shadowBlur = 18;
+
+      drawStar(sx, sy, size, size * 0.38, star.rotation + p);
+      ctx.fill();
+
+      ctx.strokeStyle = '#ffb8fa';
+      ctx.lineWidth = 1;
+      ctx.stroke();
     }
+
+    ctx.restore();
+
+    if (e.age >= e.duration) effects.splice(i, 1);
   }
 }
 
-/* 링과 중심 광채 */
-function drawBurst(effect, progress, alpha) {
-  const { x, y, perfect, colors } = effect;
-
-  ctx.save();
-  ctx.globalAlpha = alpha;
-  ctx.globalCompositeOperation = 'lighter';
-
-  const maxRadius = perfect ? 72 : 52;
-  const radius = 8 + maxRadius * progress;
-
-  const glowRadius =
-    (perfect ? 48 : 32) * (1 - progress * 0.65);
-
-  const glow = ctx.createRadialGradient(
-    x, y, 0,
-    x, y, glowRadius
-  );
-
-  glow.addColorStop(0, 'rgba(255,255,255,0.95)');
-  glow.addColorStop(0.25, colors[1]);
-  glow.addColorStop(0.6, colors[2]);
-  glow.addColorStop(1, 'rgba(255,105,199,0)');
-
-  ctx.fillStyle = glow;
-  ctx.beginPath();
-  ctx.arc(x, y, glowRadius, 0, Math.PI * 2);
-  ctx.fill();
-
-  // 바깥쪽 네온 링
-  ctx.strokeStyle = colors[1];
-  ctx.lineWidth = perfect
-    ? 4 * (1 - progress) + 0.5
-    : 3 * (1 - progress) + 0.5;
-
-  ctx.shadowColor = colors[2];
-  ctx.shadowBlur = 18;
-
-  ctx.beginPath();
-  ctx.arc(x, y, radius, 0, Math.PI * 2);
-  ctx.stroke();
-
-  // 안쪽의 하얀 링
-  ctx.strokeStyle = '#FFFFFF';
-  ctx.lineWidth = 1.5 * (1 - progress) + 0.3;
-  ctx.shadowBlur = 10;
-
-  ctx.beginPath();
-  ctx.arc(x, y, radius * 0.68, 0, Math.PI * 2);
-  ctx.stroke();
-
-  // 십자 광선
-  const rayLength = (perfect ? 65 : 42) * (1 - progress);
-
-  ctx.strokeStyle = '#FFFFFF';
-  ctx.lineWidth = 2;
-  ctx.shadowColor = colors[1];
-  ctx.shadowBlur = 20;
-
-  ctx.beginPath();
-  ctx.moveTo(x - rayLength, y);
-  ctx.lineTo(x + rayLength, y);
-  ctx.moveTo(x, y - rayLength);
-  ctx.lineTo(x, y + rayLength);
-  ctx.stroke();
-
-  ctx.restore();
-}
-
-/* 별 파티클 */
-function drawParticle(effect, dt, alpha) {
-  effect.x += effect.vx * dt;
-  effect.y += effect.vy * dt;
-
-  effect.vx *= Math.pow(0.08, dt);
-  effect.vy *= Math.pow(0.08, dt);
-  effect.vy += 55 * dt;
-  effect.rotation += effect.spin * dt;
-
-  const size = effect.size * (0.5 + alpha * 0.5);
-
-  ctx.save();
-  ctx.globalAlpha = alpha;
-
-  drawStar(
-    effect.x,
-    effect.y,
-    size,
-    size * 0.32,
-    effect.rotation,
-    effect.color
-  );
-
-  ctx.restore();
-}
-
-/* 세로 광선 */
-function drawFlash(effect, progress, alpha) {
-  const { x, y, color } = effect;
-
-  ctx.save();
-  ctx.globalAlpha = alpha * 0.8;
-  ctx.globalCompositeOperation = 'lighter';
-
-  const length = 20 + progress * 85;
-
-  const gradient = ctx.createLinearGradient(
-    x, y - length,
-    x, y + length
-  );
-
-  gradient.addColorStop(0, 'rgba(255,255,255,0)');
-  gradient.addColorStop(0.45, color);
-  gradient.addColorStop(0.5, '#FFFFFF');
-  gradient.addColorStop(0.55, color);
-  gradient.addColorStop(1, 'rgba(255,255,255,0)');
-
-  ctx.fillStyle = gradient;
-  ctx.fillRect(x - 2, y - length, 4, length * 2);
-
-  ctx.restore();
-}
-
-/* 판정 텍스트 */
-function drawJudgement(effect, progress, alpha) {
-  ctx.save();
-  ctx.globalAlpha = alpha;
-  ctx.textAlign = 'center';
-  ctx.textBaseline = 'middle';
-
-  const rise = progress * 28;
-
-  ctx.translate(effect.x, effect.y - rise);
-  ctx.scale(0.8 + Math.min(progress * 1.5, 0.2), 0.8 + Math.min(progress * 1.5, 0.2));
-
-  ctx.font = '10px "Press Start 2P"';
-  ctx.fillStyle = effect.color;
-  ctx.shadowColor = effect.color;
-  ctx.shadowBlur = 12;
-  ctx.fillText(effect.text, 0, 0);
-
-  ctx.restore();
-}
-
-/* ---------- 입력 판정 ---------- */
-
-function triggerInput(lane) {
-  if (!isPlaying) return;
-
-  const currentTime = currentBgm.currentTime;
-  let target = null;
-  let bestDiff = Infinity;
-
-  for (const note of activeNotes) {
-    if (
-      note.lane !== lane ||
-      note.hit ||
-      note.missed
-    ) continue;
-
-    const diff = Math.abs(note.time - currentTime);
-
-    if (diff < bestDiff) {
-      bestDiff = diff;
-      target = note;
-    }
-  }
-
-  // 판정에 실패하면 어떤 이펙트도 생성하지 않는다.
-  if (!target || bestDiff > 0.15) return;
-
-  target.hit = true;
-
-  combo++;
-  maxCombo = Math.max(maxCombo, combo);
-
-  const isPerfect = bestDiff <= 0.07;
-  const judgement = isPerfect ? 'PERFECT' : 'GREAT';
-
-  if (isPerfect) {
-    perfectCount++;
-    score += 1000;
-  } else {
-    greatCount++;
-    score += 500;
-  }
-
-  // 성공했을 때만 별과 링 생성
-  addHitEffect(lane, judgement);
-
-  updateHUD();
-}
-
-/* ---------- 게임 루프 ---------- */
+let lastFrameTime = 0;
 
 function gameLoop(timestamp) {
   if (!isPlaying) return;
 
-  const dt = lastFrameTime
-    ? Math.min((timestamp - lastFrameTime) / 1000, 0.04)
-    : 0;
-
+  const delta = lastFrameTime ? Math.min(timestamp-lastFrameTime, 40) : 16;
   lastFrameTime = timestamp;
-
-  ctx.clearRect(0, 0, width, height);
-  drawBackground();
 
   if (currentBgm.ended) {
     endGame();
     return;
   }
 
-  drawNotes(currentBgm.currentTime);
-  drawEffects(dt);
+  const currentTime = currentBgm.currentTime;
 
+  ctx.clearRect(0,0,width,height);
+
+  if (isBgLoaded && bgImage.complete && bgImage.naturalWidth) {
+    ctx.drawImage(bgImage,0,0,width,height);
+    ctx.fillStyle = 'rgba(0,0,0,0.48)';
+    ctx.fillRect(0,0,width,height);
+  } else {
+    ctx.fillStyle = '#000';
+    ctx.fillRect(0,0,width,height);
+  }
+
+  /* 4레인 구분선 */
+  ctx.strokeStyle = 'rgba(255,105,199,0.22)';
+  ctx.lineWidth = 1;
+
+  for (let i=1; i<4; i++) {
+    ctx.beginPath();
+    ctx.moveTo(i*laneWidth,0);
+    ctx.lineTo(i*laneWidth,height);
+    ctx.stroke();
+  }
+
+  /* 판정선: 네 레인을 관통하는 단 하나의 연속된 선 */
+  ctx.save();
+  ctx.shadowColor = '#ff69c7';
+  ctx.shadowBlur = 12;
+  ctx.strokeStyle = '#ffb9fa';
+  ctx.lineWidth = 5;
+  ctx.beginPath();
+  ctx.moveTo(0,judgeLineY);
+  ctx.lineTo(width,judgeLineY);
+  ctx.stroke();
+
+  ctx.strokeStyle = '#ffffff';
+  ctx.lineWidth = 1.5;
+  ctx.beginPath();
+  ctx.moveTo(0,judgeLineY);
+  ctx.lineTo(width,judgeLineY);
+  ctx.stroke();
+  ctx.restore();
+
+  /* 타일 */
+  for (const note of activeNotes) {
+    if (note.hit || note.missed) continue;
+
+    const timeDiff = note.time-currentTime;
+    const noteY = judgeLineY-timeDiff*NOTE_SPEED;
+
+    if (timeDiff < -0.18) {
+      note.missed = true;
+      combo = 0;
+      missCount++;
+      updateHUD();
+      continue;
+    }
+
+    if (noteY > -30 && noteY < height+30) {
+      const x = note.lane*laneWidth+6;
+      const w = laneWidth-12;
+      const color = note.lane===0 || note.lane===3 ? '#FDC7FB' : '#FD5DBD';
+
+      ctx.save();
+      ctx.shadowColor = color;
+      ctx.shadowBlur = 13;
+      ctx.fillStyle = color;
+      ctx.fillRect(x,noteY-9,w,18);
+      ctx.restore();
+    }
+  }
+
+  /* 이펙트는 성공 입력으로 생성된 것만 표시 */
+  drawEffects(delta);
+
+  lastFrameTime = timestamp;
   requestAnimationFrame(gameLoop);
 }
 
-/* ---------- 결과 화면 ---------- */
+function triggerInput(lane) {
+  if (!isPlaying) return;
+
+  const currentTime = currentBgm.currentTime;
+
+  const target = activeNotes.find(n =>
+    n.lane===lane && !n.hit && !n.missed
+  );
+
+  if (!target) return;
+
+  const diff = Math.abs(target.time-currentTime);
+
+  if (diff <= 0.15) {
+    target.hit = true;
+
+    combo++;
+    maxCombo = Math.max(maxCombo,combo);
+
+    const perfect = diff <= 0.07;
+
+    if (perfect) {
+      perfectCount++;
+      score += 1000;
+    } else {
+      greatCount++;
+      score += 500;
+    }
+
+    /* 성공 판정 순간에만 이펙트 발생 */
+    addEffect(lane);
+    updateHUD();
+  }
+}
 
 function endGame() {
   if (!isPlaying) return;
@@ -806,129 +544,76 @@ function endGame() {
   currentBgm.pause();
 
   const totalNotes = songs[activeSongKey].pattern.length;
-  const maxPossibleScore = totalNotes * 1000;
-
-  const accuracy = maxPossibleScore > 0
-    ? score / maxPossibleScore * 100
-    : 0;
+  const accuracy = totalNotes ? score/(totalNotes*1000)*100 : 0;
 
   let rank = 'F';
-  let message = '"STAGE FAILED... TRY AGAIN!"';
-  let shadowColor = '#ff4444';
+  let message = 'STAGE FAILED... TRY AGAIN!';
+  let color = '#ff4444';
 
   if (accuracy >= 90) {
-    rank = 'S';
-    message = '"AMAZING! PERFECT RHYTHM!"';
-    shadowColor = '#ffd700';
+    rank='S'; message='AMAZING! PERFECT RHYTHM!'; color='#ffd700';
   } else if (accuracy >= 80) {
-    rank = 'A';
-    message = '"GREAT JOB!"';
-    shadowColor = '#FD5DBD';
+    rank='A'; message='GREAT JOB!'; color='#FD5DBD';
   } else if (accuracy >= 70) {
-    rank = 'B';
-    message = '"GOOD!"';
-    shadowColor = '#00fff2';
+    rank='B'; message='GOOD!'; color='#00fff2';
   } else if (accuracy >= 60) {
-    rank = 'C';
-    message = '"CLEAR!"';
-    shadowColor = '#ff8800';
+    rank='C'; message='CLEAR!'; color='#ff8800';
   }
 
-  const resultScreen = document.getElementById('result-screen');
+  const result = document.getElementById('result-screen');
 
-  resultScreen.innerHTML = `
-    <div style="
-      font-size:4.5rem;
-      color:#fff;
-      text-shadow:0 0 15px ${shadowColor};
-      margin-bottom:5px;
-    ">${rank}</div>
-
-    <div style="
-      font-size:.65rem;
-      color:#fcd3f2;
-      margin-bottom:20px;
-    ">${message}</div>
-
-    <div style="
-      font-size:.65rem;
-      line-height:2.2;
-      margin-bottom:25px;
-      text-align:left;
-    ">
+  result.innerHTML = `
+    <div style="font-size:65px;color:white;text-shadow:0 0 20px ${color};margin-bottom:10px">${rank}</div>
+    <div style="font-size:9px;color:#fcd3f2;line-height:2;margin-bottom:20px">${message}</div>
+    <div style="font-size:10px;line-height:2.5;text-align:left;margin-bottom:20px">
       <p style="color:#00fff2">PERFECT : ${perfectCount}</p>
       <p style="color:#fcd3f2">GREAT : ${greatCount}</p>
       <p style="color:#ff4444">MISS : ${missCount}</p>
-      <hr style="border:0;border-top:1px solid #555;margin:5px 0">
-      <p style="color:#fff">MAX COMBO : ${maxCombo}</p>
-      <p style="color:#ffd700">SCORE : ${score}</p>
+      <hr style="border:0;border-top:1px solid #555;margin:8px 0">
+      <p>MAX COMBO : ${maxCombo}</p>
     </div>
-
-    <div>
-      <button id="retry-btn" class="start-btn">RETRY</button><br>
-      <button id="select-song-btn" class="start-btn">SELECT SONG</button>
-    </div>
+    <button id="retry-btn" class="start-btn">RETRY</button>
+    <button id="select-song-btn" class="start-btn">SELECT SONG</button>
   `;
 
-  resultScreen.classList.remove('hidden');
+  result.classList.remove('hidden');
 
-  document.getElementById('retry-btn').addEventListener(
-    'click', () => startGame(activeSongKey)
-  );
-
-  document.getElementById('select-song-btn').addEventListener(
-    'click', goToSongSelect
-  );
+  document.getElementById('retry-btn').onclick = () => startGame(activeSongKey);
+  document.getElementById('select-song-btn').onclick = goToSongSelect;
 }
 
-/* ---------- 버튼 ---------- */
+document.getElementById('start-game-btn').addEventListener('click',goToSongSelect);
 
-document.getElementById('start-game-btn').addEventListener(
-  'click', goToSongSelect
-);
-
-document.querySelectorAll('.song-select-btn').forEach(button => {
-  button.addEventListener('click', () => {
-    startGame(button.getAttribute('data-song'));
-  });
+document.querySelectorAll('.song-select-btn').forEach(btn => {
+  btn.addEventListener('click',() => startGame(btn.dataset.song));
 });
 
-/* ---------- 키보드 ---------- */
+/* 블루투스 키보드: D F J K */
+const keyMap = {d:0,f:1,j:2,k:3};
 
-const keyMap = {
-  d: 0,
-  f: 1,
-  j: 2,
-  k: 3
-};
-
-window.addEventListener('keydown', event => {
-  const key = event.key.toLowerCase();
+document.addEventListener('keydown',e => {
+  const key = e.key.toLowerCase();
 
   if (!(key in keyMap)) return;
 
-  event.preventDefault();
-
-  if (isPlaying) {
-    triggerInput(keyMap[key]);
-  }
+  e.preventDefault();
+  triggerInput(keyMap[key]);
 });
 
-/* ---------- 터치 ---------- */
-
-canvas.addEventListener('pointerdown', event => {
+/* 터치 입력 */
+canvas.addEventListener('pointerdown',e => {
   if (!isPlaying) return;
 
-  event.preventDefault();
+  e.preventDefault();
 
   const rect = canvas.getBoundingClientRect();
-  const touchX = event.clientX - rect.left;
-  const lane = Math.floor(touchX / laneWidth);
+  const scaleX = width/rect.width;
+  const x = (e.clientX-rect.left)*scaleX;
+  const lane = Math.floor(x/laneWidth);
 
-  if (lane >= 0 && lane < 4) {
-    triggerInput(lane);
-  }
+  if (lane>=0 && lane<4) triggerInput(lane);
 });
+
 </script>
 </body>
 </html>
