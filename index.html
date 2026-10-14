@@ -4,7 +4,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title> Type Ryhthm </title>
+<title>チェキ☆Rhythm</title>
 <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
 
 <style>
@@ -18,7 +18,7 @@
 
 body {
   background: #000;
-  color: white;
+  color: #fff;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -38,7 +38,7 @@ body {
   flex-direction: column;
   overflow: hidden;
   border: 2px solid #FF69C7;
-  box-shadow: 0 0 20px #ff69c766;
+  box-shadow: 0 0 20px #ff69c744;
   background: #000;
 }
 
@@ -131,7 +131,7 @@ h2 {
     <canvas id="gameCanvas"></canvas>
 
     <div id="start-screen" class="screen">
-      <h1>Type Rhythm</h1>
+      <h1>チェキ☆Rhythm</h1>
       <h2>2026 WORK BY YUN</h2>
       <button id="start-game-btn" class="start-btn">START GAME</button>
     </div>
@@ -248,8 +248,6 @@ let perfectCount = 0;
 let greatCount = 0;
 let missCount = 0;
 let activeNotes = [];
-
-/* 이펙트는 사용자가 성공 판정을 냈을 때만 생성 */
 let effects = [];
 
 function goToSongSelect() {
@@ -287,6 +285,7 @@ function startGame(songKey) {
   currentBgm.onended = endGame;
 
   isPlaying = true;
+  lastFrameTime = 0;
   currentBgm.play().catch(err => console.log('Audio error:', err));
 
   requestAnimationFrame(gameLoop);
@@ -297,7 +296,7 @@ function updateHUD() {
   document.getElementById('combo').textContent = combo;
 }
 
-/* 별 모양을 확실하게 그리는 함수 */
+/* 오각별 */
 function drawStar(x, y, outerRadius, innerRadius, rotation = 0) {
   ctx.beginPath();
 
@@ -314,7 +313,7 @@ function drawStar(x, y, outerRadius, innerRadius, rotation = 0) {
   ctx.closePath();
 }
 
-/* 눌렀을 때만 호출: 별 + 광선 + 원형 충격파 */
+/* 성공 판정 입력 때만 이펙트 생성 */
 function addEffect(lane) {
   const x = lane * laneWidth + laneWidth / 2;
   const y = judgeLineY;
@@ -322,15 +321,13 @@ function addEffect(lane) {
   effects.push({
     x, y,
     age: 0,
-    duration: 520,
-    stars: Array.from({length: 11}, (_, i) => {
-      const angle = Math.PI * 2 * i / 11 + Math.random() * 0.25;
-      const distance = 24 + Math.random() * 42;
-
+    duration: 480,
+    stars: Array.from({length: 5}, (_, i) => {
+      const angle = Math.PI * 2 * i / 5 + Math.random() * 0.35;
       return {
         angle,
-        distance,
-        size: 5 + Math.random() * 10,
+        distance: 20 + Math.random() * 30,
+        size: 6 + Math.random() * 7,
         rotation: Math.random() * Math.PI
       };
     })
@@ -344,47 +341,48 @@ function drawEffects(delta) {
 
     const p = Math.min(e.age / e.duration, 1);
     const alpha = 1 - p;
-    const radius = 12 + p * 72;
+    const radius = 10 + p * 68;
 
     ctx.save();
     ctx.globalCompositeOperation = 'lighter';
 
-    /* 분홍색 원형 충격파 */
+    /* 핑크빛 발광 원형 파동 */
     ctx.globalAlpha = alpha;
-    ctx.strokeStyle = '#ffb9fa';
-    ctx.lineWidth = Math.max(1, 5 * (1-p));
+    ctx.strokeStyle = '#ff9cf4';
+    ctx.lineWidth = Math.max(1, 4 * (1-p));
     ctx.shadowColor = '#ff69e8';
     ctx.shadowBlur = 22;
+
     ctx.beginPath();
-    ctx.ellipse(e.x, e.y, radius, radius * 0.48, 0, 0, Math.PI * 2);
+    ctx.ellipse(e.x, e.y, radius, radius * 0.45, 0, 0, Math.PI * 2);
     ctx.stroke();
 
-    /* 중심의 강한 빛 */
-    const glow = ctx.createRadialGradient(e.x,e.y,0,e.x,e.y,42*(1-p)+4);
+    /* 중심부의 핑크빛 조명 */
+    const glow = ctx.createRadialGradient(e.x,e.y,0,e.x,e.y,38*(1-p)+3);
     glow.addColorStop(0, `rgba(255,255,255,${alpha})`);
-    glow.addColorStop(0.25, `rgba(255,180,250,${alpha*0.9})`);
+    glow.addColorStop(0.3, `rgba(255,160,245,${alpha*0.75})`);
     glow.addColorStop(1, 'rgba(255,80,220,0)');
 
     ctx.fillStyle = glow;
     ctx.beginPath();
-    ctx.arc(e.x,e.y,45*(1-p)+4,0,Math.PI*2);
+    ctx.arc(e.x,e.y,42*(1-p)+3,0,Math.PI*2);
     ctx.fill();
 
-    /* 뾰족한 광선 */
-    for (let j = 0; j < 12; j++) {
-      const angle = j * Math.PI / 6;
-      const inner = 12 + p * 12;
-      const outer = 30 + p * 48;
+    /* 간결한 광선 */
+    for (let j = 0; j < 8; j++) {
+      const angle = j * Math.PI / 4;
+      const inner = 12 + p * 10;
+      const outer = 27 + p * 35;
 
       ctx.beginPath();
       ctx.moveTo(e.x + Math.cos(angle)*inner, e.y + Math.sin(angle)*inner);
       ctx.lineTo(e.x + Math.cos(angle)*outer, e.y + Math.sin(angle)*outer);
-      ctx.strokeStyle = j % 2 ? '#ffffff' : '#ffb5fa';
-      ctx.lineWidth = j % 3 === 0 ? 3 : 1.5;
+      ctx.strokeStyle = '#fff';
+      ctx.lineWidth = j % 2 === 0 ? 2 : 1;
       ctx.stroke();
     }
 
-    /* 눈에 잘 보이는 다섯 갈래 별 */
+    /* 흰색 별 + 핑크 발광: 테두리 별도 색상 없음 */
     for (const star of e.stars) {
       const dist = star.distance * (0.35 + p * 1.1);
       const sx = e.x + Math.cos(star.angle) * dist;
@@ -392,16 +390,12 @@ function drawEffects(delta) {
       const size = star.size * (1 - p * 0.65);
 
       ctx.globalAlpha = alpha;
-      ctx.fillStyle = '#ffffff';
-      ctx.shadowColor = '#ff9af2';
+      ctx.fillStyle = '#fff';
+      ctx.shadowColor = '#ff75eb';
       ctx.shadowBlur = 18;
 
-      drawStar(sx, sy, size, size * 0.38, star.rotation + p);
+      drawStar(sx, sy, size, size * 0.42, star.rotation + p);
       ctx.fill();
-
-      ctx.strokeStyle = '#ffb8fa';
-      ctx.lineWidth = 1;
-      ctx.stroke();
     }
 
     ctx.restore();
@@ -436,8 +430,8 @@ function gameLoop(timestamp) {
     ctx.fillRect(0,0,width,height);
   }
 
-  /* 4레인 구분선 */
-  ctx.strokeStyle = 'rgba(255,105,199,0.22)';
+  /* 레인 구분선 */
+  ctx.strokeStyle = 'rgba(120,210,255,0.13)';
   ctx.lineWidth = 1;
 
   for (let i=1; i<4; i++) {
@@ -447,26 +441,28 @@ function gameLoop(timestamp) {
     ctx.stroke();
   }
 
-  /* 판정선: 네 레인을 관통하는 단 하나의 연속된 선 */
+  /* 전체 레인을 관통하는 하나의 판정선 */
   ctx.save();
   ctx.shadowColor = '#ff69c7';
-  ctx.shadowBlur = 12;
-  ctx.strokeStyle = '#ffb9fa';
-  ctx.lineWidth = 5;
+  ctx.shadowBlur = 13;
+  ctx.strokeStyle = 'rgba(255,160,245,0.95)';
+  ctx.lineWidth = 4;
+
   ctx.beginPath();
   ctx.moveTo(0,judgeLineY);
   ctx.lineTo(width,judgeLineY);
   ctx.stroke();
 
-  ctx.strokeStyle = '#ffffff';
-  ctx.lineWidth = 1.5;
+  ctx.shadowBlur = 0;
+  ctx.strokeStyle = 'rgba(255,255,255,0.9)';
+  ctx.lineWidth = 1;
   ctx.beginPath();
   ctx.moveTo(0,judgeLineY);
   ctx.lineTo(width,judgeLineY);
   ctx.stroke();
   ctx.restore();
 
-  /* 타일 */
+  /* 반투명 사이버 네온 타일 */
   for (const note of activeNotes) {
     if (note.hit || note.missed) continue;
 
@@ -482,23 +478,60 @@ function gameLoop(timestamp) {
     }
 
     if (noteY > -30 && noteY < height+30) {
-      const x = note.lane*laneWidth+6;
-      const w = laneWidth-12;
-      const color = note.lane===0 || note.lane===3 ? '#FDC7FB' : '#FD5DBD';
+      const x = note.lane*laneWidth+7;
+      const y = noteY-9;
+      const w = laneWidth-14;
+      const h = 18;
+
+      const cyan = note.lane===1 || note.lane===2;
+      const main = cyan ? '#70efff' : '#ff8fe8';
 
       ctx.save();
-      ctx.shadowColor = color;
-      ctx.shadowBlur = 13;
-      ctx.fillStyle = color;
-      ctx.fillRect(x,noteY-9,w,18);
+
+      /* 외부의 은은한 발광 */
+      ctx.shadowColor = main;
+      ctx.shadowBlur = 10;
+
+      /* 유리 같은 반투명 그라데이션 */
+      const tileGradient = ctx.createLinearGradient(x,y,x+w,y+h);
+      tileGradient.addColorStop(0, cyan
+        ? 'rgba(90,225,255,0.35)'
+        : 'rgba(255,115,225,0.35)');
+      tileGradient.addColorStop(0.5, 'rgba(255,255,255,0.13)');
+      tileGradient.addColorStop(1, cyan
+        ? 'rgba(90,225,255,0.22)'
+        : 'rgba(255,115,225,0.22)');
+
+      ctx.fillStyle = tileGradient;
+      ctx.fillRect(x,y,w,h);
+
+      /* 얇고 투명한 네온 테두리 */
+      ctx.shadowBlur = 0;
+      ctx.strokeStyle = cyan
+        ? 'rgba(130,240,255,0.85)'
+        : 'rgba(255,165,240,0.85)';
+      ctx.lineWidth = 1;
+      ctx.strokeRect(x+0.5,y+0.5,w-1,h-1);
+
+      /* 상단 유리 반사광 */
+      ctx.strokeStyle = 'rgba(255,255,255,0.55)';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(x+3,y+2);
+      ctx.lineTo(x+w-3,y+2);
+      ctx.stroke();
+
+      /* 중앙의 가는 빛줄기 */
+      ctx.fillStyle = cyan
+        ? 'rgba(180,250,255,0.25)'
+        : 'rgba(255,210,250,0.25)';
+      ctx.fillRect(x+2,y+h/2-1,w-4,2);
+
       ctx.restore();
     }
   }
 
-  /* 이펙트는 성공 입력으로 생성된 것만 표시 */
   drawEffects(delta);
-
-  lastFrameTime = timestamp;
   requestAnimationFrame(gameLoop);
 }
 
@@ -521,9 +554,7 @@ function triggerInput(lane) {
     combo++;
     maxCombo = Math.max(maxCombo,combo);
 
-    const perfect = diff <= 0.07;
-
-    if (perfect) {
+    if (diff <= 0.07) {
       perfectCount++;
       score += 1000;
     } else {
@@ -531,7 +562,7 @@ function triggerInput(lane) {
       score += 500;
     }
 
-    /* 성공 판정 순간에만 이펙트 발생 */
+    /* 성공 입력에서만 별 이펙트 */
     addEffect(lane);
     updateHUD();
   }
@@ -577,7 +608,6 @@ function endGame() {
   `;
 
   result.classList.remove('hidden');
-
   document.getElementById('retry-btn').onclick = () => startGame(activeSongKey);
   document.getElementById('select-song-btn').onclick = goToSongSelect;
 }
@@ -593,7 +623,6 @@ const keyMap = {d:0,f:1,j:2,k:3};
 
 document.addEventListener('keydown',e => {
   const key = e.key.toLowerCase();
-
   if (!(key in keyMap)) return;
 
   e.preventDefault();
@@ -607,13 +636,11 @@ canvas.addEventListener('pointerdown',e => {
   e.preventDefault();
 
   const rect = canvas.getBoundingClientRect();
-  const scaleX = width/rect.width;
-  const x = (e.clientX-rect.left)*scaleX;
+  const x = (e.clientX-rect.left)*(width/rect.width);
   const lane = Math.floor(x/laneWidth);
 
   if (lane>=0 && lane<4) triggerInput(lane);
 });
-
 </script>
 </body>
 </html>
