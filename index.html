@@ -89,14 +89,13 @@ canvas {
   display: none !important;
 }
 
+/* 공통 타이틀 */
 h1 {
-  color: #fcd3f2;
   line-height: 1.5;
   margin-bottom: 16px;
-  text-shadow: 3px 3px #e664b7;
-  -webkit-text-stroke: 0.5px #000;
 }
 
+/* 시작 화면 제목 */
 .jp-title {
   font-family: 'DotGothic16', sans-serif;
   font-size: 40px;
@@ -104,26 +103,15 @@ h1 {
   line-height: 1.5;
   letter-spacing: 0;
   white-space: nowrap;
-  /* 글자 내부의 연한 핑크 그라디언트 */
-  background: linear-gradient(
-    180deg,
-    #fffaff 0%,
-    #ffe6f8 25%,
-    #ff9cde 55%,
-    #ff5bc8 80%,
-    #e934ad 100%
-  );
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
-  /* 두꺼운 글자 외곽선 */
-  -webkit-text-stroke: 1.5px #ffb4eb;
-  /* 핑크 네온 광원 */
-  filter:
-    drop-shadow(0 0 2px #fff0fb)
-    drop-shadow(0 0 5px #ff8ddd)
-    drop-shadow(0 0 12px #ff4fc8)
-    drop-shadow(0 0 22px #e934ad);
+
+  color: #fff0fb;
+  -webkit-text-fill-color: #fff0fb;
+  -webkit-text-stroke: 1px #ffd0f1;
+
+  text-shadow:
+    0 0 3px #ffb5e8,
+    0 0 8px #ff69c7,
+    0 0 16px #ff4fc8;
 }
 
 .en-title {
@@ -140,19 +128,30 @@ h2 {
   margin-bottom: 25px;
 }
 
+/* 곡 선택 제목 */
 .track-title {
   font-family: 'Press Start 2P', cursive;
   font-size: 20px;
+  font-weight: 400;
   line-height: 2;
-  color: #ffffff;
   white-space: nowrap;
   margin-bottom: 25px;
+
+  color: #fff0fb;
+  -webkit-text-fill-color: #fff0fb;
+  -webkit-text-stroke: 0.5px #ffd0f1;
+
+  text-shadow:
+    0 0 3px #ffb5e8,
+    0 0 8px #ff69c7,
+    0 0 16px #ff4fc8;
 }
 
+/* 버튼 기본 스타일 */
 .start-btn,
 .song-select-btn {
   background: transparent;
-  color: white;
+  color: #fff;
   border: none;
   cursor: pointer;
   padding: 12px;
@@ -164,55 +163,39 @@ h2 {
   font-size: 11px;
 }
 
-/* 곡을 누르면 밝아지는 효과 */
-.song-select-btn:active {
-  filter:
-    drop-shadow(0 0 5px #fff0fb)
-    drop-shadow(0 0 15px #ff4fc8);
+.start-btn:active {
+  color: #ff9cde;
 }
 
-@media (max-width: 360px) {
-  .track-title {
-    font-size: 13px;
-  }
-
-  .song-jp {
-    font-size: 19px;
-    padding: 10px 4px;
-  }
-}
-
-
-/\* 곡 이름 \*/
-\.song\-jp \{
-  font\-family: 'DotGothic16', sans\-serif;
-  font\-size: 23px;
-  font\-weight: 400;
-  letter\-spacing: 0;
-  line\-height: 1\.6;
-  white\-space: nowrap;
+/* 곡 이름 */
+.song-jp {
+  display: block;
+  font-family: 'DotGothic16', sans-serif;
+  font-size: 23px;
+  font-weight: 400;
+  letter-spacing: 0;
+  line-height: 1.6;
+  white-space: nowrap;
   padding: 12px;
 
-  background: linear\-gradient&#40;
-    180deg,
-    \#fffaff 0%,
-    \#ffe6f8 25%,
-    \#ff9cde 55%,
-    \#ff5bc8 80%,
-    \#e934ad 100%
-  &#41;;
+  color: #fff0fb;
+  -webkit-text-fill-color: #fff0fb;
+  -webkit-text-stroke: 0.5px #ffd0f1;
 
-  \-webkit\-background\-clip: text;
-  background\-clip: text;
-  \-webkit\-text\-fill\-color: transparent;
-  \-webkit\-text\-stroke: 1px \#ffb4eb;
+  text-shadow:
+    0 0 3px #ffb5e8,
+    0 0 8px #ff69c7,
+    0 0 16px #ff4fc8;
+}
 
-  filter:
-    drop\-shadow&#40;0 0 2px \#fff0fb&#41;
-    drop\-shadow&#40;0 0 5px \#ff8ddd&#41;
-    drop\-shadow&#40;0 0 12px \#ff4fc8&#41;
-    drop\-shadow&#40;0 0 22px \#e934ad&#41;;
-\}
+.song-select-btn:active {
+  color: #ffffff;
+  -webkit-text-fill-color: #ffffff;
+  text-shadow:
+    0 0 5px #fff0fb,
+    0 0 12px #ff69c7,
+    0 0 22px #ff4fc8;
+}
 
 @media (max-width: 360px) {
   .jp-title {
@@ -258,7 +241,7 @@ h2 {
 
     <div id="song-select-screen" class="screen hidden">
       <h2 class="track-title">CHOOSE YOUR TRACK</h2>
-      <button class="song-select-btn song-jp" data-song="Trembling">チェキ☆ラブ (JP)</button>
+      <button class="song-select-btn song-jp" data-song="Trembling">Gossip</button>
       <button class="song-select-btn song-jp" data-song="trembling">チェキ☆ラブ (KR)</button>
     </div>
 
@@ -473,7 +456,7 @@ function drawHeart() {
   ctx.stroke();
 }
 
-/* 터치 순간의 링과 핑크빛 효과. 별 파티클은 사용하지 않음 */
+/* 터치 순간의 링과 핑크빛 효과 */
 function drawEffects(delta) {
   for (let i = effects.length - 1; i >= 0; i--) {
     const e = effects[i];
@@ -690,7 +673,6 @@ function triggerInput(lane) {
   let target = null;
   let bestDifference = Infinity;
 
-  /* 같은 레인에서 가장 가까운 노트를 찾음 */
   for (const note of activeNotes) {
     if (note.hit || note.missed || note.lane !== lane) continue;
 
