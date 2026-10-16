@@ -422,19 +422,14 @@ function addEffect(lane, y) {
 function drawHeart() {
   ctx.beginPath();
 
+  ctx.moveTo(0, -28);
+  ctx.lineTo(0, -8);
+
   ctx.moveTo(0, -8);
   ctx.bezierCurveTo(-12, -23, -37, -22, -37, -3);
   ctx.bezierCurveTo(-37, 10, -17, 25, 0, 38);
   ctx.bezierCurveTo(17, 25, 37, 10, 37, -3);
   ctx.bezierCurveTo(37, -22, 12, -23, 0, -8);
-  ctx.closePath();
-}
-
-function drawHeartDecorations() {
-  ctx.beginPath();
-
-  ctx.moveTo(0, -28);
-  ctx.lineTo(0, -8);
 
   ctx.moveTo(0, 24);
   ctx.lineTo(0, 43);
@@ -590,30 +585,17 @@ function gameLoop(timestamp) {
     const noteY = judgeLineY - timeDiff * NOTE_SPEED;
     const x = note.lane * laneWidth + laneWidth / 2;
 
-       /* 판정 성공한 하트: 판정선 아래에서는 다시 빈 하트 */
+    /* 판정된 하트도 아래로 계속 떨어지며 빛남 */
     if (note.hit) {
       if (noteY > height + 100) continue;
 
       const s = Math.min((laneWidth - 8) / 50, 0.84);
-      const isBelowJudgeLine = noteY > judgeLineY;
 
       ctx.save();
       ctx.translate(x, noteY);
       ctx.scale(s, s);
 
       ctx.globalCompositeOperation = 'lighter';
-
-      if (!isBelowJudgeLine) {
-        /* 판정선에 닿기 전까지는 채워진 하트 */
-        ctx.fillStyle = 'rgba(255, 139, 216, 0.55)';
-        ctx.shadowColor = '#ff69c7';
-        ctx.shadowBlur = 25;
-
-        drawHeart();
-        ctx.fill();
-      }
-
-      /* 하트 외곽 발광 */
       ctx.strokeStyle = '#ff1493';
       ctx.lineWidth = 8;
       ctx.lineCap = 'round';
