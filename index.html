@@ -584,19 +584,19 @@ function gameLoop(timestamp) {
 
   
    
-    /* 판정된 하트: 커졌다 작아지며 한 번 발광 */
+    
+    /* 판정된 하트: 커졌다 작아지고 원래 크기로 복귀 */
     if (note.hit) {
       if (noteY > height + 100) continue;
 
-      const elapsed = currentTime - note.hitAt;
-      const flashDuration = 0.42;
-      const flashing = elapsed < flashDuration;
+      const elapsed = (currentTime - note.hitAt) * 1000;
+      const duration = 650;
+      const progress = Math.max(0, Math.min(elapsed / duration, 1));
 
-      // 처음 커지고 다시 원래 크기로 돌아오기
-      const progress = Math.max(0, Math.min(elapsed / flashDuration, 1));
+      // 0 → 1 → 0으로 크기가 변함
       const pulse = Math.sin(Math.PI * progress);
       const s = Math.min((laneWidth - 8) / 50, 0.84);
-      const scale = s * (1 + 0.45 * pulse);
+      const scale = s * (1 + 0.4 * pulse);
 
       ctx.save();
       ctx.translate(x, noteY);
@@ -606,24 +606,35 @@ function gameLoop(timestamp) {
       ctx.lineJoin = 'round';
       ctx.lineWidth = 4;
 
-      if (flashing) {
-        // 부드러운 핑크빛 발광
+      // 발광은 처음에 강해졌다가 서서히 사라짐
+      if (progress < 1) {
+        const glow = Math.sin(Math.PI * progress);
         ctx.globalAlpha = 1;
         ctx.shadowColor = '#ffb8eb';
-        ctx.shadowBlur = 12 + 24 * pulse;
+        ctx.shadowBlur = 10 + 28 * glow;
         ctx.strokeStyle = '#fff0fb';
+
+        // 바깥쪽 핑크빛 발광
+        ctx.lineWidth = 7;
+        drawHeart();
+
+        // 안쪽의 밝은 선
+        ctx.shadowBlur = 8 + 12 * glow;
+        ctx.strokeStyle = '#fff5fc';
+        ctx.lineWidth = 2;
+        drawHeart();
       } else {
-        // 애니메이션 종료 후 원래 모습
-        ctx.globalAlpha = 1;
+        // 애니메이션 종료 후 기본 하트로 복귀
         ctx.shadowBlur = 0;
         ctx.strokeStyle = '#ffc4f2';
+        ctx.lineWidth = 4;
+        drawHeart();
       }
 
-      drawHeart();
-      ctx.stroke();
       ctx.restore();
       continue;
     }
+
 
 
     if (timeDiff < -GREAT_WINDOW) {
@@ -656,7 +667,7 @@ function gameLoop(timestamp) {
     }
   }
 
-
+  drawEffects(delta);
   requestAnimationFrame(gameLoop);
 }
 
@@ -684,8 +695,13 @@ function triggerInput(lane) {
   const hitY = judgeLineY -
     (target.time - currentTime) * NOTE_SPEED;
 
-  target.hit = true;
+    target.hit = true;
   target.hitAt = currentTime;
+
+  const hitY = judgeLineY -
+    (target.time - currentTime) * NOTE_SPEED;
+
+  addEffect(lane, hitY);
   
   if (bestDifference <= PERFECT_WINDOW) {
     perfectCount++;
