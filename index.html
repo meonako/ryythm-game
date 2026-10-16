@@ -402,7 +402,6 @@ function startGame(songKey) {
     console.error('Audio error:', err);
   });
 
-    drawEffects(delta);
   requestAnimationFrame(gameLoop);
 }
 /* 터치 성공 시 발광 효과의 위치를 저장 */
@@ -697,6 +696,7 @@ function triggerInput(lane) {
     }
   }
 
+  
   if (!target) return;
 
   const hitY = judgeLineY -
@@ -705,10 +705,8 @@ function triggerInput(lane) {
   target.hit = true;
   target.hitAt = currentTime;
 
-  const hitY = judgeLineY -
-    (target.time - currentTime) * NOTE_SPEED;
-
   addEffect(lane, hitY);
+
   
   
   if (bestDifference <= PERFECT_WINDOW) {
