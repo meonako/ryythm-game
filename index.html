@@ -585,35 +585,43 @@ function gameLoop(timestamp) {
     const noteY = judgeLineY - timeDiff * NOTE_SPEED;
     const x = note.lane * laneWidth + laneWidth / 2;
 
-    /* 판정된 하트도 아래로 계속 떨어지며 빛남 */
+  
+    /* 판정된 하트: 한 번 발광한 뒤 원래 상태로 낙하 */
     if (note.hit) {
       if (noteY > height + 100) continue;
 
+      const elapsed = currentTime - note.hitAt;
+      const flashDuration = 0.42;
+      const flashing = elapsed >= 0 && elapsed < flashDuration;
+
+      // 커졌다가 작아지며 원래 크기로 돌아옴
+      const pulse = flashing
+        ? Math.sin(Math.PI * elapsed / flashDuration)
+        : 0;
+
       const s = Math.min((laneWidth - 8) / 50, 0.84);
+      const scale = s * (1 + 0.35 * pulse);
 
       ctx.save();
       ctx.translate(x, noteY);
-      ctx.scale(s, s);
+      ctx.scale(scale, scale);
 
-      ctx.globalCompositeOperation = 'lighter';
-      ctx.strokeStyle = '#ff1493';
-      ctx.lineWidth = 8;
+      ctx.strokeStyle = flashing ? '#ffb8eb' : '#ffc4f2';
+      ctx.lineWidth = 4;
       ctx.lineCap = 'round';
       ctx.lineJoin = 'round';
-      ctx.shadowColor = '#ff008c';
-      ctx.shadowBlur = 35;
+
+      // 발광은 처음 한 번만
+      if (flashing) {
+        ctx.globalAlpha = 1 - elapsed / flashDuration;
+        ctx.shadowColor = '#ffb8eb';
+        ctx.shadowBlur = 20 * pulse;
+      } else {
+        ctx.shadowBlur = 0;
+      }
 
       drawHeart();
       ctx.stroke();
-
-      ctx.strokeStyle = '#fff0fb';
-      ctx.lineWidth = 2;
-      ctx.shadowColor = '#ffffff';
-      ctx.shadowBlur = 12;
-
-      drawHeart();
-      ctx.stroke();
-
       ctx.restore();
       continue;
     }
@@ -648,7 +656,7 @@ function gameLoop(timestamp) {
     }
   }
 
-  drawEffects(delta);
+
   requestAnimationFrame(gameLoop);
 }
 
@@ -677,7 +685,8 @@ function triggerInput(lane) {
     (target.time - currentTime) * NOTE_SPEED;
 
   target.hit = true;
-
+target.hitAt = currentTime;
+  
   if (bestDifference <= PERFECT_WINDOW) {
     perfectCount++;
     score += 1000;
@@ -689,7 +698,6 @@ function triggerInput(lane) {
   combo++;
   maxCombo = Math.max(maxCombo, combo);
 
-  addEffect(lane, hitY);
   updateHUD();
 }
 
