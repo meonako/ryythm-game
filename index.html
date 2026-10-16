@@ -460,7 +460,7 @@ function drawEffects(delta) {
     ctx.strokeStyle = '#ffd6f5';
     ctx.lineWidth = Math.max(1, 4 * (1 - p));
     ctx.shadowColor = '#ffb8eb';
-    ctx.shadowBlur = 22;
+    ctx.shadowBlur = 12;
 
     ctx.beginPath();
     ctx.ellipse(e.x, e.y, radius, radius * 0.45, 0, 0, Math.PI * 2);
@@ -494,13 +494,13 @@ function drawEffects(delta) {
     ctx.lineCap = 'round';
     ctx.lineJoin = 'round';
     ctx.shadowColor = '#ffb3e6';
-    ctx.shadowBlur = 24 + 40 * alpha;
+    ctx.shadowBlur = 14 + 24 * alpha;
 
     drawHeart();
     ctx.stroke();
 
     ctx.strokeStyle = '#fff5fc';
-    ctx.lineWidth = 2;
+    ctx.lineWidth = 1.5;
     ctx.shadowColor = '#ffffff';
     ctx.shadowBlur = 12;
 
