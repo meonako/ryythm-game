@@ -402,9 +402,9 @@ function startGame(songKey) {
     console.error('Audio error:', err);
   });
 
+    drawEffects(delta);
   requestAnimationFrame(gameLoop);
 }
-
 /* 터치 성공 시 발광 효과의 위치를 저장 */
 function addEffect(lane, y) {
   effects.push({
@@ -585,55 +585,62 @@ function gameLoop(timestamp) {
   
    
     
-    /* 판정된 하트: 커졌다 작아지고 원래 크기로 복귀 */
+    /* 판정된 하트: 커졌다가 작아지고 원래 크기로 복귀 */
     if (note.hit) {
       if (noteY > height + 100) continue;
 
       const elapsed = (currentTime - note.hitAt) * 1000;
-      const duration = 650;
+      const duration = 600;
       const progress = Math.max(0, Math.min(elapsed / duration, 1));
 
-      // 0 → 1 → 0으로 크기가 변함
+      // 커짐 → 작아짐 → 원래 크기
       const pulse = Math.sin(Math.PI * progress);
       const s = Math.min((laneWidth - 8) / 50, 0.84);
-      const scale = s * (1 + 0.4 * pulse);
+      const scale = s * (1 + 0.5 * pulse);
 
       ctx.save();
       ctx.translate(x, noteY);
       ctx.scale(scale, scale);
-
       ctx.lineCap = 'round';
       ctx.lineJoin = 'round';
-      ctx.lineWidth = 4;
 
-      // 발광은 처음에 강해졌다가 서서히 사라짐
       if (progress < 1) {
-        const glow = Math.sin(Math.PI * progress);
-        ctx.globalAlpha = 1;
-        ctx.shadowColor = '#ffb8eb';
-        ctx.shadowBlur = 10 + 28 * glow;
-        ctx.strokeStyle = '#fff0fb';
-
-        // 바깥쪽 핑크빛 발광
-        ctx.lineWidth = 7;
+        // 넓은 핑크색 외곽 발광
+        ctx.globalAlpha = 1 - progress * 0.25;
+        ctx.strokeStyle = '#ff9fe3';
+        ctx.lineWidth = 8;
+        ctx.shadowColor = '#ff8cde';
+        ctx.shadowBlur = 12 + 30 * pulse;
         drawHeart();
 
-        // 안쪽의 밝은 선
-        ctx.shadowBlur = 8 + 12 * glow;
-        ctx.strokeStyle = '#fff5fc';
-        ctx.lineWidth = 2;
+        // 밝은 핑크빛 안쪽 선
+        ctx.strokeStyle = '#fff0fb';
+        ctx.lineWidth = 3;
+        ctx.shadowColor = '#ffd6f5';
+        ctx.shadowBlur = 10 + 18 * pulse;
+        drawHeart();
+
+        // 하얀 중심선으로 순간적인 플래시 표현
+        ctx.globalAlpha = 0.65 * (1 - progress);
+        ctx.strokeStyle = '#ffffff';
+        ctx.lineWidth = 1.5;
+        ctx.shadowColor = '#ffffff';
+        ctx.shadowBlur = 14;
         drawHeart();
       } else {
-        // 애니메이션 종료 후 기본 하트로 복귀
-        ctx.shadowBlur = 0;
+        // 종료 후 기본 하트 모양
+        ctx.globalAlpha = 1;
         ctx.strokeStyle = '#ffc4f2';
         ctx.lineWidth = 4;
+        ctx.shadowBlur = 0;
         drawHeart();
       }
 
       ctx.restore();
       continue;
     }
+
+    
 
 
 
@@ -695,13 +702,14 @@ function triggerInput(lane) {
   const hitY = judgeLineY -
     (target.time - currentTime) * NOTE_SPEED;
 
-    target.hit = true;
+  target.hit = true;
   target.hitAt = currentTime;
 
   const hitY = judgeLineY -
     (target.time - currentTime) * NOTE_SPEED;
 
   addEffect(lane, hitY);
+  
   
   if (bestDifference <= PERFECT_WINDOW) {
     perfectCount++;
