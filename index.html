@@ -457,9 +457,9 @@ function drawEffects(delta) {
     ctx.globalCompositeOperation = 'lighter';
     ctx.globalAlpha = alpha;
 
-    ctx.strokeStyle = '#ff9cf4';
+    ctx.strokeStyle = '#ffd6f5';
     ctx.lineWidth = Math.max(1, 4 * (1 - p));
-    ctx.shadowColor = '#ff69e8';
+    ctx.shadowColor = '#ffb8eb';
     ctx.shadowBlur = 22;
 
     ctx.beginPath();
@@ -489,17 +489,17 @@ function drawEffects(delta) {
     ctx.scale(baseScale * heartScale, baseScale * heartScale);
 
     ctx.globalAlpha = alpha;
-    ctx.strokeStyle = '#ff1493';
+    ctx.strokeStyle = '#ff9fe3';
     ctx.lineWidth = 8;
     ctx.lineCap = 'round';
     ctx.lineJoin = 'round';
-    ctx.shadowColor = '#ff008c';
+    ctx.shadowColor = '#ffb3e6';
     ctx.shadowBlur = 24 + 40 * alpha;
 
     drawHeart();
     ctx.stroke();
 
-    ctx.strokeStyle = '#fff0fb';
+    ctx.strokeStyle = '#fff5fc';
     ctx.lineWidth = 2;
     ctx.shadowColor = '#ffffff';
     ctx.shadowBlur = 12;
