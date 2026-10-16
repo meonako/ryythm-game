@@ -104,11 +104,26 @@ h1 {
   line-height: 1.5;
   letter-spacing: 0;
   white-space: nowrap;
-  -webkit-text-stroke: 0;
-  text-shadow:
-    2px 2px 0 #e664b7,
-    4px 4px 0 #8d347d,
-    0 0 12px #ff69c7;
+  /* 글자 내부의 연한 핑크 그라디언트 */
+  background: linear-gradient(
+    180deg,
+    #fffaff 0%,
+    #ffe6f8 25%,
+    #ff9cde 55%,
+    #ff5bc8 80%,
+    #e934ad 100%
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  /* 두꺼운 글자 외곽선 */
+  -webkit-text-stroke: 1.5px #ffb4eb;
+  /* 핑크 네온 광원 */
+  filter:
+    drop-shadow(0 0 2px #fff0fb)
+    drop-shadow(0 0 5px #ff8ddd)
+    drop-shadow(0 0 12px #ff4fc8)
+    drop-shadow(0 0 22px #e934ad);
 }
 
 .en-title {
@@ -149,20 +164,55 @@ h2 {
   font-size: 11px;
 }
 
-.start-btn:active,
+/* 곡을 누르면 밝아지는 효과 */
 .song-select-btn:active {
-  color: #FF69C7;
+  filter:
+    drop-shadow(0 0 5px #fff0fb)
+    drop-shadow(0 0 15px #ff4fc8);
 }
 
-.song-jp {
-  font-family: 'DotGothic16', sans-serif;
-  font-size: 23px;
-  font-weight: 400;
-  letter-spacing: 0;
-  line-height: 1.6;
-  white-space: nowrap;
-  text-shadow: 1px 1px 0 #e664b7;
+@media (max-width: 360px) {
+  .track-title {
+    font-size: 13px;
+  }
+
+  .song-jp {
+    font-size: 19px;
+    padding: 10px 4px;
+  }
 }
+
+
+/\* 곡 이름 \*/
+\.song\-jp \{
+  font\-family: 'DotGothic16', sans\-serif;
+  font\-size: 23px;
+  font\-weight: 400;
+  letter\-spacing: 0;
+  line\-height: 1\.6;
+  white\-space: nowrap;
+  padding: 12px;
+
+  background: linear\-gradient&#40;
+    180deg,
+    \#fffaff 0%,
+    \#ffe6f8 25%,
+    \#ff9cde 55%,
+    \#ff5bc8 80%,
+    \#e934ad 100%
+  &#41;;
+
+  \-webkit\-background\-clip: text;
+  background\-clip: text;
+  \-webkit\-text\-fill\-color: transparent;
+  \-webkit\-text\-stroke: 1px \#ffb4eb;
+
+  filter:
+    drop\-shadow&#40;0 0 2px \#fff0fb&#41;
+    drop\-shadow&#40;0 0 5px \#ff8ddd&#41;
+    drop\-shadow&#40;0 0 12px \#ff4fc8&#41;
+    drop\-shadow&#40;0 0 22px \#e934ad&#41;;
+\}
 
 @media (max-width: 360px) {
   .jp-title {
