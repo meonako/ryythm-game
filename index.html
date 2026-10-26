@@ -225,7 +225,7 @@ h2 {
 
     <div id="song-select-screen" class="screen hidden">
       <h2 class="track-title">CHOOSE YOUR TRACK</h2>
-      <button class="song-select-btn song-jp" data-song="Trembling">チェキ☆ラブ (JR)</button>
+      <button class="song-select-btn song-jp" data-song="Gossip">Gossip</button>
       <button class="song-select-btn song-jp" data-song="trembling">チェキ☆ラブ (KR)</button>
     </div>
 
@@ -311,8 +311,8 @@ function generatePattern(duration, bpm, offset, seed) {
 }
 
 const songs = {
-  Trembling: {
-    src: './Trembling.mp3',
+  Gossip: {
+    src: './Gossip.mp3',
     bg: './cover.png',
     pattern: generatePattern(93.06, 99.38, 3.90, 82)
   },
@@ -323,7 +323,7 @@ const songs = {
   }
 };
 
-let activeSongKey = 'Trembling';
+let activeSongKey = 'Gossip';
 let currentBgm = new Audio();
 
 const NOTE_SPEED = 550;
