@@ -582,20 +582,18 @@ function gameLoop(timestamp) {
     const x = note.lane * laneWidth + laneWidth / 2;
 
   
-   
-    
-  /* 판정된 하트: 순간적으로 커지며 발광한 뒤 원래 크기로 복귀 */
+   /* 판정된 하트: 빠르게 커졌다가 작아지며 발광 */
 if (note.hit) {
   if (noteY > height + 100) continue;
 
   const elapsed = (currentTime - note.hitAt) * 1000;
-  const duration = 250;
+  const duration = 180;
   const progress = Math.max(0, Math.min(elapsed / duration, 1));
 
-  // 순간적으로 커졌다가 원래 크기로 돌아오기
+  // 빠르게 커진 뒤 부드럽게 원래 크기로 축소
   const pulse = Math.sin(Math.PI * progress);
   const s = Math.min((laneWidth - 8) / 50, 0.84);
-  const scale = s * (1 + 0.5 * pulse);
+  const scale = s * (1 + 0.65 * pulse);
 
   ctx.save();
   ctx.translate(x, noteY);
@@ -605,22 +603,31 @@ if (note.hit) {
   ctx.lineJoin = 'round';
 
   if (progress < 1) {
-    // 발광 효과는 판정 직후에만 표시
-    ctx.globalAlpha = 1 - progress;
-
-    ctx.strokeStyle = '#ffb8e8';
-    ctx.lineWidth = 7;
-    ctx.shadowColor = '#ffb8e8';
-    ctx.shadowBlur = 12 + 25 * pulse;
+    // 핑크빛 외곽 발광
+    ctx.globalAlpha = 1 - progress * 0.35;
+    ctx.strokeStyle = '#ff9fe3';
+    ctx.lineWidth = 8;
+    ctx.shadowColor = '#ff8cde';
+    ctx.shadowBlur = 22 + 24 * pulse;
     drawHeart();
 
-    ctx.strokeStyle = '#fff5fc';
+    // 부드럽고 밝은 안쪽 선
+    ctx.globalAlpha = 1 - progress * 0.25;
+    ctx.strokeStyle = '#ffe8fa';
     ctx.lineWidth = 3;
+    ctx.shadowColor = '#ffd6f5';
+    ctx.shadowBlur = 16 + 18 * pulse;
+    drawHeart();
+
+    // 순간적으로 반짝이는 흰색 중심선
+    ctx.globalAlpha = 0.8 * (1 - progress);
+    ctx.strokeStyle = '#ffffff';
+    ctx.lineWidth = 1.5;
     ctx.shadowColor = '#ffffff';
-    ctx.shadowBlur = 10 + 15 * pulse;
+    ctx.shadowBlur = 20;
     drawHeart();
   } else {
-    // 발광이 끝나면 기본 하트만 표시
+    // 애니메이션 종료: 잔상 없이 기본 하트로 복귀
     ctx.globalAlpha = 1;
     ctx.strokeStyle = '#ffc4f2';
     ctx.lineWidth = 4;
@@ -632,8 +639,8 @@ if (note.hit) {
   ctx.restore();
   continue;
 }
-
     
+
 
 
 
