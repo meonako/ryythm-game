@@ -171,7 +171,7 @@ h2 {
   display: block;
   font-family: 'DotGothic16', sans-serif;
   font-size: 23px;
-  font-weight: 400;
+  font-weight: 700;
   letter-spacing: 0;
   line-height: 1.6;
   white-space: nowrap;
@@ -179,7 +179,7 @@ h2 {
 
   color: #ffffff;
   -webkit-text-fill-color: #ffffff;
-  -webkit-text-stroke: 0.4px #ffffff;
+  -webkit-text-stroke: 1px #ffffff;
 }
 @media (max-width: 360px) {
   .jp-title {
@@ -603,14 +603,21 @@ if (note.hit) {
   ctx.lineJoin = 'round';
 
   if (progress < 1) {
-    // 핑크빛 외곽 발광
-    ctx.globalAlpha = 1 - progress * 0.35;
-    ctx.strokeStyle = '#ff9fe3';
-    ctx.lineWidth = 8;
-    ctx.shadowColor = '#ff8cde';
-    ctx.shadowBlur = 22 + 24 * pulse;
-    drawHeart();
+   // 핑크빛 외곽 발광
+  ctx.globalAlpha = 1 - progress * 0.35;
+   ctx.strokeStyle = '#ff9fe3';
+   ctx.lineWidth = 7;
+   ctx.shadowColor = '#ff8cde';
+   ctx.shadowBlur = 28 + 24 * pulse;
+   drawHeart();
 
+   // 부드러운 연분홍색 외곽선
+   ctx.globalAlpha = 1 - progress * 0.25;
+   ctx.strokeStyle = '#ffd6f5';
+   ctx.lineWidth = 3;
+   ctx.shadowColor = '#ffb8e8';
+   ctx.shadowBlur = 18 + 15 * pulse;
+   drawHeart();
     // 부드럽고 밝은 안쪽 선
     ctx.globalAlpha = 1 - progress * 0.25;
     ctx.strokeStyle = '#ffe8fa';
@@ -619,13 +626,6 @@ if (note.hit) {
     ctx.shadowBlur = 16 + 18 * pulse;
     drawHeart();
 
-    // 순간적으로 반짝이는 흰색 중심선
-    ctx.globalAlpha = 0.8 * (1 - progress);
-    ctx.strokeStyle = '#ffffff';
-    ctx.lineWidth = 1.5;
-    ctx.shadowColor = '#ffffff';
-    ctx.shadowBlur = 20;
-    drawHeart();
   } else {
     // 애니메이션 종료: 잔상 없이 기본 하트로 복귀
     ctx.globalAlpha = 1;
