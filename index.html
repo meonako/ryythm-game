@@ -584,60 +584,54 @@ function gameLoop(timestamp) {
   
    
     
-    /* 판정된 하트: 커졌다가 작아지고 원래 크기로 복귀 */
-    if (note.hit) {
-      if (noteY > height + 100) continue;
+  /* 판정된 하트: 순간적으로 커지며 발광한 뒤 원래 크기로 복귀 */
+if (note.hit) {
+  if (noteY > height + 100) continue;
 
-      const elapsed = (currentTime - note.hitAt) * 1000;
-      const duration = 600;
-      const progress = Math.max(0, Math.min(elapsed / duration, 1));
+  const elapsed = (currentTime - note.hitAt) * 1000;
+  const duration = 250;
+  const progress = Math.max(0, Math.min(elapsed / duration, 1));
 
-      // 커짐 → 작아짐 → 원래 크기
-      const pulse = Math.sin(Math.PI * progress);
-      const s = Math.min((laneWidth - 8) / 50, 0.84);
-      const scale = s * (1 + 0.5 * pulse);
+  // 순간적으로 커졌다가 원래 크기로 돌아오기
+  const pulse = Math.sin(Math.PI * progress);
+  const s = Math.min((laneWidth - 8) / 50, 0.84);
+  const scale = s * (1 + 0.5 * pulse);
 
-      ctx.save();
-      ctx.translate(x, noteY);
-      ctx.scale(scale, scale);
-      ctx.lineCap = 'round';
-      ctx.lineJoin = 'round';
+  ctx.save();
+  ctx.translate(x, noteY);
+  ctx.scale(scale, scale);
 
-      if (progress < 1) {
-        // 넓은 핑크색 외곽 발광
-        ctx.globalAlpha = 1 - progress * 0.25;
-        ctx.strokeStyle = '#ff9fe3';
-        ctx.lineWidth = 8;
-        ctx.shadowColor = '#ff8cde';
-        ctx.shadowBlur = 12 + 30 * pulse;
-        drawHeart();
+  ctx.lineCap = 'round';
+  ctx.lineJoin = 'round';
 
-        // 밝은 핑크빛 안쪽 선
-        ctx.strokeStyle = '#fff0fb';
-        ctx.lineWidth = 3;
-        ctx.shadowColor = '#ffd6f5';
-        ctx.shadowBlur = 10 + 18 * pulse;
-        drawHeart();
+  if (progress < 1) {
+    // 발광 효과는 판정 직후에만 표시
+    ctx.globalAlpha = 1 - progress;
 
-        // 하얀 중심선으로 순간적인 플래시 표현
-        ctx.globalAlpha = 0.65 * (1 - progress);
-        ctx.strokeStyle = '#ffffff';
-        ctx.lineWidth = 1.5;
-        ctx.shadowColor = '#ffffff';
-        ctx.shadowBlur = 14;
-        drawHeart();
-      } else {
-        // 종료 후 기본 하트 모양
-        ctx.globalAlpha = 1;
-        ctx.strokeStyle = '#ffc4f2';
-        ctx.lineWidth = 4;
-        ctx.shadowBlur = 0;
-        drawHeart();
-      }
+    ctx.strokeStyle = '#ffb8e8';
+    ctx.lineWidth = 7;
+    ctx.shadowColor = '#ffb8e8';
+    ctx.shadowBlur = 12 + 25 * pulse;
+    drawHeart();
 
-      ctx.restore();
-      continue;
-    }
+    ctx.strokeStyle = '#fff5fc';
+    ctx.lineWidth = 3;
+    ctx.shadowColor = '#ffffff';
+    ctx.shadowBlur = 10 + 15 * pulse;
+    drawHeart();
+  } else {
+    // 발광이 끝나면 기본 하트만 표시
+    ctx.globalAlpha = 1;
+    ctx.strokeStyle = '#ffc4f2';
+    ctx.lineWidth = 4;
+    ctx.shadowColor = '#ffb8e8';
+    ctx.shadowBlur = 10;
+    drawHeart();
+  }
+
+  ctx.restore();
+  continue;
+}
 
     
 
@@ -673,7 +667,7 @@ function gameLoop(timestamp) {
     }
   }
 
-  drawEffects(delta);
+
   requestAnimationFrame(gameLoop);
 }
 
@@ -705,7 +699,6 @@ function triggerInput(lane) {
   target.hit = true;
   target.hitAt = currentTime;
 
-  addEffect(lane, hitY);
 
   
   
