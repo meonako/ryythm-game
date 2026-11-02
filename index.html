@@ -738,19 +738,19 @@ function endGame() {
   let message = 'STAGE FAILED... TRY AGAIN!';
   let color = '#ff4444';
 
-  if (accuracy >= 90) {
+  if (accuracy >= 80) {
     rank = 'S';
     message = 'AMAZING! PERFECT RHYTHM!';
     color = '#ffd700';
-  } else if (accuracy >= 80) {
+  } else if (accuracy >= 70) {
     rank = 'A';
     message = 'GREAT JOB!';
     color = '#FD5DBD';
-  } else if (accuracy >= 70) {
+  } else if (accuracy >= 60) {
     rank = 'B';
     message = 'GOOD!';
     color = '#00fff2';
-  } else if (accuracy >= 60) {
+  } else if (accuracy >= 50) {
     rank = 'C';
     message = 'CLEAR!';
     color = '#ff8800';
